@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { api } from '../api/client';
 import { useAuthStore } from '../stores/auth';
@@ -9,18 +9,14 @@ export function SharedTemplatePage() {
   const { token } = useParams<{ token: string }>();
   const navigate = useNavigate();
   const { user, login } = useAuthStore();
-  
+
   const [template, setTemplate] = useState<Template | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isCopying, setIsCopying] = useState(false);
 
-  useEffect(() => {
-    loadTemplate();
-  }, [token]);
-
-  async function loadTemplate() {
+  const loadTemplate = useCallback(async () => {
     if (!token) return;
-    
+
     try {
       const { template } = await api.getTemplateByShareToken(token);
       setTemplate(template);
@@ -29,7 +25,11 @@ export function SharedTemplatePage() {
     } finally {
       setIsLoading(false);
     }
-  }
+  }, [token]);
+
+  useEffect(() => {
+    loadTemplate();
+  }, [loadTemplate]);
 
   async function handleCopy() {
     if (!token || !user) {
@@ -39,7 +39,7 @@ export function SharedTemplatePage() {
 
     setIsCopying(true);
     try {
-      const { template: newTemplate } = await api.copyTemplate(token);
+      const { template: newTemplate } = await api.copyTemplateByShareToken(token);
       navigate(`/template/${newTemplate.id}`);
     } catch (error) {
       console.error('Failed to copy template:', error);
@@ -92,14 +92,10 @@ export function SharedTemplatePage() {
       <div className="shared-template-card card">
         <div className="template-header">
           <h1>{template.title}</h1>
-          {template.owner && (
-            <p className="template-author">by {template.owner.username}</p>
-          )}
+          {template.owner && <p className="template-author">by {template.owner.username}</p>}
         </div>
 
-        {template.description && (
-          <p className="template-description">{template.description}</p>
-        )}
+        {template.description && <p className="template-description">{template.description}</p>}
 
         <div className="template-stats">
           <div className="stat">
@@ -120,11 +116,7 @@ export function SharedTemplatePage() {
           <h3>Tiers</h3>
           <div className="tiers-preview">
             {template.tiers.map(tier => (
-              <div
-                key={tier.id}
-                className="tier-chip"
-                style={{ backgroundColor: tier.color }}
-              >
+              <div key={tier.id} className="tier-chip" style={{ backgroundColor: tier.color }}>
                 {tier.name}
               </div>
             ))}
@@ -141,9 +133,7 @@ export function SharedTemplatePage() {
         </div>
 
         {!user && (
-          <p className="login-hint">
-            Login with Discord to create rankings or copy this template.
-          </p>
+          <p className="login-hint">Login with Discord to create rankings or copy this template.</p>
         )}
       </div>
     </div>

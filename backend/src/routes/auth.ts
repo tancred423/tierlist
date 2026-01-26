@@ -3,7 +3,7 @@ import { eq } from "drizzle-orm";
 import { db, schema } from "../db/index.ts";
 import { generateId } from "../utils/id.ts";
 import { signJWT } from "../utils/jwt.ts";
-import { getDiscordAuthUrl, exchangeCodeForToken, getDiscordUser } from "../services/discord.ts";
+import { exchangeCodeForToken, getDiscordAuthUrl, getDiscordUser } from "../services/discord.ts";
 
 const FRONTEND_URL = Deno.env.get("FRONTEND_URL") || "http://localhost:5173";
 
@@ -96,7 +96,7 @@ auth.get("/discord/callback", async (c) => {
 
 auth.get("/me", async (c) => {
   const user = c.get("user");
-  
+
   if (!user) {
     return c.json({ user: null });
   }
@@ -123,7 +123,7 @@ auth.get("/me", async (c) => {
 
 auth.delete("/me", async (c) => {
   const user = c.get("user");
-  
+
   if (!user) {
     return c.json({ error: "Not authenticated" }, 401);
   }

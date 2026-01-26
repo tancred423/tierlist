@@ -9,7 +9,7 @@ export function AuthCallbackPage() {
 
   useEffect(() => {
     const token = searchParams.get('token');
-    
+
     if (token) {
       setToken(token);
       initialize().then(() => {

@@ -1,5 +1,5 @@
 import { Hono } from "@hono/hono";
-import { eq, and } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { db, schema } from "../db/index.ts";
 import { generateId } from "../utils/id.ts";
 import { requireAuth } from "../middleware/auth.ts";
@@ -26,9 +26,7 @@ cards.post("/:templateId", requireAuth, async (c) => {
   const existingCards = await db.query.cards.findMany({
     where: eq(schema.cards.templateId, templateId),
   });
-  const maxOrder = existingCards.length > 0 
-    ? Math.max(...existingCards.map(c => c.orderIndex)) + 1 
-    : 0;
+  const maxOrder = existingCards.length > 0 ? Math.max(...existingCards.map((c) => c.orderIndex)) + 1 : 0;
 
   const cardId = generateId();
 

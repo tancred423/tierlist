@@ -48,7 +48,7 @@ export function AccountPage() {
       <div className="account-card card">
         <div className="account-profile">
           {user.avatar ? (
-            <img 
+            <img
               src={`https://cdn.discordapp.com/avatars/${user.discordId}/${user.avatar}.png?size=128`}
               alt={user.username}
               className="account-avatar"
@@ -78,11 +78,7 @@ export function AccountPage() {
       <div className="account-danger-zone card">
         <h3>{t('account.dangerZone')}</h3>
         <p className="text-muted">{t('account.deleteWarning')}</p>
-        <button 
-          onClick={handleDeleteAccount} 
-          className="btn btn-danger"
-          disabled={isDeleting}
-        >
+        <button onClick={handleDeleteAccount} className="btn btn-danger" disabled={isDeleting}>
           {isDeleting ? t('account.deleting') : t('account.deleteAccount')}
         </button>
       </div>

@@ -30,7 +30,9 @@
   margin: -0.25rem -0.5rem;
   width: 100%;
   border-radius: var(--radius-sm);
-  transition: border-color var(--transition), background var(--transition);
+  transition:
+    border-color var(--transition),
+    background var(--transition);
 }
 
 .title-input:hover:not(:disabled) {

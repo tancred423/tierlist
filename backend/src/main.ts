@@ -13,17 +13,20 @@ const FRONTEND_URL = Deno.env.get("FRONTEND_URL") || "http://localhost:5173";
 
 app.use("*", logger());
 
-app.use("*", cors({
-  origin: [FRONTEND_URL, "http://localhost:5173"],
-  credentials: true,
-  allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowHeaders: ["Content-Type", "Authorization"],
-}));
+app.use(
+  "*",
+  cors({
+    origin: [FRONTEND_URL, "http://localhost:5173"],
+    credentials: true,
+    allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowHeaders: ["Content-Type", "Authorization"],
+  }),
+);
 
 app.use("*", authMiddleware);
 
 app.get("/", (c) => {
-  return c.json({ 
+  return c.json({
     name: "Tierlist API",
     version: "1.0.0",
     status: "running",

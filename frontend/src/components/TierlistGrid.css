@@ -50,7 +50,10 @@
   flex-wrap: wrap;
   gap: 0.75rem;
   align-content: flex-start;
-  transition: border-color 150ms ease, background-color 150ms ease, box-shadow 150ms ease;
+  transition:
+    border-color 150ms ease,
+    background-color 150ms ease,
+    box-shadow 150ms ease;
 }
 
 .unassigned-area.is-over {

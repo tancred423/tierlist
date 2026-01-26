@@ -19,10 +19,7 @@ class ApiClient {
     return this.token;
   }
 
-  private async request<T>(
-    endpoint: string,
-    options: RequestInit = {}
-  ): Promise<T> {
+  private async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
     const token = this.getToken();
     const headers: HeadersInit = {
       'Content-Type': 'application/json',
@@ -70,18 +67,25 @@ class ApiClient {
     return this.request(`/api/templates/share/${token}`);
   }
 
-  async copyTemplate(shareToken: string): Promise<{ template: import('../types').Template }> {
+  async copyTemplateByShareToken(
+    shareToken: string,
+  ): Promise<{ template: import('../types').Template }> {
     return this.request(`/api/templates/share/${shareToken}/copy`, { method: 'POST' });
   }
 
-  async createTemplate(data: import('../types').CreateTemplateData): Promise<{ template: import('../types').Template }> {
+  async createTemplate(
+    data: import('../types').CreateTemplateData,
+  ): Promise<{ template: import('../types').Template }> {
     return this.request('/api/templates', {
       method: 'POST',
       body: JSON.stringify(data),
     });
   }
 
-  async updateTemplate(id: string, data: import('../types').UpdateTemplateData): Promise<{ template: import('../types').Template }> {
+  async updateTemplate(
+    id: string,
+    data: import('../types').UpdateTemplateData,
+  ): Promise<{ template: import('../types').Template }> {
     return this.request(`/api/templates/${id}`, {
       method: 'PUT',
       body: JSON.stringify(data),
@@ -96,14 +100,20 @@ class ApiClient {
     return this.request(`/api/templates/${id}/copy`, { method: 'POST' });
   }
 
-  async createCard(templateId: string, data: import('../types').CreateCardData): Promise<{ card: import('../types').Card }> {
+  async createCard(
+    templateId: string,
+    data: import('../types').CreateCardData,
+  ): Promise<{ card: import('../types').Card }> {
     return this.request(`/api/cards/${templateId}`, {
       method: 'POST',
       body: JSON.stringify(data),
     });
   }
 
-  async updateCard(id: string, data: import('../types').UpdateCardData): Promise<{ card: import('../types').Card }> {
+  async updateCard(
+    id: string,
+    data: import('../types').UpdateCardData,
+  ): Promise<{ card: import('../types').Card }> {
     return this.request(`/api/cards/${id}`, {
       method: 'PUT',
       body: JSON.stringify(data),
@@ -114,51 +124,76 @@ class ApiClient {
     return this.request(`/api/cards/${id}`, { method: 'DELETE' });
   }
 
-  async reorderCards(templateId: string, cardOrders: { id: string; orderIndex: number }[]): Promise<{ success: boolean }> {
+  async reorderCards(
+    templateId: string,
+    cardOrders: { id: string; orderIndex: number }[],
+  ): Promise<{ success: boolean }> {
     return this.request(`/api/cards/${templateId}/reorder`, {
       method: 'PUT',
       body: JSON.stringify({ cardOrders }),
     });
   }
 
-  async getMyFilledTierlists(): Promise<{ owned: import('../types').FilledTierlist[]; shared: import('../types').FilledTierlist[] }> {
+  async getMyFilledTierlists(): Promise<{
+    owned: import('../types').FilledTierlist[];
+    shared: import('../types').FilledTierlist[];
+  }> {
     return this.request('/api/filled-tierlists/my');
   }
 
-  async getFilledTierlist(id: string): Promise<{ filledTierlist: import('../types').FilledTierlist; canEdit: boolean }> {
+  async getFilledTierlist(
+    id: string,
+  ): Promise<{ filledTierlist: import('../types').FilledTierlist; canEdit: boolean }> {
     return this.request(`/api/filled-tierlists/${id}`);
   }
 
-  async getFilledTierlistByViewToken(token: string): Promise<{ filledTierlist: import('../types').FilledTierlist; canEdit: boolean }> {
+  async getFilledTierlistByViewToken(
+    token: string,
+  ): Promise<{ filledTierlist: import('../types').FilledTierlist; canEdit: boolean }> {
     return this.request(`/api/filled-tierlists/view/${token}`);
   }
 
-  async getFilledTierlistByEditToken(token: string): Promise<{ filledTierlist: import('../types').FilledTierlist; canEdit: boolean }> {
+  async getFilledTierlistByEditToken(
+    token: string,
+  ): Promise<{ filledTierlist: import('../types').FilledTierlist; canEdit: boolean }> {
     return this.request(`/api/filled-tierlists/edit/${token}`);
   }
 
-  async createFilledTierlist(data: { templateId: string; title?: string; shareToken?: string }): Promise<{ filledTierlist: import('../types').FilledTierlist }> {
+  async createFilledTierlist(data: {
+    templateId: string;
+    title?: string;
+    shareToken?: string;
+  }): Promise<{ filledTierlist: import('../types').FilledTierlist }> {
     return this.request('/api/filled-tierlists', {
       method: 'POST',
       body: JSON.stringify(data),
     });
   }
 
-  async updateFilledTierlist(id: string, data: { title?: string; viewShareEnabled?: boolean; editShareEnabled?: boolean }): Promise<{ success: boolean }> {
+  async updateFilledTierlist(
+    id: string,
+    data: { title?: string; viewShareEnabled?: boolean; editShareEnabled?: boolean },
+  ): Promise<{ success: boolean }> {
     return this.request(`/api/filled-tierlists/${id}`, {
       method: 'PUT',
       body: JSON.stringify(data),
     });
   }
 
-  async updatePlacements(id: string, placements: import('../types').PlacementData[]): Promise<{ placements: import('../types').CardPlacement[] }> {
+  async updatePlacements(
+    id: string,
+    placements: import('../types').PlacementData[],
+  ): Promise<{ placements: import('../types').CardPlacement[] }> {
     return this.request(`/api/filled-tierlists/${id}/placements`, {
       method: 'PUT',
       body: JSON.stringify({ placements }),
     });
   }
 
-  async regenerateTokens(id: string, data: { regenerateView?: boolean; regenerateEdit?: boolean }): Promise<{ viewShareToken: string; editShareToken: string }> {
+  async regenerateTokens(
+    id: string,
+    data: { regenerateView?: boolean; regenerateEdit?: boolean },
+  ): Promise<{ viewShareToken: string; editShareToken: string }> {
     return this.request(`/api/filled-tierlists/${id}/regenerate-tokens`, {
       method: 'POST',
       body: JSON.stringify(data),
@@ -173,7 +208,9 @@ class ApiClient {
     return this.request(`/api/filled-tierlists/${id}/leave`, { method: 'POST' });
   }
 
-  async copyFilledTierlist(id: string): Promise<{ filledTierlist: import('../types').FilledTierlist }> {
+  async copyFilledTierlist(
+    id: string,
+  ): Promise<{ filledTierlist: import('../types').FilledTierlist }> {
     return this.request(`/api/filled-tierlists/${id}/copy`, { method: 'POST' });
   }
 

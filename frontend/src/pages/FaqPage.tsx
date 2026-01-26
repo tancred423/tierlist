@@ -19,9 +19,15 @@ export function FaqPage() {
           <div className="faq-answer">
             <p>{t('faq.whatIsThisAnswer1')}</p>
             <ul>
-              <li><strong>{t('faq.templates')}:</strong> {t('faq.templatesDesc')}</li>
-              <li><strong>{t('faq.rankings')}:</strong> {t('faq.rankingsDesc')}</li>
-              <li><strong>{t('faq.sharing')}:</strong> {t('faq.sharingDesc')}</li>
+              <li>
+                <strong>{t('faq.templates')}:</strong> {t('faq.templatesDesc')}
+              </li>
+              <li>
+                <strong>{t('faq.rankings')}:</strong> {t('faq.rankingsDesc')}
+              </li>
+              <li>
+                <strong>{t('faq.sharing')}:</strong> {t('faq.sharingDesc')}
+              </li>
             </ul>
           </div>
         </details>
@@ -30,10 +36,18 @@ export function FaqPage() {
           <summary>{t('faq.howToUse')}</summary>
           <div className="faq-answer">
             <ol>
-              <li><strong>{t('faq.step1Title')}:</strong> {t('faq.step1Desc')}</li>
-              <li><strong>{t('faq.step2Title')}:</strong> {t('faq.step2Desc')}</li>
-              <li><strong>{t('faq.step3Title')}:</strong> {t('faq.step3Desc')}</li>
-              <li><strong>{t('faq.step4Title')}:</strong> {t('faq.step4Desc')}</li>
+              <li>
+                <strong>{t('faq.step1Title')}:</strong> {t('faq.step1Desc')}
+              </li>
+              <li>
+                <strong>{t('faq.step2Title')}:</strong> {t('faq.step2Desc')}
+              </li>
+              <li>
+                <strong>{t('faq.step3Title')}:</strong> {t('faq.step3Desc')}
+              </li>
+              <li>
+                <strong>{t('faq.step4Title')}:</strong> {t('faq.step4Desc')}
+              </li>
             </ol>
           </div>
         </details>

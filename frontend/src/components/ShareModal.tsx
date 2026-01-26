@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import { api } from '../api/client';
 import { useI18n } from '../i18n';
 import type { FilledTierlist } from '../types';
@@ -47,7 +47,13 @@ export function ShareModal({ tierlist, onClose, onUpdate }: ShareModalProps) {
   }
 
   async function handleRegenerateView() {
-    if (!confirm(t('share.regenerateViewConfirm') || 'This will create a new link and invalidate the old one. Continue?')) return;
+    if (
+      !confirm(
+        t('share.regenerateViewConfirm') ||
+          'This will create a new link and invalidate the old one. Continue?',
+      )
+    )
+      return;
 
     setIsUpdating(true);
     try {
@@ -61,7 +67,13 @@ export function ShareModal({ tierlist, onClose, onUpdate }: ShareModalProps) {
   }
 
   async function handleRegenerateEdit() {
-    if (!confirm(t('share.regenerateEditConfirm') || 'This will create a new link and remove all co-owners. Continue?')) return;
+    if (
+      !confirm(
+        t('share.regenerateEditConfirm') ||
+          'This will create a new link and remove all co-owners. Continue?',
+      )
+    )
+      return;
 
     setIsUpdating(true);
     try {
@@ -87,10 +99,12 @@ export function ShareModal({ tierlist, onClose, onUpdate }: ShareModalProps) {
     try {
       const html2canvas = (await import('html2canvas')).default;
       const canvas = await html2canvas(gridContainer as HTMLElement, {
-        backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--color-bg').trim() || '#0f0f0f',
+        backgroundColor:
+          getComputedStyle(document.documentElement).getPropertyValue('--color-bg').trim() ||
+          '#0f0f0f',
         scale: 2,
       });
-      
+
       const link = document.createElement('a');
       link.download = `${tierlist.title.replace(/[^a-z0-9]/gi, '_')}.png`;
       link.href = canvas.toDataURL('image/png');
@@ -105,7 +119,9 @@ export function ShareModal({ tierlist, onClose, onUpdate }: ShareModalProps) {
       <div className="modal share-modal" onClick={e => e.stopPropagation()}>
         <div className="modal-header">
           <h2>{t('tierlist.shareRanking')}</h2>
-          <button onClick={onClose} className="btn btn-icon">×</button>
+          <button onClick={onClose} className="btn btn-icon">
+            ×
+          </button>
         </div>
         <div className="modal-body">
           <section className="share-section">
@@ -139,12 +155,15 @@ export function ShareModal({ tierlist, onClose, onUpdate }: ShareModalProps) {
                     readOnly
                     className="form-input share-link-input"
                   />
-                  <button onClick={() => copyToClipboard(viewUrl, 'view')} className="btn btn-secondary">
+                  <button
+                    onClick={() => copyToClipboard(viewUrl, 'view')}
+                    className="btn btn-secondary"
+                  >
                     {copied === 'view' ? t('tierlist.linkCopied') : t('tierlist.copyLink')}
                   </button>
                 </div>
-                <button 
-                  onClick={handleRegenerateView} 
+                <button
+                  onClick={handleRegenerateView}
                   className="btn btn-secondary btn-sm regenerate-btn"
                   disabled={isUpdating}
                 >
@@ -179,12 +198,15 @@ export function ShareModal({ tierlist, onClose, onUpdate }: ShareModalProps) {
                     readOnly
                     className="form-input share-link-input"
                   />
-                  <button onClick={() => copyToClipboard(editUrl, 'edit')} className="btn btn-secondary">
+                  <button
+                    onClick={() => copyToClipboard(editUrl, 'edit')}
+                    className="btn btn-secondary"
+                  >
                     {copied === 'edit' ? t('tierlist.linkCopied') : t('tierlist.copyLink')}
                   </button>
                 </div>
-                <button 
-                  onClick={handleRegenerateEdit} 
+                <button
+                  onClick={handleRegenerateEdit}
                   className="btn btn-secondary btn-sm regenerate-btn"
                   disabled={isUpdating}
                 >
@@ -194,7 +216,9 @@ export function ShareModal({ tierlist, onClose, onUpdate }: ShareModalProps) {
             )}
             {tierlist.coOwners && tierlist.coOwners.length > 0 && (
               <div className="co-owners-list">
-                <h4>{t('tierlist.coOwners')} ({tierlist.coOwners.length})</h4>
+                <h4>
+                  {t('tierlist.coOwners')} ({tierlist.coOwners.length})
+                </h4>
                 <ul>
                   {tierlist.coOwners.map(co => (
                     <li key={co.userId}>{co.user.username}</li>
@@ -205,7 +229,9 @@ export function ShareModal({ tierlist, onClose, onUpdate }: ShareModalProps) {
           </section>
         </div>
         <div className="modal-footer">
-          <button onClick={onClose} className="btn btn-primary">{t('common.close')}</button>
+          <button onClick={onClose} className="btn btn-primary">
+            {t('common.close')}
+          </button>
         </div>
       </div>
     </div>

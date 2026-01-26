@@ -1,12 +1,11 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { useState, ReactNode } from 'react';
+import { I18nContext } from './I18nContext';
 import en from './translations/en.json';
 import de from './translations/de.json';
 
 type Language = 'en' | 'de';
 
 const translations = { en, de };
-
-type TranslationKeys = typeof en;
 
 function getNestedValue(obj: Record<string, unknown>, path: string): string {
   const keys = path.split('.');
@@ -20,14 +19,6 @@ function getNestedValue(obj: Record<string, unknown>, path: string): string {
   }
   return typeof result === 'string' ? result : path;
 }
-
-interface I18nContextType {
-  language: Language;
-  setLanguage: (lang: Language) => void;
-  t: (key: string) => string;
-}
-
-const I18nContext = createContext<I18nContextType | null>(null);
 
 export function I18nProvider({ children }: { children: ReactNode }) {
   const [language, setLanguageState] = useState<Language>(() => {
@@ -47,16 +38,6 @@ export function I18nProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <I18nContext.Provider value={{ language, setLanguage, t }}>
-      {children}
-    </I18nContext.Provider>
+    <I18nContext.Provider value={{ language, setLanguage, t }}>{children}</I18nContext.Provider>
   );
-}
-
-export function useI18n() {
-  const context = useContext(I18nContext);
-  if (!context) {
-    throw new Error('useI18n must be used within an I18nProvider');
-  }
-  return context;
 }

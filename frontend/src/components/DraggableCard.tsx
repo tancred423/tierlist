@@ -11,23 +11,24 @@ interface DraggableCardProps {
   compact?: boolean;
 }
 
-export function DraggableCard({ card, disabled, isActive, showDetails, compact }: DraggableCardProps) {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({
+export function DraggableCard({
+  card,
+  disabled,
+  isActive,
+  showDetails,
+  compact,
+}: DraggableCardProps) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: `card-${card.id}`,
     disabled,
   });
 
-  const style = disabled ? {} : {
-    transform: CSS.Transform.toString(transform),
-    transition,
-  };
+  const style = disabled
+    ? {}
+    : {
+        transform: CSS.Transform.toString(transform),
+        transition,
+      };
 
   return (
     <div
@@ -47,9 +48,7 @@ export function DraggableCard({ card, disabled, isActive, showDetails, compact }
       {showDetails && (
         <div className="card-details">
           <span className="card-title">{card.title}</span>
-          {card.description && (
-            <span className="card-desc">{card.description}</span>
-          )}
+          {card.description && <span className="card-desc">{card.description}</span>}
         </div>
       )}
       {!showDetails && (

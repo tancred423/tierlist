@@ -27,7 +27,7 @@ export const useThemeStore = create<ThemeState>((set, get) => {
   const storedMode = localStorage.getItem('theme') as ThemeMode | null;
   const initialMode: ThemeMode = storedMode || 'system';
   const initialEffective = getEffectiveTheme(initialMode);
-  
+
   applyTheme(initialEffective);
 
   window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {

@@ -33,7 +33,7 @@ async function createSignature(data: string): Promise<string> {
     encoder.encode(JWT_SECRET),
     { name: "HMAC", hash: "SHA-256" },
     false,
-    ["sign"]
+    ["sign"],
   );
   const signature = await crypto.subtle.sign("HMAC", key, encoder.encode(data));
   return base64UrlEncode(new Uint8Array(signature));

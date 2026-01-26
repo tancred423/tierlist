@@ -197,8 +197,17 @@ case "${1:-help}" in
         echo ""
         
         FAILED=0
+
+        echo -e "${YELLOW}[1/6] Formatting backend...${NC}"
+        if docker exec tierlist-backend deno fmt; then
+            echo -e "${GREEN}Backend format passed!${NC}"
+        else
+            echo -e "${RED}Backend format failed!${NC}"
+            FAILED=1
+        fi
+        echo ""
         
-        echo -e "${YELLOW}[1/4] Linting backend...${NC}"
+        echo -e "${YELLOW}[2/6] Linting backend...${NC}"
         if docker exec tierlist-backend deno lint; then
             echo -e "${GREEN}Backend lint passed!${NC}"
         else
@@ -207,7 +216,7 @@ case "${1:-help}" in
         fi
         echo ""
         
-        echo -e "${YELLOW}[2/4] Type checking backend...${NC}"
+        echo -e "${YELLOW}[3/6] Type checking backend...${NC}"
         if docker exec tierlist-backend deno check src/main.ts; then
             echo -e "${GREEN}Backend type check passed!${NC}"
         else
@@ -216,7 +225,16 @@ case "${1:-help}" in
         fi
         echo ""
         
-        echo -e "${YELLOW}[3/4] Linting frontend...${NC}"
+        echo -e "${YELLOW}[4/6] Formatting frontend...${NC}"
+        if docker exec tierlist-frontend npm run format; then
+            echo -e "${GREEN}Frontend format passed!${NC}"
+        else
+            echo -e "${RED}Frontend format failed!${NC}"
+            FAILED=1
+        fi
+        echo ""
+        
+        echo -e "${YELLOW}[5/6] Linting frontend...${NC}"
         if docker exec tierlist-frontend npm run lint; then
             echo -e "${GREEN}Frontend lint passed!${NC}"
         else
@@ -225,7 +243,7 @@ case "${1:-help}" in
         fi
         echo ""
         
-        echo -e "${YELLOW}[4/4] Type checking frontend...${NC}"
+        echo -e "${YELLOW}[6/6] Type checking frontend...${NC}"
         if docker exec tierlist-frontend npx tsc --noEmit; then
             echo -e "${GREEN}Frontend type check passed!${NC}"
         else

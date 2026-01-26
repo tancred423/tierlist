@@ -28,7 +28,7 @@
   --transition: 150ms ease;
 }
 
-[data-theme="light"] {
+[data-theme='light'] {
   --color-bg: #f8f9fa;
   --color-bg-elevated: #ffffff;
   --color-bg-card: #f1f3f4;

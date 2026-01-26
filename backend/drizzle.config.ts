@@ -4,7 +4,7 @@ const getDatabaseUrl = () => {
   if (typeof Deno !== "undefined") {
     return Deno.env.get("DATABASE_URL");
   }
-  return process.env.DATABASE_URL;
+  return Deno.env.DATABASE_URL;
 };
 
 export default defineConfig({

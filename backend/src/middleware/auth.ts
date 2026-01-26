@@ -15,7 +15,7 @@ declare module "@hono/hono" {
 
 export async function authMiddleware(c: Context, next: Next) {
   const authHeader = c.req.header("Authorization");
-  
+
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
     c.set("user", null);
     return next();
@@ -40,7 +40,7 @@ export async function authMiddleware(c: Context, next: Next) {
 
 export function requireAuth(c: Context, next: Next) {
   const user = c.get("user");
-  
+
   if (!user) {
     return c.json({ error: "Authentication required" }, 401);
   }

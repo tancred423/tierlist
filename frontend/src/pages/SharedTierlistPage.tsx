@@ -16,7 +16,7 @@ export function SharedTierlistPage({ mode }: SharedTierlistPageProps) {
   const navigate = useNavigate();
   const { user, login } = useAuthStore();
   const { t } = useI18n();
-  
+
   const [tierlist, setTierlist] = useState<FilledTierlist | null>(null);
   const [placements, setPlacements] = useState<CardPlacement[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -24,9 +24,37 @@ export function SharedTierlistPage({ mode }: SharedTierlistPageProps) {
   const [canEdit, setCanEdit] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isCopying, setIsCopying] = useState(false);
-  
-  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pendingPlacementsRef = useRef<PlacementData[] | null>(null);
+
+  const loadTierlist = useCallback(async () => {
+    if (!token) return;
+
+    try {
+      let result;
+      if (mode === 'view') {
+        result = await api.getFilledTierlistByViewToken(token);
+      } else {
+        result = await api.getFilledTierlistByEditToken(token);
+      }
+
+      setTierlist(result.filledTierlist);
+      setPlacements(result.filledTierlist.placements);
+      setCanEdit(result.canEdit);
+    } catch (err) {
+      console.error('Failed to load tierlist:', err);
+      setError(
+        mode === 'view'
+          ? t('share.viewNotAvailable') ||
+              'This tierlist is not available for viewing. The owner may have disabled sharing.'
+          : t('share.editNotAvailable') ||
+              'This tierlist is not available for editing. The owner may have disabled sharing.',
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  }, [token, mode, t]);
 
   useEffect(() => {
     if (mode === 'edit' && !user) {
@@ -34,7 +62,7 @@ export function SharedTierlistPage({ mode }: SharedTierlistPageProps) {
       return;
     }
     loadTierlist();
-  }, [token, mode, user]);
+  }, [mode, user, login, loadTierlist]);
 
   useEffect(() => {
     return () => {
@@ -44,60 +72,69 @@ export function SharedTierlistPage({ mode }: SharedTierlistPageProps) {
     };
   }, []);
 
-  async function loadTierlist() {
-    if (!token) return;
-    
-    try {
-      let result;
-      if (mode === 'view') {
-        result = await api.getFilledTierlistByViewToken(token);
-      } else {
-        result = await api.getFilledTierlistByEditToken(token);
+  const savePlacements = useCallback(
+    async (placementData: PlacementData[]) => {
+      if (!tierlist) return;
+
+      setSaveStatus('saving');
+      try {
+        await api.updatePlacements(tierlist.id, placementData);
+        setSaveStatus('saved');
+      } catch (error) {
+        console.error('Failed to save placements:', error);
+        setSaveStatus('error');
       }
-      
-      setTierlist(result.filledTierlist);
-      setPlacements(result.filledTierlist.placements);
-      setCanEdit(result.canEdit);
-    } catch (err) {
-      console.error('Failed to load tierlist:', err);
-      setError(mode === 'view' 
-        ? t('share.viewNotAvailable') || 'This tierlist is not available for viewing. The owner may have disabled sharing.'
-        : t('share.editNotAvailable') || 'This tierlist is not available for editing. The owner may have disabled sharing.'
-      );
-    } finally {
-      setIsLoading(false);
+    },
+    [tierlist],
+  );
+
+  const handlePlacementsChange = useCallback(
+    (newPlacements: PlacementData[]) => {
+      setPlacements(newPlacements as CardPlacement[]);
+      pendingPlacementsRef.current = newPlacements;
+
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+      }
+
+      setSaveStatus('saving');
+      saveTimeoutRef.current = setTimeout(() => {
+        if (pendingPlacementsRef.current) {
+          savePlacements(pendingPlacementsRef.current);
+          pendingPlacementsRef.current = null;
+        }
+      }, 500);
+    },
+    [savePlacements],
+  );
+
+  async function handleLeave(tierlistId: string) {
+    if (!confirm(t('tierlist.leaveConfirm') || 'Are you sure you want to leave as co-owner?'))
+      return;
+
+    try {
+      await api.leaveFilledTierlist(tierlistId);
+      navigate('/');
+    } catch (error) {
+      console.error('Failed to leave:', error);
     }
   }
 
-  const savePlacements = useCallback(async (placementData: PlacementData[]) => {
-    if (!tierlist) return;
-    
-    setSaveStatus('saving');
-    try {
-      await api.updatePlacements(tierlist.id, placementData);
-      setSaveStatus('saved');
-    } catch (error) {
-      console.error('Failed to save placements:', error);
-      setSaveStatus('error');
+  async function handleCopy(tierlistId: string) {
+    if (!user) {
+      login();
+      return;
     }
-  }, [tierlist]);
 
-  const handlePlacementsChange = useCallback((newPlacements: PlacementData[]) => {
-    setPlacements(newPlacements as CardPlacement[]);
-    pendingPlacementsRef.current = newPlacements;
-    
-    if (saveTimeoutRef.current) {
-      clearTimeout(saveTimeoutRef.current);
+    setIsCopying(true);
+    try {
+      const { filledTierlist: newList } = await api.copyFilledTierlist(tierlistId);
+      navigate(`/tierlist/${newList.id}`);
+    } catch (error) {
+      console.error('Failed to copy ranking:', error);
+      setIsCopying(false);
     }
-    
-    setSaveStatus('saving');
-    saveTimeoutRef.current = setTimeout(() => {
-      if (pendingPlacementsRef.current) {
-        savePlacements(pendingPlacementsRef.current);
-        pendingPlacementsRef.current = null;
-      }
-    }, 500);
-  }, [savePlacements]);
+  }
 
   if (isLoading) {
     return (
@@ -123,40 +160,14 @@ export function SharedTierlistPage({ mode }: SharedTierlistPageProps) {
     );
   }
 
-  async function handleLeave() {
-    if (!confirm(t('tierlist.leaveConfirm') || 'Are you sure you want to leave as co-owner?')) return;
-    
-    try {
-      await api.leaveFilledTierlist(tierlist.id);
-      navigate('/');
-    } catch (error) {
-      console.error('Failed to leave:', error);
-    }
-  }
-
-  async function handleCopy() {
-    if (!user) {
-      login();
-      return;
-    }
-    
-    setIsCopying(true);
-    try {
-      const { filledTierlist: newList } = await api.copyFilledTierlist(tierlist.id);
-      navigate(`/tierlist/${newList.id}`);
-    } catch (error) {
-      console.error('Failed to copy ranking:', error);
-      setIsCopying(false);
-    }
-  }
-
   return (
     <div className="shared-tierlist-page">
       <div className="page-header">
         <div className="header-info">
           <h1>{tierlist.title}</h1>
           <p className="text-muted">
-            {t('template.by')} {tierlist.owner?.username} • {t('home.basedOn')} "{tierlist.template.title}"
+            {t('template.by')} {tierlist.owner?.username} • {t('home.basedOn')} "
+            {tierlist.template.title}"
             {mode === 'view' && <span className="view-badge">{t('tierlist.viewOnly')}</span>}
             {mode === 'edit' && canEdit && <span className="edit-badge">{t('home.coOwner')}</span>}
           </p>
@@ -169,11 +180,15 @@ export function SharedTierlistPage({ mode }: SharedTierlistPageProps) {
               {saveStatus === 'error' && t('tierlist.saveError')}
             </span>
           )}
-          <button onClick={handleCopy} className="btn btn-secondary" disabled={isCopying}>
+          <button
+            onClick={() => handleCopy(tierlist.id)}
+            className="btn btn-secondary"
+            disabled={isCopying}
+          >
             {isCopying ? t('tierlist.copying') : t('tierlist.copyRanking')}
           </button>
           {mode === 'edit' && canEdit && (
-            <button onClick={handleLeave} className="btn btn-secondary">
+            <button onClick={() => handleLeave(tierlist.id)} className="btn btn-secondary">
               {t('tierlist.leave')}
             </button>
           )}

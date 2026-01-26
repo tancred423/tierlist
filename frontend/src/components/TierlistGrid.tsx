@@ -18,7 +18,7 @@ import {
   sortableKeyboardCoordinates,
   rectSortingStrategy,
 } from '@dnd-kit/sortable';
-import type { Template, CardPlacement, PlacementData, Card } from '../types';
+import type { Template, CardPlacement, PlacementData } from '../types';
 import { useI18n } from '../i18n';
 import { TierRow } from './TierRow';
 import { DraggableCard, CardOverlay } from './DraggableCard';
@@ -32,15 +32,20 @@ interface TierlistGridProps {
   readOnly?: boolean;
 }
 
-export function TierlistGrid({ template, placements, onPlacementsChange, readOnly = false }: TierlistGridProps) {
+export function TierlistGrid({
+  template,
+  placements,
+  onPlacementsChange,
+  readOnly = false,
+}: TierlistGridProps) {
   const { t } = useI18n();
   const [activeId, setActiveId] = useState<string | null>(null);
   const [overId, setOverId] = useState<string | null>(null);
 
-  const customCollisionDetection: CollisionDetection = (args) => {
+  const customCollisionDetection: CollisionDetection = args => {
     const pointerCollisions = pointerWithin(args);
     const rectCollisions = rectIntersection(args);
-    
+
     const allCollisions = [...pointerCollisions];
     rectCollisions.forEach(rc => {
       if (!allCollisions.find(c => c.id === rc.id)) {
@@ -52,29 +57,21 @@ export function TierlistGrid({ template, placements, onPlacementsChange, readOnl
       return [];
     }
 
-    const cardCollisions = allCollisions.filter(
-      c => (c.id as string).startsWith('card-')
-    );
-    const containerCollisions = allCollisions.filter(
-      c => {
-        const id = c.id as string;
-        return id === 'unassigned' || id.startsWith('cell:');
-      }
-    );
+    const cardCollisions = allCollisions.filter(c => (c.id as string).startsWith('card-'));
+    const containerCollisions = allCollisions.filter(c => {
+      const id = c.id as string;
+      return id === 'unassigned' || id.startsWith('cell:');
+    });
 
-    const pointerCardCollision = pointerCollisions.find(
-      c => (c.id as string).startsWith('card-')
-    );
+    const pointerCardCollision = pointerCollisions.find(c => (c.id as string).startsWith('card-'));
     if (pointerCardCollision) {
       return [pointerCardCollision];
     }
 
-    const pointerContainerCollision = pointerCollisions.find(
-      c => {
-        const id = c.id as string;
-        return id === 'unassigned' || id.startsWith('cell:');
-      }
-    );
+    const pointerContainerCollision = pointerCollisions.find(c => {
+      const id = c.id as string;
+      return id === 'unassigned' || id.startsWith('cell:');
+    });
     if (pointerContainerCollision) {
       return [pointerContainerCollision];
     }
@@ -98,7 +95,7 @@ export function TierlistGrid({ template, placements, onPlacementsChange, readOnl
     }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
-    })
+    }),
   );
 
   const cardMap = useMemo(() => {
@@ -121,9 +118,7 @@ export function TierlistGrid({ template, placements, onPlacementsChange, readOnl
   };
 
   const unassignedCards = useMemo(() => {
-    return placements
-      .filter(p => !p.tierId)
-      .sort((a, b) => a.orderIndex - b.orderIndex);
+    return placements.filter(p => !p.tierId).sort((a, b) => a.orderIndex - b.orderIndex);
   }, [placements]);
 
   const getCardIdFromDragId = (dragId: string) => {
@@ -136,9 +131,12 @@ export function TierlistGrid({ template, placements, onPlacementsChange, readOnl
   const activeCard = activeId ? cardMap.get(getCardIdFromDragId(activeId)) : null;
   const activePlacement = activeId ? placementMap.get(getCardIdFromDragId(activeId)) : null;
 
-  const getTargetFromOverId = (id: string | null): { tierId: string | null; columnId: string | null } => {
-    if (!id) return { tierId: undefined as unknown as null, columnId: undefined as unknown as null };
-    
+  const getTargetFromOverId = (
+    id: string | null,
+  ): { tierId: string | null; columnId: string | null } => {
+    if (!id)
+      return { tierId: undefined as unknown as null, columnId: undefined as unknown as null };
+
     if (id === 'unassigned') {
       return { tierId: null, columnId: null };
     }
@@ -157,30 +155,31 @@ export function TierlistGrid({ template, placements, onPlacementsChange, readOnl
   };
 
   const overTarget = getTargetFromOverId(overId);
-  
+
   const shouldHighlightCell = (cellTierId: string, cellColumnId: string): boolean => {
     if (!activeId || !overId) return false;
     if (overTarget.tierId === undefined) return false;
-    
+
     const isOverThisCell = overTarget.tierId === cellTierId && overTarget.columnId === cellColumnId;
     if (!isOverThisCell) return false;
-    
+
     if (!activePlacement) return true;
-    const isDraggingFromThisCell = activePlacement.tierId === cellTierId && activePlacement.columnId === cellColumnId;
-    
+    const isDraggingFromThisCell =
+      activePlacement.tierId === cellTierId && activePlacement.columnId === cellColumnId;
+
     return !isDraggingFromThisCell;
   };
 
   const shouldHighlightUnassigned = (): boolean => {
     if (!activeId || !overId) return false;
     if (overTarget.tierId === undefined) return false;
-    
+
     const isOverUnassigned = overTarget.tierId === null && overTarget.columnId === null;
     if (!isOverUnassigned) return false;
-    
+
     if (!activePlacement) return true;
     const isDraggingFromUnassigned = activePlacement.tierId === null;
-    
+
     return !isDraggingFromUnassigned;
   };
 
@@ -192,12 +191,12 @@ export function TierlistGrid({ template, placements, onPlacementsChange, readOnl
   function handleDragOver(event: DragOverEvent) {
     if (readOnly) return;
     const { over } = event;
-    setOverId(over?.id as string || null);
+    setOverId((over?.id as string) || null);
   }
 
   function handleDragEnd(event: DragEndEvent) {
     if (readOnly) return;
-    
+
     const { active, over } = event;
     setActiveId(null);
     setOverId(null);
@@ -231,8 +230,9 @@ export function TierlistGrid({ template, placements, onPlacementsChange, readOnl
     const currentPlacement = placementMap.get(cardId);
     if (!currentPlacement) return;
 
-    const isSameCell = currentPlacement.tierId === targetTierId && currentPlacement.columnId === targetColumnId;
-    
+    const isSameCell =
+      currentPlacement.tierId === targetTierId && currentPlacement.columnId === targetColumnId;
+
     if (isSameCell && !targetCardId) {
       return;
     }
@@ -243,14 +243,14 @@ export function TierlistGrid({ template, placements, onPlacementsChange, readOnl
       const cellCards = newPlacements
         .filter(p => p.tierId === targetTierId && p.columnId === targetColumnId)
         .sort((a, b) => a.orderIndex - b.orderIndex);
-      
+
       const draggedIndex = cellCards.findIndex(p => p.cardId === cardId);
       const targetIndex = cellCards.findIndex(p => p.cardId === targetCardId);
-      
+
       if (draggedIndex !== -1 && targetIndex !== -1) {
         const [removed] = cellCards.splice(draggedIndex, 1);
         cellCards.splice(targetIndex, 0, removed);
-        
+
         cellCards.forEach((p, index) => {
           const placement = newPlacements.find(np => np.cardId === p.cardId);
           if (placement) {
@@ -274,7 +274,7 @@ export function TierlistGrid({ template, placements, onPlacementsChange, readOnl
       const cellCards = newPlacements
         .filter(p => p.tierId === targetTierId && p.columnId === targetColumnId)
         .sort((a, b) => a.orderIndex - b.orderIndex);
-      
+
       if (targetCardId) {
         const targetIndex = cellCards.findIndex(p => p.cardId === targetCardId);
         const draggedIndex = cellCards.findIndex(p => p.cardId === cardId);
@@ -283,7 +283,7 @@ export function TierlistGrid({ template, placements, onPlacementsChange, readOnl
           cellCards.splice(targetIndex, 0, removed);
         }
       }
-      
+
       cellCards.forEach((p, index) => {
         const placement = newPlacements.find(np => np.cardId === p.cardId);
         if (placement) {
@@ -292,12 +292,14 @@ export function TierlistGrid({ template, placements, onPlacementsChange, readOnl
       });
     }
 
-    onPlacementsChange(newPlacements.map(p => ({
-      cardId: p.cardId,
-      tierId: p.tierId,
-      columnId: p.columnId,
-      orderIndex: p.orderIndex,
-    })));
+    onPlacementsChange(
+      newPlacements.map(p => ({
+        cardId: p.cardId,
+        tierId: p.tierId,
+        columnId: p.columnId,
+        orderIndex: p.orderIndex,
+      })),
+    );
   }
 
   return (
@@ -309,9 +311,12 @@ export function TierlistGrid({ template, placements, onPlacementsChange, readOnl
       onDragEnd={handleDragEnd}
     >
       <div className="tierlist-grid-container">
-        <div className="tierlist-grid" style={{ 
-          gridTemplateColumns: `auto repeat(${template.columns.length}, 1fr)` 
-        }}>
+        <div
+          className="tierlist-grid"
+          style={{
+            gridTemplateColumns: `auto repeat(${template.columns.length}, 1fr)`,
+          }}
+        >
           {template.columns.length > 1 && (
             <>
               <div className="grid-header-spacer" />
@@ -328,7 +333,7 @@ export function TierlistGrid({ template, placements, onPlacementsChange, readOnl
               {template.columns.map(column => {
                 const cellPlacements = getPlacementsForCell(tier.id, column.id);
                 const cellId = getCellId(tier.id, column.id);
-                
+
                 return (
                   <DroppableCell
                     key={cellId}
@@ -362,7 +367,9 @@ export function TierlistGrid({ template, placements, onPlacementsChange, readOnl
         </div>
 
         <div className="unassigned-section">
-          <h3 className="unassigned-header">{t('tierlist.unrankedCards')} ({unassignedCards.length})</h3>
+          <h3 className="unassigned-header">
+            {t('tierlist.unrankedCards')} ({unassignedCards.length})
+          </h3>
           <DroppableCell
             id={getUnassignedId()}
             isOver={shouldHighlightUnassigned()}
@@ -387,9 +394,7 @@ export function TierlistGrid({ template, placements, onPlacementsChange, readOnl
               })}
             </SortableContext>
             {unassignedCards.length === 0 && (
-              <div className="empty-unassigned">
-                {t('tierlist.allCardsRanked')}
-              </div>
+              <div className="empty-unassigned">{t('tierlist.allCardsRanked')}</div>
             )}
           </DroppableCell>
         </div>

@@ -12,10 +12,7 @@ export function DroppableCell({ id, isOver, className = '', children }: Droppabl
   const { setNodeRef } = useDroppable({ id });
 
   return (
-    <div
-      ref={setNodeRef}
-      className={`droppable-cell ${isOver ? 'is-over' : ''} ${className}`}
-    >
+    <div ref={setNodeRef} className={`droppable-cell ${isOver ? 'is-over' : ''} ${className}`}>
       {children}
     </div>
   );

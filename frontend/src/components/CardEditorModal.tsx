@@ -15,7 +15,7 @@ export function CardEditorModal({ card, onClose, onSave }: CardEditorModalProps)
   const [description, setDescription] = useState(card?.description || '');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const hasUnsavedChanges = 
+  const hasUnsavedChanges =
     title !== (card?.title || '') ||
     imageUrl !== (card?.imageUrl || '') ||
     description !== (card?.description || '');
@@ -51,7 +51,9 @@ export function CardEditorModal({ card, onClose, onSave }: CardEditorModalProps)
       <div className="modal" onClick={e => e.stopPropagation()}>
         <div className="modal-header">
           <h2>{card ? t('card.editCard') : t('card.addCard')}</h2>
-          <button onClick={handleClose} className="btn btn-icon">×</button>
+          <button onClick={handleClose} className="btn btn-icon">
+            ×
+          </button>
         </div>
         <form onSubmit={handleSubmit}>
           <div className="modal-body">
@@ -79,14 +81,14 @@ export function CardEditorModal({ card, onClose, onSave }: CardEditorModalProps)
               />
               {imageUrl && (
                 <div style={{ marginTop: '0.5rem' }}>
-                  <img 
-                    src={imageUrl} 
-                    alt="Preview" 
-                    style={{ 
-                      maxWidth: '100%', 
-                      maxHeight: '150px', 
+                  <img
+                    src={imageUrl}
+                    alt="Preview"
+                    style={{
+                      maxWidth: '100%',
+                      maxHeight: '150px',
                       borderRadius: 'var(--radius-sm)',
-                      objectFit: 'cover'
+                      objectFit: 'cover',
                     }}
                     onError={e => {
                       (e.target as HTMLImageElement).style.display = 'none';
@@ -112,8 +114,12 @@ export function CardEditorModal({ card, onClose, onSave }: CardEditorModalProps)
             <button type="button" onClick={handleClose} className="btn btn-secondary">
               {t('common.cancel')}
             </button>
-            <button type="submit" className="btn btn-primary" disabled={isSubmitting || !title.trim()}>
-              {isSubmitting ? t('common.loading') : (card ? t('common.save') : t('card.addCard'))}
+            <button
+              type="submit"
+              className="btn btn-primary"
+              disabled={isSubmitting || !title.trim()}
+            >
+              {isSubmitting ? t('common.loading') : card ? t('common.save') : t('card.addCard')}
             </button>
           </div>
         </form>

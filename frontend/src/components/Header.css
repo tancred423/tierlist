@@ -139,7 +139,7 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  background: #5865F2;
+  background: #5865f2;
   color: white;
   border: none;
   padding: 0.5rem 1rem;
@@ -150,7 +150,7 @@
 }
 
 .btn-discord:hover {
-  background: #4752C4;
+  background: #4752c4;
 }
 
 @media (max-width: 768px) {
@@ -165,15 +165,15 @@
   .user-name {
     display: none;
   }
-  
+
   .chevron {
     display: none;
   }
-  
+
   .btn-discord span {
     display: none;
   }
-  
+
   .btn-discord {
     padding: 0.5rem;
   }

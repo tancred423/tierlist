@@ -1,5 +1,5 @@
 import { Hono } from "@hono/hono";
-import { eq, and, desc } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 import { db, schema } from "../db/index.ts";
 import { generateId, generateToken } from "../utils/id.ts";
 import { requireAuth } from "../middleware/auth.ts";
@@ -47,12 +47,12 @@ filledTierlists.get("/my", requireAuth, async (c) => {
     },
   });
 
-  const sharedLists = coOwnedRelations.map(rel => ({
+  const sharedLists = coOwnedRelations.map((rel) => ({
     ...rel.filledTierlist,
     isShared: true,
   }));
 
-  return c.json({ 
+  return c.json({
     owned: ownedLists,
     shared: sharedLists,
   });
@@ -155,7 +155,7 @@ filledTierlists.get("/:id", requireAuth, async (c) => {
   }
 
   const isOwner = filledList.ownerId === user.userId;
-  const isCoOwner = filledList.coOwners.some(co => co.userId === user.userId);
+  const isCoOwner = filledList.coOwners.some((co) => co.userId === user.userId);
 
   if (!isOwner && !isCoOwner) {
     return c.json({ error: "Access denied" }, 403);
@@ -170,7 +170,7 @@ filledTierlists.get("/view/:token", async (c) => {
   const filledList = await db.query.filledTierlists.findFirst({
     where: and(
       eq(schema.filledTierlists.viewShareToken, token),
-      eq(schema.filledTierlists.viewShareEnabled, true)
+      eq(schema.filledTierlists.viewShareEnabled, true),
     ),
     with: {
       template: {
@@ -200,7 +200,7 @@ filledTierlists.get("/edit/:token", requireAuth, async (c) => {
   const filledList = await db.query.filledTierlists.findFirst({
     where: and(
       eq(schema.filledTierlists.editShareToken, token),
-      eq(schema.filledTierlists.editShareEnabled, true)
+      eq(schema.filledTierlists.editShareEnabled, true),
     ),
     with: {
       template: {
@@ -221,7 +221,7 @@ filledTierlists.get("/edit/:token", requireAuth, async (c) => {
     return c.json({ error: "Tierlist not found or edit sharing disabled" }, 404);
   }
 
-  const isAlreadyCoOwner = filledList.coOwners.some(co => co.userId === user.userId);
+  const isAlreadyCoOwner = filledList.coOwners.some((co) => co.userId === user.userId);
   const isOwner = filledList.ownerId === user.userId;
 
   if (!isAlreadyCoOwner && !isOwner) {
@@ -251,7 +251,7 @@ filledTierlists.put("/:id", requireAuth, async (c) => {
   }
 
   const isOwner = filledList.ownerId === user.userId;
-  const isCoOwner = filledList.coOwners.some(co => co.userId === user.userId);
+  const isCoOwner = filledList.coOwners.some((co) => co.userId === user.userId);
 
   if (!isOwner && !isCoOwner) {
     return c.json({ error: "Access denied" }, 403);
@@ -291,7 +291,7 @@ filledTierlists.put("/:id/placements", requireAuth, async (c) => {
   }
 
   const isOwner = filledList.ownerId === user.userId;
-  const isCoOwner = filledList.coOwners.some(co => co.userId === user.userId);
+  const isCoOwner = filledList.coOwners.some((co) => co.userId === user.userId);
 
   if (!isOwner && !isCoOwner) {
     return c.json({ error: "Access denied" }, 403);
@@ -367,7 +367,7 @@ filledTierlists.post("/:id/regenerate-tokens", requireAuth, async (c) => {
     where: eq(schema.filledTierlists.id, id),
   });
 
-  return c.json({ 
+  return c.json({
     viewShareToken: updatedList?.viewShareToken,
     editShareToken: updatedList?.editShareToken,
   });
@@ -380,7 +380,7 @@ filledTierlists.post("/:id/leave", requireAuth, async (c) => {
   const coOwnerRecord = await db.query.filledTierlistCoOwners.findFirst({
     where: and(
       eq(schema.filledTierlistCoOwners.listId, id),
-      eq(schema.filledTierlistCoOwners.userId, user.userId)
+      eq(schema.filledTierlistCoOwners.userId, user.userId),
     ),
   });
 
@@ -391,7 +391,7 @@ filledTierlists.post("/:id/leave", requireAuth, async (c) => {
   await db.delete(schema.filledTierlistCoOwners)
     .where(and(
       eq(schema.filledTierlistCoOwners.listId, id),
-      eq(schema.filledTierlistCoOwners.userId, user.userId)
+      eq(schema.filledTierlistCoOwners.userId, user.userId),
     ));
 
   return c.json({ success: true });

@@ -7,7 +7,10 @@
   position: relative;
   background: var(--color-bg-card);
   border: 2px solid transparent;
-  transition: transform 100ms ease, border-color 150ms ease, box-shadow 150ms ease;
+  transition:
+    transform 100ms ease,
+    border-color 150ms ease,
+    box-shadow 150ms ease;
   flex-shrink: 0;
 }
 
@@ -128,7 +131,9 @@
   pointer-events: none;
   opacity: 0;
   visibility: hidden;
-  transition: opacity 150ms ease, visibility 150ms ease;
+  transition:
+    opacity 150ms ease,
+    visibility 150ms ease;
   box-shadow: var(--shadow-lg);
 }
 

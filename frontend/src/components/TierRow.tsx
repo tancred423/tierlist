@@ -11,9 +11,9 @@ export function TierRow({ tier, children }: TierRowProps) {
 
   return (
     <>
-      <div 
+      <div
         className="tier-label"
-        style={{ 
+        style={{
           backgroundColor: tier.color,
           color: textColor,
         }}
