@@ -1,0 +1,16 @@
+.droppable-cell {
+  background: var(--color-bg-elevated);
+  min-height: 100px;
+  padding: 0.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-content: flex-start;
+  transition: background-color 150ms ease;
+}
+
+.droppable-cell.is-over {
+  background: rgba(99, 102, 241, 0.15);
+  outline: 2px dashed var(--color-primary);
+  outline-offset: -2px;
+}

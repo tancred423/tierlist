@@ -1,0 +1,125 @@
+.share-modal {
+  max-width: 550px;
+}
+
+.share-section {
+  padding: 1rem 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.share-image-btn {
+  width: 100%;
+  justify-content: center;
+}
+
+.share-section:last-child {
+  border-bottom: none;
+}
+
+.share-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.share-section h3 {
+  font-size: 1rem;
+  margin-bottom: 0.25rem;
+}
+
+.share-section p {
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+}
+
+.toggle-switch {
+  position: relative;
+  width: 48px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+.toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  transition: 0.2s;
+  border-radius: 24px;
+}
+
+.toggle-slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 2px;
+  bottom: 2px;
+  background-color: var(--color-text-muted);
+  transition: 0.2s;
+  border-radius: 50%;
+}
+
+.toggle-switch input:checked + .toggle-slider {
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.toggle-switch input:checked + .toggle-slider:before {
+  transform: translateX(24px);
+  background-color: white;
+}
+
+.share-link-row {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.share-link-input {
+  flex: 1;
+  font-size: 0.875rem;
+  font-family: monospace;
+}
+
+.regenerate-btn {
+  font-size: 0.75rem;
+}
+
+.co-owners-list {
+  margin-top: 1rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--color-border);
+}
+
+.co-owners-list h4 {
+  font-size: 0.875rem;
+  margin-bottom: 0.5rem;
+  color: var(--color-text-muted);
+}
+
+.co-owners-list ul {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.co-owners-list li {
+  font-size: 0.875rem;
+  padding: 0.25rem 0.75rem;
+  background: var(--color-bg-card);
+  border-radius: var(--radius-sm);
+}

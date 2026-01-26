@@ -1,0 +1,223 @@
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { api } from '../api/client';
+import { useAuthStore } from '../stores/auth';
+import { useI18n } from '../i18n';
+import type { FilledTierlist, CardPlacement, PlacementData } from '../types';
+import { TierlistGrid } from '../components/TierlistGrid';
+import { ShareModal } from '../components/ShareModal';
+import './TierlistEditorPage.css';
+
+export function TierlistEditorPage() {
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const { user } = useAuthStore();
+  const { t } = useI18n();
+  
+  const [tierlist, setTierlist] = useState<FilledTierlist | null>(null);
+  const [placements, setPlacements] = useState<CardPlacement[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [saveStatus, setSaveStatus] = useState<'saved' | 'saving' | 'error'>('saved');
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [canEdit, setCanEdit] = useState(false);
+  const [isCopying, setIsCopying] = useState(false);
+  
+  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const pendingPlacementsRef = useRef<PlacementData[] | null>(null);
+
+  useEffect(() => {
+    if (!user) {
+      navigate('/');
+      return;
+    }
+    loadTierlist();
+  }, [id, user, navigate]);
+
+  useEffect(() => {
+    return () => {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  async function loadTierlist() {
+    if (!id) return;
+    
+    try {
+      const { filledTierlist, canEdit: editable } = await api.getFilledTierlist(id);
+      setTierlist(filledTierlist);
+      setPlacements(filledTierlist.placements);
+      setCanEdit(editable);
+    } catch (error) {
+      console.error('Failed to load tierlist:', error);
+      navigate('/');
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  const savePlacements = useCallback(async (placementData: PlacementData[]) => {
+    if (!id) return;
+    
+    setSaveStatus('saving');
+    try {
+      await api.updatePlacements(id, placementData);
+      setSaveStatus('saved');
+    } catch (error) {
+      console.error('Failed to save placements:', error);
+      setSaveStatus('error');
+    }
+  }, [id]);
+
+  const handlePlacementsChange = useCallback((newPlacements: PlacementData[]) => {
+    setPlacements(newPlacements as CardPlacement[]);
+    pendingPlacementsRef.current = newPlacements;
+    
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
+    }
+    
+    setSaveStatus('saving');
+    saveTimeoutRef.current = setTimeout(() => {
+      if (pendingPlacementsRef.current) {
+        savePlacements(pendingPlacementsRef.current);
+        pendingPlacementsRef.current = null;
+      }
+    }, 500);
+  }, [savePlacements]);
+
+  async function handleTitleChange(newTitle: string) {
+    if (!id || !tierlist) return;
+    
+    try {
+      await api.updateFilledTierlist(id, { title: newTitle });
+      setTierlist({ ...tierlist, title: newTitle });
+    } catch (error) {
+      console.error('Failed to update title:', error);
+    }
+  }
+
+  async function handleDeleteRanking() {
+    if (!tierlist) return;
+    if (!confirm(t('tierlist.deleteConfirm'))) return;
+
+    try {
+      await api.deleteFilledTierlist(tierlist.id);
+      navigate('/');
+    } catch (error) {
+      console.error('Failed to delete ranking:', error);
+      alert(t('errors.failedToDelete'));
+    }
+  }
+
+  if (isLoading) {
+    return (
+      <div className="loading-container">
+        <div className="loading-spinner" />
+      </div>
+    );
+  }
+
+  if (!tierlist) {
+    return (
+      <div className="container">
+        <div className="empty-state">
+          <h3>Tierlist not found</h3>
+        </div>
+      </div>
+    );
+  }
+
+  const isOwner = tierlist.ownerId === user?.id;
+  const isCoOwner = canEdit && !isOwner;
+
+  async function handleLeave() {
+    if (!confirm(t('tierlist.leaveConfirm') || 'Are you sure you want to leave as co-owner?')) return;
+    
+    try {
+      await api.leaveFilledTierlist(tierlist.id);
+      navigate('/');
+    } catch (error) {
+      console.error('Failed to leave:', error);
+    }
+  }
+
+  async function handleCopy() {
+    setIsCopying(true);
+    try {
+      const { filledTierlist: newList } = await api.copyFilledTierlist(tierlist.id);
+      navigate(`/tierlist/${newList.id}`);
+    } catch (error) {
+      console.error('Failed to copy ranking:', error);
+      setIsCopying(false);
+    }
+  }
+
+  return (
+    <div className="tierlist-editor-page">
+      <div className="editor-header">
+        <div className="header-title">
+          {isOwner ? (
+            <input
+              type="text"
+              value={tierlist.title}
+              onChange={e => handleTitleChange(e.target.value)}
+              className="title-input"
+            />
+          ) : (
+            <h1 className="title-text">{tierlist.title}</h1>
+          )}
+          <p className="text-muted">
+            {t('home.basedOn')} "{tierlist.template.title}" {tierlist.template.owner ? `${t('template.by')} ${tierlist.template.owner.username}` : ''}
+            {isCoOwner && <span className="co-owner-badge">{t('home.coOwner')}</span>}
+          </p>
+        </div>
+        <div className="editor-actions">
+          {canEdit && (
+            <span className={`save-status ${saveStatus}`}>
+              {saveStatus === 'saving' && t('tierlist.saving')}
+              {saveStatus === 'saved' && t('tierlist.saved')}
+              {saveStatus === 'error' && t('tierlist.saveError')}
+            </span>
+          )}
+          {isCoOwner && (
+            <>
+              <button onClick={handleCopy} className="btn btn-secondary" disabled={isCopying}>
+                {isCopying ? t('tierlist.copying') : t('tierlist.copyRanking')}
+              </button>
+              <button onClick={handleLeave} className="btn btn-secondary">
+                {t('tierlist.leave')}
+              </button>
+            </>
+          )}
+          {isOwner && (
+            <>
+              <button onClick={handleDeleteRanking} className="btn btn-danger">
+                {t('common.delete')}
+              </button>
+              <button onClick={() => setShowShareModal(true)} className="btn btn-secondary">
+                {t('common.share')}
+              </button>
+            </>
+          )}
+        </div>
+      </div>
+
+      <TierlistGrid
+        template={tierlist.template}
+        placements={placements}
+        onPlacementsChange={handlePlacementsChange}
+        readOnly={!canEdit}
+      />
+
+      {showShareModal && tierlist && (
+        <ShareModal
+          tierlist={tierlist}
+          onClose={() => setShowShareModal(false)}
+          onUpdate={(updates) => setTierlist({ ...tierlist, ...updates })}
+        />
+      )}
+    </div>
+  );
+}

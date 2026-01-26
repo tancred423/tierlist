@@ -1,0 +1,71 @@
+.tierlist-grid-container {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.tierlist-grid {
+  display: grid;
+  min-width: 600px;
+  gap: 2px;
+  background: var(--color-border);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  margin: 0 1rem;
+}
+
+.grid-header-spacer {
+  background: var(--color-bg-elevated);
+}
+
+.column-header {
+  background: var(--color-bg-elevated);
+  padding: 0.75rem 1rem;
+  font-weight: 500;
+  font-size: 0.875rem;
+  text-align: center;
+  color: var(--color-text-muted);
+}
+
+.unassigned-section {
+  margin: 2.5rem 1rem 0;
+  padding-top: 1rem;
+  border-top: 1px solid var(--color-border);
+}
+
+.unassigned-header {
+  font-size: 1rem;
+  font-weight: 500;
+  margin-bottom: 0.75rem;
+  color: var(--color-text-muted);
+}
+
+.unassigned-area {
+  min-height: 180px;
+  background: var(--color-bg-elevated);
+  border: 2px dashed var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-content: flex-start;
+  transition: border-color 150ms ease, background-color 150ms ease, box-shadow 150ms ease;
+}
+
+.unassigned-area.is-over {
+  border-color: var(--color-primary);
+  border-style: dashed;
+  background: rgba(99, 102, 241, 0.1);
+  box-shadow: inset 0 0 0 2px rgba(99, 102, 241, 0.2);
+}
+
+.empty-unassigned {
+  width: 100%;
+  min-height: 148px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: var(--color-text-muted);
+}

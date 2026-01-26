@@ -1,0 +1,123 @@
+.tierlist-editor-page {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding-bottom: 2rem;
+  width: 100%;
+}
+
+.tierlist-editor-page .editor-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  width: 100%;
+  padding: 0 1rem;
+}
+
+.header-title {
+  flex: 1;
+  text-align: left;
+  margin: 0;
+}
+
+.title-input {
+  font-size: 1.5rem;
+  font-weight: 600;
+  background: transparent;
+  border: 1px solid transparent;
+  padding: 0.25rem 0.5rem;
+  margin: -0.25rem -0.5rem;
+  width: 100%;
+  border-radius: var(--radius-sm);
+  transition: border-color var(--transition), background var(--transition);
+}
+
+.title-input:hover:not(:disabled) {
+  border-color: var(--color-border);
+}
+
+.title-input:focus {
+  background: var(--color-bg-elevated);
+  border-color: var(--color-primary);
+}
+
+.title-input:disabled {
+  opacity: 1;
+}
+
+.title-text {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.co-owner-badge {
+  font-size: 0.75rem;
+  padding: 0.125rem 0.5rem;
+  border-radius: var(--radius-sm);
+  background: rgba(34, 197, 94, 0.15);
+  color: var(--color-success);
+  font-weight: 500;
+}
+
+.text-muted {
+  color: var(--color-text-muted);
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.shared-badge {
+  font-size: 0.75rem;
+  padding: 0.125rem 0.5rem;
+  border-radius: var(--radius-sm);
+  background: rgba(99, 102, 241, 0.15);
+  color: var(--color-primary);
+  font-weight: 500;
+}
+
+.editor-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-shrink: 0;
+}
+
+.save-status {
+  font-size: 0.8125rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--radius-sm);
+}
+
+.save-status.saving {
+  color: var(--color-text-muted);
+}
+
+.save-status.saved {
+  color: var(--color-success);
+}
+
+.save-status.error {
+  color: var(--color-danger);
+}
+
+@media (max-width: 768px) {
+  .editor-header {
+    flex-direction: column;
+  }
+
+  .title-input {
+    font-size: 1.25rem;
+  }
+
+  .editor-actions {
+    width: 100%;
+  }
+
+  .editor-actions .btn {
+    flex: 1;
+  }
+}

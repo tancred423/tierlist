@@ -1,0 +1,80 @@
+.account-page {
+  max-width: 600px;
+}
+
+.account-page h1 {
+  margin-bottom: 1.5rem;
+}
+
+.account-card {
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.account-profile {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.account-avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.account-avatar-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-primary);
+  color: white;
+  font-size: 2rem;
+  font-weight: 600;
+}
+
+.account-info {
+  flex: 1;
+}
+
+.account-username {
+  font-size: 1.5rem;
+  margin-bottom: 0.25rem;
+}
+
+.account-member-since {
+  color: var(--color-text-muted);
+  font-size: 0.875rem;
+}
+
+.account-actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.account-danger-zone {
+  padding: 1.5rem;
+  border-color: var(--color-danger);
+}
+
+.account-danger-zone h3 {
+  color: var(--color-danger);
+  margin-bottom: 0.5rem;
+}
+
+.account-danger-zone .text-muted {
+  margin-bottom: 1rem;
+}
+
+@media (max-width: 480px) {
+  .account-profile {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .account-actions {
+    justify-content: center;
+  }
+}

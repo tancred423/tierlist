@@ -1,0 +1,9 @@
+FROM denoland/deno:2.1.4
+
+WORKDIR /app
+
+ENV DENO_DIR=/deno-dir
+
+EXPOSE 3000
+
+CMD ["sh", "-c", "deno install && deno task dev"]

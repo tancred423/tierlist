@@ -1,0 +1,117 @@
+export interface User {
+  id: string;
+  discordId: string;
+  username: string;
+  avatar: string | null;
+  discriminator: string | null;
+  createdAt?: string;
+}
+
+export interface Tier {
+  id: string;
+  templateId: string;
+  name: string;
+  color: string;
+  orderIndex: number;
+}
+
+export interface Column {
+  id: string;
+  templateId: string;
+  name: string | null;
+  orderIndex: number;
+}
+
+export interface Card {
+  id: string;
+  templateId: string;
+  title: string;
+  imageUrl: string | null;
+  description: string | null;
+  orderIndex: number;
+}
+
+export interface Template {
+  id: string;
+  ownerId: string;
+  title: string;
+  description: string | null;
+  isPublic: boolean;
+  shareToken: string | null;
+  createdAt: string;
+  updatedAt: string;
+  owner?: User;
+  tiers: Tier[];
+  columns: Column[];
+  cards: Card[];
+}
+
+export interface CardPlacement {
+  id: string;
+  filledTierlistId: string;
+  cardId: string;
+  tierId: string | null;
+  columnId: string | null;
+  orderIndex: number;
+}
+
+export interface CoOwner {
+  userId: string;
+  user: User;
+  joinedAt: string;
+}
+
+export interface FilledTierlist {
+  id: string;
+  templateId: string;
+  ownerId: string;
+  title: string;
+  viewShareToken: string | null;
+  viewShareEnabled: boolean;
+  editShareToken: string | null;
+  editShareEnabled: boolean;
+  createdAt: string;
+  updatedAt: string;
+  template: Template;
+  owner?: User;
+  placements: CardPlacement[];
+  coOwners?: CoOwner[];
+  isShared?: boolean;
+}
+
+export interface CreateTemplateData {
+  title: string;
+  description?: string;
+  isPublic?: boolean;
+  tiers?: { name: string; color: string }[];
+  columns?: { name: string | null }[];
+}
+
+export interface UpdateTemplateData {
+  title?: string;
+  description?: string;
+  isPublic?: boolean;
+  tiers?: { id?: string; name: string; color: string }[];
+  columns?: { id?: string; name: string | null }[];
+}
+
+export interface CreateCardData {
+  title: string;
+  imageUrl?: string;
+  description?: string;
+  orderIndex?: number;
+}
+
+export interface UpdateCardData {
+  title?: string;
+  imageUrl?: string;
+  description?: string;
+  orderIndex?: number;
+}
+
+export interface PlacementData {
+  cardId: string;
+  tierId: string | null;
+  columnId: string | null;
+  orderIndex: number;
+}
