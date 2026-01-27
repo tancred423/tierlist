@@ -15,6 +15,7 @@ import {
   sortableKeyboardCoordinates,
   useSortable,
   verticalListSortingStrategy,
+  rectSortingStrategy,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { api } from '../api/client';
@@ -133,6 +134,50 @@ function SortableColumnRow({
       >
         ×
       </button>
+    </div>
+  );
+}
+
+interface SortableCardItemProps {
+  card: Card;
+  onEdit: (card: Card) => void;
+  onDelete: (cardId: string) => void;
+  t: (key: string) => string;
+}
+
+function SortableCardItem({ card, onEdit, onDelete, t }: SortableCardItemProps) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: card.id,
+  });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  return (
+    <div ref={setNodeRef} style={style} className="card-preview sortable-card">
+      <div className="card-drag-handle" {...attributes} {...listeners}>
+        ⋮⋮
+      </div>
+      {card.imageUrl ? (
+        <img src={card.imageUrl} alt={card.title} className="card-image" />
+      ) : (
+        <div className="card-image-placeholder">No Image</div>
+      )}
+      <div className="card-content">
+        <h4>{card.title}</h4>
+        {card.description && <p className="card-description">{card.description}</p>}
+      </div>
+      <div className="card-actions">
+        <button onClick={() => onEdit(card)} className="btn btn-secondary btn-sm">
+          {t('common.edit')}
+        </button>
+        <button onClick={() => onDelete(card.id)} className="btn btn-danger btn-sm">
+          {t('common.delete')}
+        </button>
+      </div>
     </div>
   );
 }
@@ -313,6 +358,22 @@ export function TemplateEditorPage() {
         return arrayMove(items, oldIndex, newIndex);
       });
     }
+  }
+
+  function handleCardDragEnd(event: DragEndEvent) {
+    const { active, over } = event;
+    if (over && active.id !== over.id) {
+      setCards(items => {
+        const oldIndex = items.findIndex(c => c.id === active.id);
+        const newIndex = items.findIndex(c => c.id === over.id);
+        return arrayMove(items, oldIndex, newIndex);
+      });
+    }
+  }
+
+  function handleSortAlphabetically() {
+    if (!confirm(t('template.sortAlphabeticallyConfirm'))) return;
+    setCards(items => [...items].sort((a, b) => a.title.localeCompare(b.title)));
   }
 
   async function handleAddCard() {
@@ -532,9 +593,16 @@ export function TemplateEditorPage() {
             <h2>
               {t('template.cards')} ({cards.length})
             </h2>
-            <button onClick={handleAddCard} className="btn btn-secondary btn-sm">
-              + {t('template.addCard')}
-            </button>
+            <div className="section-header-actions">
+              {cards.length > 1 && (
+                <button onClick={handleSortAlphabetically} className="btn btn-secondary btn-sm">
+                  {t('template.sortAlphabetically')}
+                </button>
+              )}
+              <button onClick={handleAddCard} className="btn btn-secondary btn-sm">
+                + {t('template.addCard')}
+              </button>
+            </div>
           </div>
           {cards.length === 0 ? (
             <div className="empty-state" style={{ padding: '2rem 1rem' }}>
@@ -542,35 +610,25 @@ export function TemplateEditorPage() {
               <p className="text-muted">{t('template.addCardsHint')}</p>
             </div>
           ) : (
-            <div className="cards-grid">
-              {cards.map(card => (
-                <div key={card.id} className="card-preview">
-                  {card.imageUrl ? (
-                    <img src={card.imageUrl} alt={card.title} className="card-image" />
-                  ) : (
-                    <div className="card-image-placeholder">No Image</div>
-                  )}
-                  <div className="card-content">
-                    <h4>{card.title}</h4>
-                    {card.description && <p className="card-description">{card.description}</p>}
-                  </div>
-                  <div className="card-actions">
-                    <button
-                      onClick={() => handleEditCard(card)}
-                      className="btn btn-secondary btn-sm"
-                    >
-                      {t('common.edit')}
-                    </button>
-                    <button
-                      onClick={() => handleDeleteCard(card.id)}
-                      className="btn btn-danger btn-sm"
-                    >
-                      {t('common.delete')}
-                    </button>
-                  </div>
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragEnd={handleCardDragEnd}
+            >
+              <SortableContext items={cards.map(c => c.id)} strategy={rectSortingStrategy}>
+                <div className="cards-grid">
+                  {cards.map(card => (
+                    <SortableCardItem
+                      key={card.id}
+                      card={card}
+                      onEdit={handleEditCard}
+                      onDelete={handleDeleteCard}
+                      t={t}
+                    />
+                  ))}
                 </div>
-              ))}
-            </div>
+              </SortableContext>
+            </DndContext>
           )}
         </section>
       </div>

@@ -70,6 +70,8 @@
     "addCard": "Karte hinzufügen",
     "noCards": "Noch keine Karten",
     "addCardsHint": "Füge Karten zu deiner Vorlage hinzu, um loszulegen",
+    "sortAlphabetically": "A-Z sortieren",
+    "sortAlphabeticallyConfirm": "Karten alphabetisch sortieren? Dies wird deine manuelle Sortierung überschreiben.",
     "unsavedChanges": "Du hast ungespeicherte Änderungen. Möchtest du wirklich schließen?",
     "deleteConfirm": "Möchtest du diese Vorlage wirklich löschen? Dies kann nicht rückgängig gemacht werden.",
     "copy": "Kopie erstellen"
