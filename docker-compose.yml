@@ -3,7 +3,7 @@ services:
     image: ${BACKEND_IMAGE:-ghcr.io/tancred423/tierlist/backend:latest}
     container_name: tierlist-backend
     environment:
-      DATABASE_URL: ${DATABASE_URL}
+      DATABASE_URL: mysql://${MYSQL_USER:-tierlist}:${MYSQL_PASSWORD}@${MYSQL_HOST:-mysql}:3306/${MYSQL_DATABASE:-tierlist}
       DISCORD_CLIENT_ID: ${DISCORD_CLIENT_ID}
       DISCORD_CLIENT_SECRET: ${DISCORD_CLIENT_SECRET}
       DISCORD_REDIRECT_URI: ${DISCORD_REDIRECT_URI}
@@ -11,7 +11,7 @@ services:
       FRONTEND_URL: ${FRONTEND_URL}
       NODE_ENV: production
     ports:
-      - "${BACKEND_PORT:-3000}:3000"
+      - "${BACKEND_PORT:-7555}:3000"
     restart: unless-stopped
     networks:
       - mysql-network
@@ -21,7 +21,7 @@ services:
     image: ${FRONTEND_IMAGE:-ghcr.io/tancred423/tierlist/frontend:latest}
     container_name: tierlist-frontend
     ports:
-      - "${FRONTEND_PORT:-80}:80"
+      - "${FRONTEND_PORT:-7556}:80"
     depends_on:
       - backend
     restart: unless-stopped
