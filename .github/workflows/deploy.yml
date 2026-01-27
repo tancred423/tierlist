@@ -141,7 +141,7 @@ jobs:
           key: ${{ secrets.DEPLOY_SSH_KEY }}
           script: |
             cd ${{ secrets.DEPLOY_PATH }}
-
+            
             # Log in to GitHub Container Registry (requires GHCR_PAT secret - a Personal Access Token with read:packages scope)
             echo ${{ secrets.GHCR_PAT }} | docker login ghcr.io -u ${{ github.repository_owner }} --password-stdin
             
@@ -150,6 +150,12 @@ jobs:
             
             # Restart services with new images
             docker compose up -d --force-recreate
+            
+            # Wait for backend to be ready ... ugly, a fix for later
+            sleep 5
+            
+            # Run database migrations
+            docker exec tierlist-backend deno task db:migrate
             
             # Clean up old images
             docker image prune -f
