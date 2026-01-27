@@ -1,8 +1,6 @@
 services:
   backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
+    image: ghcr.io/${GITHUB_REPOSITORY}/backend:latest
     container_name: tierlist-backend
     environment:
       DATABASE_URL: ${DATABASE_URL}
@@ -20,12 +18,8 @@ services:
       - tierlist-network
 
   frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
+    image: ghcr.io/${GITHUB_REPOSITORY}/frontend:latest
     container_name: tierlist-frontend
-    environment:
-      VITE_API_URL: ${VITE_API_URL}
     ports:
       - "${FRONTEND_PORT:-80}:80"
     depends_on:

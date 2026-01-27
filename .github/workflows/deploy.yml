@@ -141,7 +141,9 @@ jobs:
           key: ${{ secrets.DEPLOY_SSH_KEY }}
           script: |
             cd ${{ secrets.DEPLOY_PATH }}
-            
+
+            export GITHUB_REPOSITORY='${{ github.repository }}'
+
             # Log in to GitHub Container Registry (requires GHCR_PAT secret - a Personal Access Token with read:packages scope)
             echo ${{ secrets.GHCR_PAT }} | docker login ghcr.io -u ${{ github.repository_owner }} --password-stdin
             
