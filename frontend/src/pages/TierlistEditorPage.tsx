@@ -42,12 +42,8 @@ export function TierlistEditorPage() {
   }, [id, navigate]);
 
   useEffect(() => {
-    if (!user) {
-      navigate('/');
-      return;
-    }
     loadTierlist();
-  }, [user, navigate, loadTierlist]);
+  }, [loadTierlist]);
 
   useEffect(() => {
     return () => {

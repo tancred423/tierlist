@@ -154,6 +154,12 @@ select:focus {
 .btn-icon {
   padding: 0.5rem;
   border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-text);
+}
+
+.btn-icon:hover {
+  background: var(--color-bg-card);
 }
 
 .card {

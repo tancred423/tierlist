@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { api } from '../api/client';
 import { useAuthStore } from '../stores/auth';
 import { useI18n } from '../i18n';
@@ -14,7 +14,8 @@ interface SharedTierlistPageProps {
 export function SharedTierlistPage({ mode }: SharedTierlistPageProps) {
   const { token } = useParams<{ token: string }>();
   const navigate = useNavigate();
-  const { user, login } = useAuthStore();
+  const location = useLocation();
+  const { user } = useAuthStore();
   const { t } = useI18n();
 
   const [tierlist, setTierlist] = useState<FilledTierlist | null>(null);
@@ -57,12 +58,8 @@ export function SharedTierlistPage({ mode }: SharedTierlistPageProps) {
   }, [token, mode, t]);
 
   useEffect(() => {
-    if (mode === 'edit' && !user) {
-      login();
-      return;
-    }
     loadTierlist();
-  }, [mode, user, login, loadTierlist]);
+  }, [loadTierlist]);
 
   useEffect(() => {
     return () => {
@@ -120,9 +117,14 @@ export function SharedTierlistPage({ mode }: SharedTierlistPageProps) {
     }
   }
 
+  function redirectToLogin() {
+    const currentPath = location.pathname + location.search;
+    navigate(`/login?redirect=${encodeURIComponent(currentPath)}`);
+  }
+
   async function handleCopy(tierlistId: string) {
     if (!user) {
-      login();
+      redirectToLogin();
       return;
     }
 
@@ -150,11 +152,6 @@ export function SharedTierlistPage({ mode }: SharedTierlistPageProps) {
         <div className="empty-state">
           <h3>Unable to Access Tierlist</h3>
           <p>{error || 'This tierlist could not be found.'}</p>
-          {mode === 'edit' && !user && (
-            <button onClick={login} className="btn btn-primary" style={{ marginTop: '1rem' }}>
-              Login with Discord
-            </button>
-          )}
         </div>
       </div>
     );

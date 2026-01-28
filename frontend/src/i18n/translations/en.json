@@ -23,6 +23,11 @@
     "loginWithDiscord": "Login with Discord",
     "loginToStartRanking": "Login to Start Ranking"
   },
+  "login": {
+    "title": "Login Required",
+    "message": "You need to be logged in to access this page. Please sign in with your Discord account to continue.",
+    "hint": "Your Discord account is used only for authentication."
+  },
   "theme": {
     "theme": "Theme",
     "light": "Light",

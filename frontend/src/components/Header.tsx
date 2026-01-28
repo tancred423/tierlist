@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../stores/auth';
 import { useThemeStore } from '../stores/theme';
 import { useI18n } from '../i18n';
@@ -129,6 +129,7 @@ export function Header() {
   const { mode, setMode } = useThemeStore();
   const { language, setLanguage, t } = useI18n();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [langOpen, setLangOpen] = useState(false);
   const [themeOpen, setThemeOpen] = useState(false);
@@ -138,6 +139,12 @@ export function Header() {
     setLangOpen(false);
     setThemeOpen(false);
     setUserOpen(false);
+  };
+
+  const handleLogin = () => {
+    const currentPath = location.pathname + location.search;
+    localStorage.setItem('auth_redirect', currentPath);
+    login();
   };
 
   const getAvatarUrl = () => {
@@ -288,10 +295,12 @@ export function Header() {
               </button>
             </Dropdown>
           ) : (
-            <button onClick={login} className="btn btn-discord">
-              <DiscordIcon />
-              {t('auth.loginWithDiscord')}
-            </button>
+            location.pathname !== '/login' && (
+              <button onClick={handleLogin} className="btn btn-discord">
+                <DiscordIcon />
+                {t('auth.loginWithDiscord')}
+              </button>
+            )
           )}
         </nav>
       </div>

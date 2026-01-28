@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../api/client';
 import { useAuthStore } from '../stores/auth';
@@ -10,12 +10,6 @@ export function AccountPage() {
   const { t } = useI18n();
   const navigate = useNavigate();
   const [isDeleting, setIsDeleting] = useState(false);
-
-  useEffect(() => {
-    if (!user) {
-      navigate('/');
-    }
-  }, [user, navigate]);
 
   if (!user) {
     return null;

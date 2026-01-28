@@ -12,8 +12,8 @@ interface ShareModalProps {
 
 export function ShareModal({ tierlist, onClose, onUpdate }: ShareModalProps) {
   const { t } = useI18n();
-  const [viewEnabled, setViewEnabled] = useState(tierlist.viewShareEnabled);
-  const [editEnabled, setEditEnabled] = useState(tierlist.editShareEnabled);
+  const [viewEnabled, setViewEnabled] = useState(tierlist.viewShareEnabled ?? false);
+  const [editEnabled, setEditEnabled] = useState(tierlist.editShareEnabled ?? false);
   const [isUpdating, setIsUpdating] = useState(false);
   const [copied, setCopied] = useState<string | null>(null);
 

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import type { Card } from '../types';
 import { useI18n } from '../i18n';
 
@@ -14,6 +14,13 @@ export function CardEditorModal({ card, onClose, onSave }: CardEditorModalProps)
   const [imageUrl, setImageUrl] = useState(card?.imageUrl || '');
   const [description, setDescription] = useState(card?.description || '');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const titleInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (!card && titleInputRef.current) {
+      titleInputRef.current.focus();
+    }
+  }, [card]);
 
   const hasUnsavedChanges =
     title !== (card?.title || '') ||
@@ -60,6 +67,7 @@ export function CardEditorModal({ card, onClose, onSave }: CardEditorModalProps)
             <div className="form-group">
               <label className="form-label">{t('card.title')} *</label>
               <input
+                ref={titleInputRef}
                 type="text"
                 value={title}
                 onChange={e => setTitle(e.target.value)}

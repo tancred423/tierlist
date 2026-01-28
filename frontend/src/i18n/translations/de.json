@@ -23,6 +23,11 @@
     "loginWithDiscord": "Mit Discord anmelden",
     "loginToStartRanking": "Anmelden zum Ranken"
   },
+  "login": {
+    "title": "Anmeldung erforderlich",
+    "message": "Du musst angemeldet sein, um auf diese Seite zuzugreifen. Bitte melde dich mit deinem Discord-Konto an, um fortzufahren.",
+    "hint": "Dein Discord-Konto wird nur zur Authentifizierung verwendet."
+  },
   "theme": {
     "theme": "Design",
     "light": "Hell",

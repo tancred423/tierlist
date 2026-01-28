@@ -292,9 +292,14 @@ export function HomePage() {
     loadData();
   }, [loadData]);
 
+  function loginWithRedirect() {
+    localStorage.setItem('auth_redirect', '/');
+    login();
+  }
+
   async function handleStartRanking(template: Template) {
     if (!user) {
-      login();
+      loginWithRedirect();
       return;
     }
 
@@ -311,7 +316,7 @@ export function HomePage() {
 
   async function handleCopyTemplate(template: Template) {
     if (!user) {
-      login();
+      loginWithRedirect();
       return;
     }
 

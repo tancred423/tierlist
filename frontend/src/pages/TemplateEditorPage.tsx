@@ -19,7 +19,6 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { api } from '../api/client';
-import { useAuthStore } from '../stores/auth';
 import { useI18n } from '../i18n';
 import type { Template, Tier, Column, Card } from '../types';
 import { CardEditorModal } from '../components/CardEditorModal';
@@ -185,7 +184,6 @@ function SortableCardItem({ card, onEdit, onDelete, t }: SortableCardItemProps) 
 export function TemplateEditorPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { user } = useAuthStore();
   const { t } = useI18n();
 
   const isNewTemplate = !id || id === 'new';
@@ -248,10 +246,6 @@ export function TemplateEditorPage() {
   }, [id, navigate]);
 
   useEffect(() => {
-    if (!user) {
-      navigate('/');
-      return;
-    }
     if (isNewTemplate) {
       if (!isCreatingRef.current) {
         isCreatingRef.current = true;
@@ -260,7 +254,7 @@ export function TemplateEditorPage() {
     } else {
       loadTemplate();
     }
-  }, [user, navigate, isNewTemplate, createNewTemplate, loadTemplate]);
+  }, [isNewTemplate, createNewTemplate, loadTemplate]);
 
   async function handleSave() {
     if (!title.trim()) {

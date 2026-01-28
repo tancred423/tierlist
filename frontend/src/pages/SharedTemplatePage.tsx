@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { api } from '../api/client';
 import { useAuthStore } from '../stores/auth';
 import type { Template } from '../types';
@@ -8,7 +8,8 @@ import './SharedTemplatePage.css';
 export function SharedTemplatePage() {
   const { token } = useParams<{ token: string }>();
   const navigate = useNavigate();
-  const { user, login } = useAuthStore();
+  const location = useLocation();
+  const { user } = useAuthStore();
 
   const [template, setTemplate] = useState<Template | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -31,9 +32,14 @@ export function SharedTemplatePage() {
     loadTemplate();
   }, [loadTemplate]);
 
+  function redirectToLogin() {
+    const currentPath = location.pathname + location.search;
+    navigate(`/login?redirect=${encodeURIComponent(currentPath)}`);
+  }
+
   async function handleCopy() {
     if (!token || !user) {
-      login();
+      redirectToLogin();
       return;
     }
 
@@ -53,7 +59,7 @@ export function SharedTemplatePage() {
     if (!template) return;
 
     if (!user) {
-      login();
+      redirectToLogin();
       return;
     }
 
