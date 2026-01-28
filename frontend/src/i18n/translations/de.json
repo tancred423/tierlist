@@ -107,6 +107,7 @@
     "uploading": "Wird hochgeladen...",
     "removeImage": "Bild entfernen",
     "currentImage": "Aktuelles Bild",
+    "squareImageHint": "Quadratische Bilder werden für beste Ergebnisse empfohlen",
     "noImageInClipboard": "Kein Bild in der Zwischenablage gefunden",
     "clipboardPermissionDenied": "Zugriff auf Zwischenablage verweigert. Bitte erlauben oder Drag & Drop verwenden.",
     "clipboardError": "Zwischenablage konnte nicht gelesen werden"

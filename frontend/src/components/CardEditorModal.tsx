@@ -18,7 +18,10 @@ export function CardEditorModal({ card, templateId, onClose, onSave }: CardEdito
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
-  const [imageSource, setImageSource] = useState<'url' | 'upload'>('url');
+  const isUploadedImage = card?.imageUrl?.startsWith('/uploads/') ?? false;
+  const [imageSource, setImageSource] = useState<'url' | 'upload'>(
+    isUploadedImage ? 'upload' : 'url',
+  );
   const titleInputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const dropZoneRef = useRef<HTMLDivElement>(null);
@@ -174,6 +177,7 @@ export function CardEditorModal({ card, templateId, onClose, onSave }: CardEdito
 
             <div className="form-group">
               <label className="form-label">{t('card.image')}</label>
+              <p className="form-hint">{t('card.squareImageHint')}</p>
 
               <div className="image-source-tabs">
                 <button
@@ -194,8 +198,8 @@ export function CardEditorModal({ card, templateId, onClose, onSave }: CardEdito
 
               {imageSource === 'url' ? (
                 <input
-                  type="url"
-                  value={imageUrl}
+                  type="text"
+                  value={imageUrl.startsWith('/uploads/') ? '' : imageUrl}
                   onChange={e => setImageUrl(e.target.value)}
                   className="form-input"
                   placeholder={t('card.imageUrlPlaceholder')}

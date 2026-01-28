@@ -107,6 +107,7 @@
     "uploading": "Uploading...",
     "removeImage": "Remove Image",
     "currentImage": "Current Image",
+    "squareImageHint": "Square images are recommended for best results",
     "noImageInClipboard": "No image found in clipboard",
     "clipboardPermissionDenied": "Clipboard access denied. Please allow access or use drag & drop.",
     "clipboardError": "Could not read clipboard"

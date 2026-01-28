@@ -221,6 +221,12 @@ select:focus {
   font-size: 0.875rem;
 }
 
+.form-hint {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  margin-bottom: 0.5rem;
+}
+
 .form-input {
   width: 100%;
 }
