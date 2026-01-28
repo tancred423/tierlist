@@ -1,0 +1,252 @@
+import { useState, useEffect, useCallback } from 'react';
+import { Link } from 'react-router-dom';
+import { api } from '../api/client';
+import { useClockFormatStore } from '../stores/clockFormat';
+import { useI18n } from '../i18n';
+import { getDisplayName } from '../types';
+import type { FilledTierlist, Pagination as PaginationType } from '../types';
+import { Pagination } from '../components/Pagination';
+import './MyTierlistsPage.css';
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+
+function getImageUrl(url: string | null): string | null {
+  if (!url) return null;
+  if (url.startsWith('/uploads/')) {
+    return `${API_URL}${url}`;
+  }
+  return url;
+}
+
+function formatDate(dateString: string, language: string, clockFormat: '12h' | '24h'): string {
+  const date = new Date(dateString);
+  return date.toLocaleDateString(language === 'de' ? 'de-DE' : 'en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: clockFormat === '12h',
+  });
+}
+
+interface TierlistWithCoOwner extends FilledTierlist {
+  isCoOwner: boolean;
+}
+
+interface TierlistCardProps {
+  tierlist: TierlistWithCoOwner;
+  t: (key: string) => string;
+  language: string;
+  clockFormat: '12h' | '24h';
+}
+
+function TierlistCard({ tierlist, t, language, clockFormat }: TierlistCardProps) {
+  const maxTiers = 5;
+  const maxCols = 5;
+  const maxUnranked = 5;
+
+  const template = tierlist.template;
+  if (!template) return null;
+
+  const sortedTiers = [...template.tiers].sort((a, b) => a.orderIndex - b.orderIndex);
+  const sortedCols = [...template.columns].sort((a, b) => a.orderIndex - b.orderIndex);
+
+  const visibleTiers = sortedTiers.slice(0, maxTiers);
+  const extraTiers = sortedTiers.length - maxTiers;
+  const visibleCols = sortedCols.slice(0, maxCols);
+  const extraCols = sortedCols.length - maxCols;
+
+  const placements = tierlist.placements || [];
+  const cardMap = new Map(template.cards.map(c => [c.id, c]));
+
+  const getCardForCell = (tierId: string, colId: string) => {
+    const placement = placements.find(p => p.tierId === tierId && p.columnId === colId);
+    if (placement) {
+      return cardMap.get(placement.cardId);
+    }
+    return null;
+  };
+
+  const unrankedPlacements = placements.filter(p => !p.tierId || !p.columnId);
+  const visibleUnranked = unrankedPlacements.slice(0, maxUnranked);
+  const extraUnranked = unrankedPlacements.length - maxUnranked;
+
+  const isSharedForEdit =
+    tierlist.editShareEnabled || (tierlist.coOwners && tierlist.coOwners.length > 0);
+
+  return (
+    <Link to={`/tierlist/${tierlist.id}`} className="tierlist-card card">
+      <div className="tierlist-header">
+        <h4 className="tierlist-title">{tierlist.title}</h4>
+        <div className="tierlist-badges">
+          {tierlist.isCoOwner && <span className="coowner-badge">{t('home.coOwner')}</span>}
+          {!tierlist.isCoOwner && isSharedForEdit && (
+            <span className="shared-badge">{t('home.shared')}</span>
+          )}
+        </div>
+        <span className="tierlist-template">
+          {t('home.basedOn')} "{template.title}"{' '}
+          {template.owner ? `${t('template.by')} ${getDisplayName(template.owner)}` : ''}
+        </span>
+        {tierlist.templateSnapshot?.snapshotAt && (
+          <span className="tierlist-revision">
+            {t('template.revision')}:{' '}
+            {formatDate(tierlist.templateSnapshot.snapshotAt, language, clockFormat)}
+          </span>
+        )}
+      </div>
+
+      <div className="tierlist-table-preview">
+        <div className="preview-grid">
+          {(sortedCols.length > 1 || sortedCols.some(c => c.name)) && (
+            <div className="preview-header-row">
+              <div className="preview-tier-label" />
+              {visibleCols.map((col, i) => (
+                <div key={col.id} className="preview-col-header" title={col.name || ''}>
+                  {col.name || `${i + 1}`}
+                </div>
+              ))}
+              {extraCols > 0 && <div className="preview-extra">+{extraCols}</div>}
+            </div>
+          )}
+          {visibleTiers.map(tier => (
+            <div key={tier.id} className="preview-row">
+              <div
+                className="preview-tier-label"
+                style={{ backgroundColor: tier.color }}
+                title={tier.name}
+              >
+                {tier.name}
+              </div>
+              {visibleCols.map(col => {
+                const card = getCardForCell(tier.id, col.id);
+                return (
+                  <div key={col.id} className="preview-cell">
+                    {card && (
+                      <div className="preview-cell-card" title={card.title}>
+                        {card.imageUrl ? (
+                          <img src={getImageUrl(card.imageUrl)!} alt={card.title} />
+                        ) : (
+                          <span>{card.title[0]}</span>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+              {extraCols > 0 && <div className="preview-cell preview-cell-extra" />}
+            </div>
+          ))}
+          {extraTiers > 0 && (
+            <div className="preview-row preview-row-extra">
+              <div className="preview-extra-tiers">
+                +{extraTiers} {t('template.more')}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {visibleUnranked.length > 0 && (
+        <div className="tierlist-unranked-preview">
+          {visibleUnranked.map(placement => {
+            const card = cardMap.get(placement.cardId);
+            if (!card) return null;
+            return (
+              <div key={placement.cardId} className="preview-card" title={card.title}>
+                {card.imageUrl ? (
+                  <img src={getImageUrl(card.imageUrl)!} alt={card.title} />
+                ) : (
+                  <span>{card.title[0]}</span>
+                )}
+              </div>
+            );
+          })}
+          {extraUnranked > 0 && (
+            <div className="preview-card preview-card-extra">+{extraUnranked}</div>
+          )}
+        </div>
+      )}
+    </Link>
+  );
+}
+
+export function MyTierlistsPage() {
+  const [tierlists, setTierlists] = useState<TierlistWithCoOwner[]>([]);
+  const [pagination, setPagination] = useState<PaginationType | null>(null);
+  const [page, setPage] = useState(1);
+  const [isLoading, setIsLoading] = useState(true);
+  const { t, language } = useI18n();
+  const { getEffectiveFormat } = useClockFormatStore();
+  const clockFormat = getEffectiveFormat();
+
+  const loadData = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const result = await api.getMyFilledTierlists({ page, limit: 12 });
+      setTierlists(result.tierlists);
+      setPagination(result.pagination);
+    } catch (error) {
+      console.error('Failed to load tierlists:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [page]);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
+
+  if (isLoading) {
+    return (
+      <div className="loading-container">
+        <div className="loading-spinner" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="container my-tierlists-page">
+      <div className="page-header">
+        <h1>{t('myTierlists.title')}</h1>
+      </div>
+
+      {tierlists.length === 0 ? (
+        <div className="empty-state">
+          <p>{t('myTierlists.empty')}</p>
+          <p className="empty-hint">
+            {t('myTierlists.hint')} <Link to="/my-templates">{t('myTierlists.hintTemplates')}</Link>{' '}
+            {t('myTierlists.hintOr')}{' '}
+            <Link to="/public-templates">{t('myTierlists.hintPublic')}</Link>{' '}
+            {t('myTierlists.hintEnd')}
+          </p>
+        </div>
+      ) : (
+        <>
+          <div className="tierlists-grid">
+            {tierlists.map(tierlist => (
+              <TierlistCard
+                key={tierlist.id}
+                tierlist={tierlist}
+                t={t}
+                language={language}
+                clockFormat={clockFormat}
+              />
+            ))}
+          </div>
+
+          {pagination && (
+            <Pagination
+              page={pagination.page}
+              totalPages={pagination.totalPages}
+              total={pagination.total}
+              limit={pagination.limit}
+              onPageChange={setPage}
+            />
+          )}
+        </>
+      )}
+    </div>
+  );
+}

@@ -8,6 +8,9 @@ const filledTierlists = new Hono();
 
 filledTierlists.get("/my", requireAuth, async (c) => {
   const user = c.get("user")!;
+  const page = parseInt(c.req.query("page") || "1");
+  const limit = parseInt(c.req.query("limit") || "10");
+  const offset = (page - 1) * limit;
 
   const ownedLists = await db.query.filledTierlists.findMany({
     where: eq(schema.filledTierlists.ownerId, user.userId),
@@ -54,9 +57,24 @@ filledTierlists.get("/my", requireAuth, async (c) => {
     isShared: true,
   }));
 
+  const allLists = [
+    ...ownedLists.map((l) => ({ ...l, isCoOwner: false })),
+    ...sharedLists.map((l) => ({ ...l, isCoOwner: true })),
+  ].sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
+
+  const total = allLists.length;
+  const paginatedLists = allLists.slice(offset, offset + limit);
+
   return c.json({
+    tierlists: paginatedLists,
     owned: ownedLists,
     shared: sharedLists,
+    pagination: {
+      page,
+      limit,
+      total,
+      totalPages: Math.ceil(total / limit),
+    },
   });
 });
 

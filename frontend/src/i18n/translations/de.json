@@ -16,8 +16,10 @@
     "viewAll": "Alle anzeigen"
   },
   "nav": {
+    "myTierlists": "Meine Tierlists",
     "myTemplates": "Meine Vorlagen",
-    "myRankings": "Meine Rankings"
+    "myRankings": "Meine Rankings",
+    "publicTemplates": "Öffentliche Vorlagen"
   },
   "auth": {
     "loginWithDiscord": "Mit Discord anmelden",
@@ -61,6 +63,41 @@
     "coOwner": "Mitbesitzer",
     "shared": "Geteilt"
   },
+  "myTierlists": {
+    "title": "Meine Tierlists",
+    "empty": "Du hast noch keine Tierlists erstellt.",
+    "hint": "Schau dir",
+    "hintTemplates": "Meine Vorlagen",
+    "hintOr": "oder",
+    "hintPublic": "Öffentliche Vorlagen",
+    "hintEnd": "an, um eine neue Tierlist zu starten!"
+  },
+  "myTemplates": {
+    "title": "Meine Vorlagen",
+    "empty": "Du hast noch keine Vorlagen erstellt.",
+    "createFirst": "Erstelle deine erste Vorlage, um loszulegen!"
+  },
+  "publicTemplates": {
+    "title": "Öffentliche Vorlagen",
+    "empty": "Noch keine öffentlichen Vorlagen.",
+    "beFirst": "Sei der Erste, der eine Vorlage erstellt und teilt!",
+    "search": "Vorlagen suchen...",
+    "likes": "Likes",
+    "upvote": "Gefällt mir",
+    "removeVote": "Gefällt mir nicht mehr",
+    "sortPopular": "Beliebteste",
+    "sortNewest": "Neueste",
+    "sortOldest": "Älteste"
+  },
+  "pagination": {
+    "previous": "Zurück",
+    "next": "Weiter",
+    "page": "Seite",
+    "of": "von",
+    "showing": "Zeige",
+    "to": "bis",
+    "results": "Ergebnisse"
+  },
   "template": {
     "by": "von",
     "revision": "Version",
@@ -88,7 +125,8 @@
     "sortAlphabeticallyConfirm": "Karten alphabetisch sortieren? Dies wird deine manuelle Sortierung überschreiben.",
     "unsavedChanges": "Du hast ungespeicherte Änderungen. Möchtest du wirklich schließen?",
     "deleteConfirm": "Möchtest du diese Vorlage wirklich löschen? Dies kann nicht rückgängig gemacht werden.",
-    "copy": "Kopie erstellen"
+    "copy": "Kopie erstellen",
+    "atLeastOneCard": "Mindestens eine Karte ist erforderlich"
   },
   "card": {
     "title": "Titel",

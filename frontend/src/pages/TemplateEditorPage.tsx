@@ -272,6 +272,11 @@ export function TemplateEditorPage() {
       return;
     }
 
+    if (cards.length === 0) {
+      alert(t('template.atLeastOneCard'));
+      return;
+    }
+
     if (!id || !template) return;
 
     setIsSaving(true);

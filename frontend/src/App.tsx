@@ -4,6 +4,9 @@ import { useAuthStore } from './stores/auth';
 import { Layout } from './components/Layout';
 import { RequireAuth } from './components/RequireAuth';
 import { HomePage } from './pages/HomePage';
+import { MyTierlistsPage } from './pages/MyTierlistsPage';
+import { MyTemplatesPage } from './pages/MyTemplatesPage';
+import { PublicTemplatesPage } from './pages/PublicTemplatesPage';
 import { AuthCallbackPage } from './pages/AuthCallbackPage';
 import { LoginPage } from './pages/LoginPage';
 import { TemplateEditorPage } from './pages/TemplateEditorPage';
@@ -33,6 +36,23 @@ function App() {
     <Routes>
       <Route path="/" element={<Layout />}>
         <Route index element={<HomePage />} />
+        <Route
+          path="my-tierlists"
+          element={
+            <RequireAuth>
+              <MyTierlistsPage />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="my-templates"
+          element={
+            <RequireAuth>
+              <MyTemplatesPage />
+            </RequireAuth>
+          }
+        />
+        <Route path="public-templates" element={<PublicTemplatesPage />} />
         <Route path="login" element={<LoginPage />} />
         <Route path="auth/callback" element={<AuthCallbackPage />} />
         <Route

@@ -136,3 +136,10 @@ export interface PlacementData {
   columnId: string | null;
   orderIndex: number;
 }
+
+export interface Pagination {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+}

@@ -1,5 +1,5 @@
 import { Hono } from "@hono/hono";
-import { desc, eq } from "drizzle-orm";
+import { and, desc, eq, like, or, sql } from "drizzle-orm";
 import { db, schema } from "../db/index.ts";
 import { generateId, generateToken } from "../utils/id.ts";
 import { requireAuth } from "../middleware/auth.ts";
@@ -18,36 +18,132 @@ const DEFAULT_TIERS = [
 ];
 
 templates.get("/public", async (c) => {
-  const publicTemplates = await db.query.templates.findMany({
-    where: eq(schema.templates.isPublic, true),
-    with: {
-      owner: {
-        columns: { id: true, username: true, nickname: true, avatar: true },
-      },
-      tiers: true,
-      columns: true,
-      cards: true,
-    },
-    orderBy: [desc(schema.templates.createdAt)],
-  });
+  const search = c.req.query("search")?.trim() || "";
+  const page = parseInt(c.req.query("page") || "1");
+  const limit = parseInt(c.req.query("limit") || "10");
+  const sort = c.req.query("sort") || "popular";
+  const offset = (page - 1) * limit;
 
-  return c.json({ templates: publicTemplates });
+  let whereClause = eq(schema.templates.isPublic, true);
+  if (search) {
+    whereClause = and(
+      eq(schema.templates.isPublic, true),
+      or(
+        like(schema.templates.title, `%${search}%`),
+        like(schema.templates.description, `%${search}%`),
+      ),
+    )!;
+  }
+
+  try {
+    const publicTemplates = await db.query.templates.findMany({
+      where: whereClause,
+      with: {
+        owner: {
+          columns: { id: true, username: true, nickname: true, avatar: true },
+        },
+        tiers: true,
+        columns: true,
+        cards: true,
+        likes: true,
+      },
+    });
+
+    const templatesWithLikeCount = publicTemplates.map((template) => {
+      const likeCount = (template.likes || []).length;
+      const { likes: _likes, ...rest } = template;
+      return { ...rest, likeCount };
+    });
+
+    if (sort === "newest") {
+      templatesWithLikeCount.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    } else if (sort === "oldest") {
+      templatesWithLikeCount.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+    } else {
+      templatesWithLikeCount.sort((a, b) => b.likeCount - a.likeCount);
+    }
+
+    const total = templatesWithLikeCount.length;
+    const paginatedTemplates = templatesWithLikeCount.slice(offset, offset + limit);
+
+    return c.json({
+      templates: paginatedTemplates,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
+    });
+  } catch (error) {
+    console.error("Error fetching public templates with likes, falling back:", error);
+    const publicTemplates = await db.query.templates.findMany({
+      where: whereClause,
+      with: {
+        owner: {
+          columns: { id: true, username: true, nickname: true, avatar: true },
+        },
+        tiers: true,
+        columns: true,
+        cards: true,
+      },
+      orderBy: [desc(schema.templates.createdAt)],
+    });
+
+    const templatesWithLikeCount = publicTemplates.map((template) => ({
+      ...template,
+      likeCount: 0,
+    }));
+
+    const total = templatesWithLikeCount.length;
+    const paginatedTemplates = templatesWithLikeCount.slice(offset, offset + limit);
+
+    return c.json({
+      templates: paginatedTemplates,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
+    });
+  }
 });
 
 templates.get("/my", requireAuth, async (c) => {
   const user = c.get("user")!;
+  const page = parseInt(c.req.query("page") || "1");
+  const limit = parseInt(c.req.query("limit") || "10");
+  const offset = (page - 1) * limit;
 
-  const userTemplates = await db.query.templates.findMany({
-    where: eq(schema.templates.ownerId, user.userId),
-    with: {
-      tiers: true,
-      columns: true,
-      cards: true,
+  const [userTemplates, countResult] = await Promise.all([
+    db.query.templates.findMany({
+      where: eq(schema.templates.ownerId, user.userId),
+      with: {
+        tiers: true,
+        columns: true,
+        cards: true,
+      },
+      orderBy: [desc(schema.templates.createdAt)],
+      limit,
+      offset,
+    }),
+    db.select({ count: sql<number>`count(*)` })
+      .from(schema.templates)
+      .where(eq(schema.templates.ownerId, user.userId)),
+  ]);
+
+  const total = Number(countResult[0]?.count || 0);
+
+  return c.json({
+    templates: userTemplates,
+    pagination: {
+      page,
+      limit,
+      total,
+      totalPages: Math.ceil(total / limit),
     },
-    orderBy: [desc(schema.templates.createdAt)],
   });
-
-  return c.json({ templates: userTemplates });
 });
 
 templates.post("/", requireAuth, async (c) => {
@@ -397,6 +493,7 @@ templates.put("/:id", requireAuth, async (c) => {
 
   const template = await db.query.templates.findFirst({
     where: eq(schema.templates.id, id),
+    with: { cards: true },
   });
 
   if (!template) {
@@ -405,6 +502,10 @@ templates.put("/:id", requireAuth, async (c) => {
 
   if (template.ownerId !== user.userId) {
     return c.json({ error: "Access denied" }, 403);
+  }
+
+  if (template.cards.length === 0) {
+    return c.json({ error: "At least one card is required" }, 400);
   }
 
   await db.update(schema.templates)
@@ -476,6 +577,64 @@ templates.delete("/:id", requireAuth, async (c) => {
   await db.delete(schema.templates).where(eq(schema.templates.id, id));
 
   return c.json({ success: true });
+});
+
+templates.get("/:id/like", requireAuth, async (c) => {
+  const id = c.req.param("id");
+  const user = c.get("user")!;
+
+  const like = await db.query.templateLikes.findFirst({
+    where: and(
+      eq(schema.templateLikes.templateId, id),
+      eq(schema.templateLikes.userId, user.userId),
+    ),
+  });
+
+  return c.json({ liked: !!like });
+});
+
+templates.post("/:id/like", requireAuth, async (c) => {
+  const id = c.req.param("id");
+  const user = c.get("user")!;
+
+  const template = await db.query.templates.findFirst({
+    where: eq(schema.templates.id, id),
+  });
+
+  if (!template) {
+    return c.json({ error: "Template not found" }, 404);
+  }
+
+  if (!template.isPublic) {
+    return c.json({ error: "Can only like public templates" }, 403);
+  }
+
+  const existingLike = await db.query.templateLikes.findFirst({
+    where: and(
+      eq(schema.templateLikes.templateId, id),
+      eq(schema.templateLikes.userId, user.userId),
+    ),
+  });
+
+  if (existingLike) {
+    await db.delete(schema.templateLikes).where(
+      and(
+        eq(schema.templateLikes.templateId, id),
+        eq(schema.templateLikes.userId, user.userId),
+      ),
+    );
+  } else {
+    await db.insert(schema.templateLikes).values({
+      templateId: id,
+      userId: user.userId,
+    });
+  }
+
+  const allLikes = await db.query.templateLikes.findMany({
+    where: eq(schema.templateLikes.templateId, id),
+  });
+
+  return c.json({ liked: !existingLike, likeCount: allLikes.length });
 });
 
 export default templates;

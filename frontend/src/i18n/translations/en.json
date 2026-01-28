@@ -16,8 +16,10 @@
     "viewAll": "View all"
   },
   "nav": {
+    "myTierlists": "My Tierlists",
     "myTemplates": "My Templates",
-    "myRankings": "My Rankings"
+    "myRankings": "My Rankings",
+    "publicTemplates": "Public Templates"
   },
   "auth": {
     "loginWithDiscord": "Login with Discord",
@@ -61,6 +63,41 @@
     "coOwner": "Co-owner",
     "shared": "Shared"
   },
+  "myTierlists": {
+    "title": "My Tierlists",
+    "empty": "You haven't created any tierlists yet.",
+    "hint": "Check out",
+    "hintTemplates": "My Templates",
+    "hintOr": "or",
+    "hintPublic": "Public Templates",
+    "hintEnd": "to start a new tierlist!"
+  },
+  "myTemplates": {
+    "title": "My Templates",
+    "empty": "You haven't created any templates yet.",
+    "createFirst": "Create your first template to get started!"
+  },
+  "publicTemplates": {
+    "title": "Public Templates",
+    "empty": "No public templates yet.",
+    "beFirst": "Be the first to create and share a template!",
+    "search": "Search templates...",
+    "likes": "likes",
+    "upvote": "Like",
+    "removeVote": "Unlike",
+    "sortPopular": "Most Popular",
+    "sortNewest": "Newest",
+    "sortOldest": "Oldest"
+  },
+  "pagination": {
+    "previous": "Previous",
+    "next": "Next",
+    "page": "Page",
+    "of": "of",
+    "showing": "Showing",
+    "to": "to",
+    "results": "results"
+  },
   "template": {
     "by": "by",
     "revision": "Revision",
@@ -88,7 +125,8 @@
     "sortAlphabeticallyConfirm": "Sort cards alphabetically? This will overwrite your manual sorting.",
     "unsavedChanges": "You have unsaved changes. Are you sure you want to close?",
     "deleteConfirm": "Are you sure you want to delete this template? This cannot be undone.",
-    "copy": "Make a Copy"
+    "copy": "Make a Copy",
+    "atLeastOneCard": "At least one card is required"
   },
   "card": {
     "title": "Title",

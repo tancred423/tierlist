@@ -1,0 +1,248 @@
+.my-tierlists-page {
+  padding: 1.5rem 1rem;
+}
+
+.page-header {
+  margin-bottom: 1.5rem;
+}
+
+.page-header h1 {
+  font-size: 1.5rem;
+}
+
+.tierlists-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1rem;
+}
+
+.tierlist-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  text-decoration: none;
+  color: inherit;
+  transition:
+    border-color var(--transition),
+    transform var(--transition);
+  height: 100%;
+}
+
+.tierlist-card:hover {
+  border-color: var(--color-primary);
+  transform: translateY(-2px);
+}
+
+.tierlist-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.tierlist-title {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.tierlist-badges {
+  display: flex;
+  gap: 0.375rem;
+  flex-wrap: wrap;
+}
+
+.tierlist-template {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+}
+
+.tierlist-revision {
+  font-size: 0.6875rem;
+  color: var(--color-text-muted);
+}
+
+.tierlist-table-preview {
+  background: var(--color-bg);
+  border-radius: var(--radius-md);
+  padding: 0.5rem;
+  overflow: hidden;
+  margin-top: auto;
+}
+
+.tierlist-unranked-preview {
+  display: flex;
+  gap: 0.25rem;
+  flex-wrap: wrap;
+  padding: 0.5rem;
+  background: var(--color-bg);
+  border-radius: var(--radius-sm);
+}
+
+.empty-state {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: var(--color-text-muted);
+}
+
+.empty-hint {
+  margin-top: 0.5rem;
+}
+
+.empty-hint a {
+  color: var(--color-primary);
+  text-decoration: none;
+}
+
+.empty-hint a:hover {
+  text-decoration: underline;
+}
+
+.coowner-badge,
+.shared-badge {
+  font-size: 0.625rem;
+  padding: 0.125rem 0.375rem;
+  border-radius: var(--radius-sm);
+  font-weight: 500;
+}
+
+.coowner-badge {
+  background: rgba(99, 102, 241, 0.2);
+  color: var(--color-primary);
+}
+
+.shared-badge {
+  background: rgba(34, 197, 94, 0.2);
+  color: var(--color-success);
+}
+
+.preview-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 0.625rem;
+}
+
+.preview-header-row {
+  display: flex;
+  gap: 2px;
+}
+
+.preview-col-header {
+  flex: 1;
+  min-width: 0;
+  padding: 0.25rem 0.375rem;
+  text-align: center;
+  background: var(--color-bg-elevated);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.preview-row {
+  display: flex;
+  gap: 2px;
+}
+
+.preview-tier-label {
+  width: 60px;
+  flex-shrink: 0;
+  padding: 0.25rem 0.375rem;
+  font-weight: 600;
+  color: #000;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.preview-header-row .preview-tier-label {
+  background: transparent;
+}
+
+.preview-cell {
+  flex: 1;
+  min-width: 0;
+  min-height: 20px;
+  background: var(--color-bg-elevated);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px;
+}
+
+.preview-cell-card {
+  width: 18px;
+  height: 18px;
+  border-radius: 2px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-primary);
+  color: white;
+  font-weight: 600;
+}
+
+.preview-cell-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.preview-cell-extra {
+  flex: 0 0 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.5rem;
+  color: var(--color-text-muted);
+}
+
+.preview-extra {
+  flex: 0 0 24px;
+  font-size: 0.625rem;
+  color: var(--color-text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.preview-row-extra {
+  padding: 0.125rem 0;
+}
+
+.preview-extra-tiers {
+  font-size: 0.625rem;
+  color: var(--color-text-muted);
+  padding-left: 0.375rem;
+}
+
+.preview-card {
+  width: 24px;
+  height: 24px;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-primary);
+  color: white;
+  font-size: 0.625rem;
+  font-weight: 600;
+}
+
+.preview-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.preview-card-extra {
+  background: var(--color-bg-card);
+  color: var(--color-text-muted);
+  font-size: 0.5rem;
+}
+
+@media (max-width: 600px) {
+  .tierlists-grid {
+    grid-template-columns: 1fr;
+  }
+}

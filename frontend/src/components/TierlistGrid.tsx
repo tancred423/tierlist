@@ -317,7 +317,7 @@ export function TierlistGrid({
             gridTemplateColumns: `auto repeat(${template.columns.length}, 1fr)`,
           }}
         >
-          {template.columns.length > 1 && (
+          {(template.columns.length > 1 || template.columns.some(c => c.name)) && (
             <>
               <div className="grid-header-spacer" />
               {template.columns.map(column => (

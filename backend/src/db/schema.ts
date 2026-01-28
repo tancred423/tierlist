@@ -94,6 +94,7 @@ export const usersRelations = relations(users, ({ many }) => ({
   templates: many(templates),
   filledTierlists: many(filledTierlists),
   coOwnedLists: many(filledTierlistCoOwners),
+  likes: many(templateLikes),
 }));
 
 export const templatesRelations = relations(templates, ({ one, many }) => ({
@@ -105,6 +106,7 @@ export const templatesRelations = relations(templates, ({ one, many }) => ({
   columns: many(columns),
   cards: many(cards),
   filledTierlists: many(filledTierlists),
+  likes: many(templateLikes),
 }));
 
 export const tiersRelations = relations(tiers, ({ one, many }) => ({
@@ -171,5 +173,24 @@ export const cardPlacementsRelations = relations(cardPlacements, ({ one }) => ({
   column: one(columns, {
     fields: [cardPlacements.columnId],
     references: [columns.id],
+  }),
+}));
+
+export const templateLikes = mysqlTable("template_likes", {
+  templateId: varchar("template_id", { length: 36 }).notNull().references(() => templates.id, { onDelete: "cascade" }),
+  userId: varchar("user_id", { length: 36 }).notNull().references(() => users.id, { onDelete: "cascade" }),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (table) => ({
+  pk: primaryKey({ columns: [table.templateId, table.userId] }),
+}));
+
+export const templateLikesRelations = relations(templateLikes, ({ one }) => ({
+  template: one(templates, {
+    fields: [templateLikes.templateId],
+    references: [templates.id],
+  }),
+  user: one(users, {
+    fields: [templateLikes.userId],
+    references: [users.id],
   }),
 }));

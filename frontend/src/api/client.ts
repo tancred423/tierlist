@@ -51,12 +51,33 @@ class ApiClient {
     return this.request('/api/auth/me');
   }
 
-  async getPublicTemplates(): Promise<{ templates: import('../types').Template[] }> {
-    return this.request('/api/templates/public');
+  async getPublicTemplates(params?: {
+    page?: number;
+    limit?: number;
+    search?: string;
+    sort?: 'popular' | 'newest' | 'oldest';
+  }): Promise<{
+    templates: (import('../types').Template & { likeCount: number })[];
+    pagination: import('../types').Pagination;
+  }> {
+    const queryParams = new URLSearchParams();
+    if (params?.page) queryParams.set('page', params.page.toString());
+    if (params?.limit) queryParams.set('limit', params.limit.toString());
+    if (params?.search) queryParams.set('search', params.search);
+    if (params?.sort) queryParams.set('sort', params.sort);
+    const query = queryParams.toString();
+    return this.request(`/api/templates/public${query ? `?${query}` : ''}`);
   }
 
-  async getMyTemplates(): Promise<{ templates: import('../types').Template[] }> {
-    return this.request('/api/templates/my');
+  async getMyTemplates(params?: { page?: number; limit?: number }): Promise<{
+    templates: import('../types').Template[];
+    pagination: import('../types').Pagination;
+  }> {
+    const queryParams = new URLSearchParams();
+    if (params?.page) queryParams.set('page', params.page.toString());
+    if (params?.limit) queryParams.set('limit', params.limit.toString());
+    const query = queryParams.toString();
+    return this.request(`/api/templates/my${query ? `?${query}` : ''}`);
   }
 
   async getTemplate(id: string): Promise<{ template: import('../types').Template }> {
@@ -100,6 +121,16 @@ class ApiClient {
     return this.request(`/api/templates/${id}/copy`, { method: 'POST' });
   }
 
+  async getTemplateLike(id: string): Promise<{ liked: boolean }> {
+    return this.request(`/api/templates/${id}/like`);
+  }
+
+  async toggleTemplateLike(id: string): Promise<{ liked: boolean; likeCount: number }> {
+    return this.request(`/api/templates/${id}/like`, {
+      method: 'POST',
+    });
+  }
+
   async createTemplateFromRanking(
     rankingId: string,
   ): Promise<{ template: import('../types').Template }> {
@@ -140,11 +171,17 @@ class ApiClient {
     });
   }
 
-  async getMyFilledTierlists(): Promise<{
+  async getMyFilledTierlists(params?: { page?: number; limit?: number }): Promise<{
+    tierlists: (import('../types').FilledTierlist & { isCoOwner: boolean })[];
     owned: import('../types').FilledTierlist[];
     shared: import('../types').FilledTierlist[];
+    pagination: import('../types').Pagination;
   }> {
-    return this.request('/api/filled-tierlists/my');
+    const queryParams = new URLSearchParams();
+    if (params?.page) queryParams.set('page', params.page.toString());
+    if (params?.limit) queryParams.set('limit', params.limit.toString());
+    const query = queryParams.toString();
+    return this.request(`/api/filled-tierlists/my${query ? `?${query}` : ''}`);
   }
 
   async getFilledTierlist(

@@ -189,6 +189,31 @@ export function Header() {
           <span className="logo-text">Tierlist</span>
         </Link>
 
+        <nav className="header-main-nav">
+          {user && (
+            <>
+              <Link
+                to="/my-tierlists"
+                className={`nav-link ${location.pathname === '/my-tierlists' ? 'active' : ''}`}
+              >
+                {t('nav.myTierlists')}
+              </Link>
+              <Link
+                to="/my-templates"
+                className={`nav-link ${location.pathname === '/my-templates' ? 'active' : ''}`}
+              >
+                {t('nav.myTemplates')}
+              </Link>
+            </>
+          )}
+          <Link
+            to="/public-templates"
+            className={`nav-link ${location.pathname === '/public-templates' ? 'active' : ''}`}
+          >
+            {t('nav.publicTemplates')}
+          </Link>
+        </nav>
+
         <nav className="header-nav">
           <Dropdown
             trigger={
