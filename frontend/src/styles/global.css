@@ -269,3 +269,113 @@ select:focus {
   margin-bottom: 0.5rem;
   color: var(--color-text);
 }
+
+.image-source-tabs {
+  display: flex;
+  gap: 0;
+  margin-bottom: 0.75rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.image-source-tab {
+  flex: 1;
+  padding: 0.5rem 1rem;
+  background: var(--color-bg-elevated);
+  color: var(--color-text-muted);
+  font-size: 0.875rem;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.image-source-tab:not(:last-child) {
+  border-right: 1px solid var(--color-border);
+}
+
+.image-source-tab:hover {
+  background: var(--color-bg-card);
+}
+
+.image-source-tab.active {
+  background: var(--color-primary);
+  color: white;
+}
+
+.upload-dropzone {
+  border: 2px dashed var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 2rem 1rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.upload-dropzone:hover,
+.upload-dropzone:focus {
+  border-color: var(--color-primary);
+  outline: none;
+}
+
+.upload-dropzone.uploading {
+  border-color: var(--color-primary);
+  background: rgba(99, 102, 241, 0.1);
+}
+
+.upload-icon {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.upload-text {
+  color: var(--color-text-muted);
+  font-size: 0.875rem;
+  margin-bottom: 0.75rem;
+}
+
+.upload-status {
+  color: var(--color-primary);
+  font-weight: 500;
+}
+
+.upload-error {
+  color: var(--color-danger);
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
+}
+
+.image-preview {
+  position: relative;
+  display: inline-block;
+  margin-top: 0.75rem;
+}
+
+.image-preview img {
+  max-width: 100%;
+  max-height: 150px;
+  border-radius: var(--radius-sm);
+  object-fit: cover;
+}
+
+.image-preview .remove-image {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  background: var(--color-danger);
+  color: white;
+  border-radius: 50%;
+  font-size: 1rem;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.image-preview .remove-image:hover {
+  background: #dc2626;
+}

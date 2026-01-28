@@ -1,26 +1,99 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import type { Card } from '../types';
 import { useI18n } from '../i18n';
+import { api } from '../api/client';
 
 interface CardEditorModalProps {
   card: Card | null;
+  templateId: string;
   onClose: () => void;
   onSave: (data: { title: string; imageUrl?: string; description?: string }) => void;
 }
 
-export function CardEditorModal({ card, onClose, onSave }: CardEditorModalProps) {
+export function CardEditorModal({ card, templateId, onClose, onSave }: CardEditorModalProps) {
   const { t } = useI18n();
   const [title, setTitle] = useState(card?.title || '');
   const [imageUrl, setImageUrl] = useState(card?.imageUrl || '');
   const [description, setDescription] = useState(card?.description || '');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [imageSource, setImageSource] = useState<'url' | 'upload'>('url');
   const titleInputRef = useRef<HTMLInputElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const dropZoneRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!card && titleInputRef.current) {
       titleInputRef.current.focus();
     }
   }, [card]);
+
+  const uploadImage = useCallback(
+    async (file: File | Blob) => {
+      setIsUploading(true);
+      setUploadError(null);
+
+      try {
+        const result = await api.uploadImage(templateId, file);
+        setImageUrl(result.imageUrl);
+        setImageSource('upload');
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'Upload failed';
+        setUploadError(message);
+      } finally {
+        setIsUploading(false);
+      }
+    },
+    [templateId],
+  );
+
+  const handleFileChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (file) {
+        uploadImage(file);
+      }
+    },
+    [uploadImage],
+  );
+
+  const handlePaste = useCallback(
+    (e: React.ClipboardEvent) => {
+      const items = e.clipboardData?.items;
+      if (!items) return;
+
+      for (const item of items) {
+        if (item.type.startsWith('image/')) {
+          e.preventDefault();
+          const file = item.getAsFile();
+          if (file) {
+            uploadImage(file);
+          }
+          break;
+        }
+      }
+    },
+    [uploadImage],
+  );
+
+  const handleDrop = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      const file = e.dataTransfer?.files?.[0];
+      if (file && file.type.startsWith('image/')) {
+        uploadImage(file);
+      }
+    },
+    [uploadImage],
+  );
+
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  }, []);
 
   const hasUnsavedChanges =
     title !== (card?.title || '') ||
@@ -79,29 +152,91 @@ export function CardEditorModal({ card, onClose, onSave }: CardEditorModalProps)
             </div>
 
             <div className="form-group">
-              <label className="form-label">{t('card.imageUrl')}</label>
-              <input
-                type="url"
-                value={imageUrl}
-                onChange={e => setImageUrl(e.target.value)}
-                className="form-input"
-                placeholder={t('card.imageUrlPlaceholder')}
-              />
+              <label className="form-label">{t('card.image')}</label>
+
+              <div className="image-source-tabs">
+                <button
+                  type="button"
+                  className={`image-source-tab ${imageSource === 'url' ? 'active' : ''}`}
+                  onClick={() => setImageSource('url')}
+                >
+                  {t('card.imageUrl')}
+                </button>
+                <button
+                  type="button"
+                  className={`image-source-tab ${imageSource === 'upload' ? 'active' : ''}`}
+                  onClick={() => setImageSource('upload')}
+                >
+                  {t('card.imageUpload')}
+                </button>
+              </div>
+
+              {imageSource === 'url' ? (
+                <input
+                  type="url"
+                  value={imageUrl}
+                  onChange={e => setImageUrl(e.target.value)}
+                  className="form-input"
+                  placeholder={t('card.imageUrlPlaceholder')}
+                />
+              ) : (
+                <div
+                  ref={dropZoneRef}
+                  className={`upload-dropzone ${isUploading ? 'uploading' : ''}`}
+                  onPaste={handlePaste}
+                  onDrop={handleDrop}
+                  onDragOver={handleDragOver}
+                  tabIndex={0}
+                >
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/jpeg,image/png,image/gif,image/webp,image/avif"
+                    onChange={handleFileChange}
+                    style={{ display: 'none' }}
+                  />
+
+                  {isUploading ? (
+                    <div className="upload-status">{t('card.uploading')}</div>
+                  ) : (
+                    <>
+                      <div className="upload-icon">📷</div>
+                      <div className="upload-text">{t('card.dropOrPaste')}</div>
+                      <button
+                        type="button"
+                        className="btn btn-secondary btn-sm"
+                        onClick={() => fileInputRef.current?.click()}
+                      >
+                        {t('card.chooseFile')}
+                      </button>
+                    </>
+                  )}
+                </div>
+              )}
+
+              {uploadError && <div className="upload-error">{uploadError}</div>}
+
               {imageUrl && (
-                <div style={{ marginTop: '0.5rem' }}>
+                <div className="image-preview">
                   <img
-                    src={imageUrl}
+                    src={
+                      imageUrl.startsWith('/uploads/')
+                        ? `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}${imageUrl}`
+                        : imageUrl
+                    }
                     alt="Preview"
-                    style={{
-                      maxWidth: '100%',
-                      maxHeight: '150px',
-                      borderRadius: 'var(--radius-sm)',
-                      objectFit: 'cover',
-                    }}
                     onError={e => {
                       (e.target as HTMLImageElement).style.display = 'none';
                     }}
                   />
+                  <button
+                    type="button"
+                    className="btn btn-icon btn-sm remove-image"
+                    onClick={() => setImageUrl('')}
+                    title={t('card.removeImage')}
+                  >
+                    ×
+                  </button>
                 </div>
               )}
             </div>

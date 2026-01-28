@@ -4,6 +4,7 @@ import { db, schema } from "../db/index.ts";
 import { generateId } from "../utils/id.ts";
 import { signJWT } from "../utils/jwt.ts";
 import { exchangeCodeForToken, getDiscordAuthUrl, getDiscordUser } from "../services/discord.ts";
+import { deleteUserImages } from "./uploads.ts";
 
 const FRONTEND_URL = Deno.env.get("FRONTEND_URL") || "http://localhost:5173";
 
@@ -169,6 +170,8 @@ auth.delete("/me", async (c) => {
   if (!user) {
     return c.json({ error: "Not authenticated" }, 401);
   }
+
+  await deleteUserImages(user.userId);
 
   await db.delete(schema.users).where(eq(schema.users.id, user.userId));
 

@@ -92,13 +92,19 @@
   },
   "card": {
     "title": "Titel",
-    "imageUrl": "Bild-URL",
+    "image": "Bild",
+    "imageUrl": "URL",
+    "imageUpload": "Hochladen",
     "imageUrlPlaceholder": "https://beispiel.de/bild.jpg",
     "description": "Beschreibung",
     "descriptionPlaceholder": "Optionale Beschreibung...",
     "addCard": "Karte hinzufügen",
     "editCard": "Karte bearbeiten",
-    "deleteConfirm": "Möchtest du diese Karte wirklich löschen?"
+    "deleteConfirm": "Möchtest du diese Karte wirklich löschen?",
+    "dropOrPaste": "Bild hierher ziehen oder aus Zwischenablage einfügen",
+    "chooseFile": "Datei wählen",
+    "uploading": "Wird hochgeladen...",
+    "removeImage": "Bild entfernen"
   },
   "tierlist": {
     "unrankedCards": "Nicht gerankte Karten",

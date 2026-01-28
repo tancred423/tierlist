@@ -230,6 +230,40 @@ class ApiClient {
       body: JSON.stringify(data),
     });
   }
+
+  async uploadImage(
+    templateId: string,
+    file: File | Blob,
+  ): Promise<{ imageUrl: string; size: number }> {
+    const token = this.getToken();
+    const formData = new FormData();
+    formData.append('image', file);
+
+    const response = await fetch(`${API_URL}/api/uploads/${templateId}`, {
+      method: 'POST',
+      headers: {
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ error: 'Upload failed' }));
+      throw new Error(error.error || 'Upload failed');
+    }
+
+    return response.json();
+  }
+
+  async getStorageInfo(): Promise<{
+    used: number;
+    limit: number;
+    usedGB: number;
+    limitGB: number;
+    available: boolean;
+  }> {
+    return this.request('/api/uploads/storage');
+  }
 }
 
 export const api = new ApiClient();

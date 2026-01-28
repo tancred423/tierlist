@@ -3,6 +3,7 @@ import { desc, eq } from "drizzle-orm";
 import { db, schema } from "../db/index.ts";
 import { generateId, generateToken } from "../utils/id.ts";
 import { requireAuth } from "../middleware/auth.ts";
+import { deleteTemplateImages } from "./uploads.ts";
 
 const templates = new Hono();
 
@@ -469,6 +470,8 @@ templates.delete("/:id", requireAuth, async (c) => {
   if (template.ownerId !== user.userId) {
     return c.json({ error: "Access denied" }, 403);
   }
+
+  await deleteTemplateImages(id);
 
   await db.delete(schema.templates).where(eq(schema.templates.id, id));
 

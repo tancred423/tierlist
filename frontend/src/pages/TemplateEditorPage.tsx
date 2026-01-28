@@ -24,6 +24,16 @@ import type { Template, Tier, Column, Card } from '../types';
 import { CardEditorModal } from '../components/CardEditorModal';
 import './TemplateEditorPage.css';
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+
+function getImageUrl(url: string | null): string | null {
+  if (!url) return null;
+  if (url.startsWith('/uploads/')) {
+    return `${API_URL}${url}`;
+  }
+  return url;
+}
+
 const DEFAULT_TIERS = [
   { name: 'S', color: '#ff7f7f' },
   { name: 'A', color: '#ffbf7f' },
@@ -161,7 +171,7 @@ function SortableCardItem({ card, onEdit, onDelete, t }: SortableCardItemProps) 
         ⋮⋮
       </div>
       {card.imageUrl ? (
-        <img src={card.imageUrl} alt={card.title} className="card-image" />
+        <img src={getImageUrl(card.imageUrl)!} alt={card.title} className="card-image" />
       ) : (
         <div className="card-image-placeholder">No Image</div>
       )}
@@ -635,9 +645,10 @@ export function TemplateEditorPage() {
         </section>
       </div>
 
-      {showCardModal && (
+      {showCardModal && template && (
         <CardEditorModal
           card={editingCard}
+          templateId={template.id}
           onClose={() => {
             setShowCardModal(false);
             setEditingCard(null);

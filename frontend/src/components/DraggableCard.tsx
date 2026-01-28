@@ -3,6 +3,16 @@ import { CSS } from '@dnd-kit/utilities';
 import type { Card } from '../types';
 import './DraggableCard.css';
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+
+function getImageUrl(url: string | null): string | null {
+  if (!url) return null;
+  if (url.startsWith('/uploads/')) {
+    return `${API_URL}${url}`;
+  }
+  return url;
+}
+
 interface DraggableCardProps {
   card: Card;
   disabled?: boolean;
@@ -39,7 +49,7 @@ export function DraggableCard({
       title={card.title}
     >
       {card.imageUrl ? (
-        <img src={card.imageUrl} alt={card.title} className="card-image" />
+        <img src={getImageUrl(card.imageUrl)!} alt={card.title} className="card-image" />
       ) : (
         <div className="card-no-image">
           <span>{card.title.charAt(0).toUpperCase()}</span>
@@ -69,7 +79,7 @@ export function CardOverlay({ card }: CardOverlayProps) {
   return (
     <div className="draggable-card card-overlay">
       {card.imageUrl ? (
-        <img src={card.imageUrl} alt={card.title} className="card-image" />
+        <img src={getImageUrl(card.imageUrl)!} alt={card.title} className="card-image" />
       ) : (
         <div className="card-no-image">
           <span>{card.title.charAt(0).toUpperCase()}</span>

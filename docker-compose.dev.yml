@@ -47,11 +47,17 @@ services:
       DISCORD_REDIRECT_URI: ${DISCORD_REDIRECT_URI:-http://localhost:3000/api/auth/discord/callback}
       JWT_SECRET: ${JWT_SECRET:-your-super-secret-jwt-key-change-in-production}
       FRONTEND_URL: ${FRONTEND_URL:-http://localhost:5173}
+      UPLOADS_DIR: /app/uploads
+      UPLOAD_MAX_SIZE_MB: ${UPLOAD_MAX_SIZE_MB:-10}
+      UPLOAD_MAX_OUTPUT_KB: ${UPLOAD_MAX_OUTPUT_KB:-100}
+      UPLOAD_MAX_DIMENSION: ${UPLOAD_MAX_DIMENSION:-200}
+      UPLOAD_STORAGE_LIMIT_GB: ${UPLOAD_STORAGE_LIMIT_GB:-5}
       NODE_ENV: development
     ports:
       - "3000:3000"
     volumes:
       - ./backend:/app
+      - ./images:/app/uploads
     depends_on:
       mysql:
         condition: service_healthy

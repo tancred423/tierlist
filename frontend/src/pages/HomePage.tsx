@@ -31,6 +31,16 @@ function formatDate(dateString: string, language: string, clockFormat: '12h' | '
   });
 }
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+
+function getImageUrl(url: string | null): string | null {
+  if (!url) return null;
+  if (url.startsWith('/uploads/')) {
+    return `${API_URL}${url}`;
+  }
+  return url;
+}
+
 function TemplateCard({
   template,
   onStartRanking,
@@ -120,7 +130,7 @@ function TemplateCard({
         {visibleCards.map(card => (
           <div key={card.id} className="preview-card" title={card.title}>
             {card.imageUrl ? (
-              <img src={card.imageUrl} alt={card.title} />
+              <img src={getImageUrl(card.imageUrl)!} alt={card.title} />
             ) : (
               <span>{card.title[0]}</span>
             )}
@@ -244,7 +254,7 @@ function RankingCard({ ranking, t, language, clockFormat }: RankingCardProps) {
                     {card && (
                       <div className="preview-cell-card" title={card.title}>
                         {card.imageUrl ? (
-                          <img src={card.imageUrl} alt={card.title} />
+                          <img src={getImageUrl(card.imageUrl)!} alt={card.title} />
                         ) : (
                           <span>{card.title[0]}</span>
                         )}
@@ -274,7 +284,7 @@ function RankingCard({ ranking, t, language, clockFormat }: RankingCardProps) {
             return (
               <div key={placement.cardId} className="preview-card" title={card.title}>
                 {card.imageUrl ? (
-                  <img src={card.imageUrl} alt={card.title} />
+                  <img src={getImageUrl(card.imageUrl)!} alt={card.title} />
                 ) : (
                   <span>{card.title[0]}</span>
                 )}

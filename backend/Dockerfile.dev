@@ -1,6 +1,14 @@
 FROM denoland/deno:2.1.4
 
+USER root
+
+RUN apt-get update && apt-get install -y \
+    libvips-dev \
+    && rm -rf /var/lib/apt/lists/*
+
 WORKDIR /app
+
+RUN mkdir -p /app/uploads && chown -R deno:deno /app/uploads
 
 ENV DENO_DIR=/deno-dir
 

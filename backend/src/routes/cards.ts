@@ -3,6 +3,7 @@ import { and, eq } from "drizzle-orm";
 import { db, schema } from "../db/index.ts";
 import { generateId } from "../utils/id.ts";
 import { requireAuth } from "../middleware/auth.ts";
+import { deleteCardImage } from "./uploads.ts";
 
 const cards = new Hono();
 
@@ -70,6 +71,10 @@ cards.put("/:id", requireAuth, async (c) => {
     return c.json({ error: "Access denied" }, 403);
   }
 
+  if (body.imageUrl !== undefined && body.imageUrl !== card.imageUrl) {
+    await deleteCardImage(card.imageUrl);
+  }
+
   await db.update(schema.cards)
     .set({
       title: body.title ?? card.title,
@@ -110,6 +115,8 @@ cards.delete("/:id", requireAuth, async (c) => {
   }
 
   const templateId = card.templateId;
+
+  await deleteCardImage(card.imageUrl);
 
   await db.delete(schema.cards).where(eq(schema.cards.id, id));
 

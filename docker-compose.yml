@@ -9,9 +9,16 @@ services:
       DISCORD_REDIRECT_URI: ${DISCORD_REDIRECT_URI}
       JWT_SECRET: ${JWT_SECRET}
       FRONTEND_URL: ${FRONTEND_URL}
+      UPLOADS_DIR: /app/uploads
+      UPLOAD_MAX_SIZE_MB: ${UPLOAD_MAX_SIZE_MB:-10}
+      UPLOAD_MAX_OUTPUT_KB: ${UPLOAD_MAX_OUTPUT_KB:-100}
+      UPLOAD_MAX_DIMENSION: ${UPLOAD_MAX_DIMENSION:-200}
+      UPLOAD_STORAGE_LIMIT_GB: ${UPLOAD_STORAGE_LIMIT_GB:-5}
       NODE_ENV: production
     ports:
       - "${BACKEND_PORT:-7555}:3000"
+    volumes:
+      - ./images:/app/uploads
     restart: unless-stopped
     networks:
       - mysql-network
