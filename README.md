@@ -2,6 +2,12 @@
 
 A web application for creating and sharing customizable tierlists with categories, rows, and columns.
 
+Create own templates and rankings:
+<img width="1303" height="832" alt="Screenshot 2026-01-28 at 10 16 56" src="https://github.com/user-attachments/assets/c3c544dd-32c2-4e6b-a6ee-cbc22af2f473" />
+
+Rank the cards:
+<img width="1417" height="956" alt="Screenshot 2026-01-28 at 10 17 33" src="https://github.com/user-attachments/assets/103ba030-8577-4b1a-8f25-1c33316a9b24" />
+
 ## What It Does
 
 Tierlist allows you to create structured tierlists where items can be ranked across multiple dimensions:
