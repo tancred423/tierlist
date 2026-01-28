@@ -274,6 +274,14 @@ export function TemplateEditorPage() {
         tiers: tiers.map(t => ({ id: t.id, name: t.name, color: t.color })),
         columns: columns.map(c => ({ id: c.id, name: c.name })),
       });
+
+      if (cards.length > 0) {
+        await api.reorderCards(
+          id,
+          cards.map((c, i) => ({ id: c.id, orderIndex: i })),
+        );
+      }
+
       setSaveStatus('saved');
       setTimeout(() => setSaveStatus('idle'), 2000);
     } catch (error) {
