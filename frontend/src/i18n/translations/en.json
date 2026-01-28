@@ -101,10 +101,15 @@
     "addCard": "Add Card",
     "editCard": "Edit Card",
     "deleteConfirm": "Are you sure you want to delete this card?",
-    "dropOrPaste": "Drop image here or paste from clipboard",
+    "dragDropHint": "Drag & drop an image here",
     "chooseFile": "Choose File",
+    "pasteFromClipboard": "Paste from Clipboard",
     "uploading": "Uploading...",
-    "removeImage": "Remove image"
+    "removeImage": "Remove Image",
+    "currentImage": "Current Image",
+    "noImageInClipboard": "No image found in clipboard",
+    "clipboardPermissionDenied": "Clipboard access denied. Please allow access or use drag & drop.",
+    "clipboardError": "Could not read clipboard"
   },
   "tierlist": {
     "unrankedCards": "Unranked Cards",

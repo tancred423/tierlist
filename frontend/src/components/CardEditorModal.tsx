@@ -95,6 +95,27 @@ export function CardEditorModal({ card, templateId, onClose, onSave }: CardEdito
     e.stopPropagation();
   }, []);
 
+  const handlePasteFromClipboard = useCallback(async () => {
+    try {
+      const clipboardItems = await navigator.clipboard.read();
+      for (const item of clipboardItems) {
+        const imageType = item.types.find(type => type.startsWith('image/'));
+        if (imageType) {
+          const blob = await item.getType(imageType);
+          uploadImage(blob);
+          return;
+        }
+      }
+      setUploadError(t('card.noImageInClipboard'));
+    } catch (err) {
+      if (err instanceof Error && err.name === 'NotAllowedError') {
+        setUploadError(t('card.clipboardPermissionDenied'));
+      } else {
+        setUploadError(t('card.clipboardError'));
+      }
+    }
+  }, [uploadImage, t]);
+
   const hasUnsavedChanges =
     title !== (card?.title || '') ||
     imageUrl !== (card?.imageUrl || '') ||
@@ -201,14 +222,23 @@ export function CardEditorModal({ card, templateId, onClose, onSave }: CardEdito
                   ) : (
                     <>
                       <div className="upload-icon">📷</div>
-                      <div className="upload-text">{t('card.dropOrPaste')}</div>
-                      <button
-                        type="button"
-                        className="btn btn-secondary btn-sm"
-                        onClick={() => fileInputRef.current?.click()}
-                      >
-                        {t('card.chooseFile')}
-                      </button>
+                      <div className="upload-text">{t('card.dragDropHint')}</div>
+                      <div className="upload-buttons">
+                        <button
+                          type="button"
+                          className="btn btn-secondary btn-sm"
+                          onClick={() => fileInputRef.current?.click()}
+                        >
+                          {t('card.chooseFile')}
+                        </button>
+                        <button
+                          type="button"
+                          className="btn btn-secondary btn-sm"
+                          onClick={handlePasteFromClipboard}
+                        >
+                          {t('card.pasteFromClipboard')}
+                        </button>
+                      </div>
                     </>
                   )}
                 </div>
@@ -217,26 +247,28 @@ export function CardEditorModal({ card, templateId, onClose, onSave }: CardEdito
               {uploadError && <div className="upload-error">{uploadError}</div>}
 
               {imageUrl && (
-                <div className="image-preview">
-                  <img
-                    src={
-                      imageUrl.startsWith('/uploads/')
-                        ? `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}${imageUrl}`
-                        : imageUrl
-                    }
-                    alt="Preview"
-                    onError={e => {
-                      (e.target as HTMLImageElement).style.display = 'none';
-                    }}
-                  />
-                  <button
-                    type="button"
-                    className="btn btn-icon btn-sm remove-image"
-                    onClick={() => setImageUrl('')}
-                    title={t('card.removeImage')}
-                  >
-                    ×
-                  </button>
+                <div className="current-image-section">
+                  <label className="form-label">{t('card.currentImage')}</label>
+                  <div className="current-image-preview">
+                    <img
+                      src={
+                        imageUrl.startsWith('/uploads/')
+                          ? `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}${imageUrl}`
+                          : imageUrl
+                      }
+                      alt="Preview"
+                      onError={e => {
+                        (e.target as HTMLImageElement).style.display = 'none';
+                      }}
+                    />
+                    <button
+                      type="button"
+                      className="btn btn-danger btn-sm"
+                      onClick={() => setImageUrl('')}
+                    >
+                      {t('card.removeImage')}
+                    </button>
+                  </div>
                 </div>
               )}
             </div>

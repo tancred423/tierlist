@@ -307,7 +307,7 @@ select:focus {
 .upload-dropzone {
   border: 2px dashed var(--color-border);
   border-radius: var(--radius-md);
-  padding: 2rem 1rem;
+  padding: 1.5rem 1rem;
   text-align: center;
   cursor: pointer;
   transition: all var(--transition);
@@ -325,14 +325,21 @@ select:focus {
 }
 
 .upload-icon {
-  font-size: 2rem;
-  margin-bottom: 0.5rem;
+  font-size: 1.75rem;
+  margin-bottom: 0.375rem;
 }
 
 .upload-text {
   color: var(--color-text-muted);
-  font-size: 0.875rem;
-  margin-bottom: 0.75rem;
+  font-size: 0.8125rem;
+  margin-bottom: 0.625rem;
+}
+
+.upload-buttons {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+  flex-wrap: wrap;
 }
 
 .upload-status {
@@ -346,36 +353,25 @@ select:focus {
   margin-top: 0.5rem;
 }
 
-.image-preview {
-  position: relative;
-  display: inline-block;
-  margin-top: 0.75rem;
+.current-image-section {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--color-border);
 }
 
-.image-preview img {
+.current-image-preview {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: var(--color-bg-card);
+  border-radius: var(--radius-md);
+}
+
+.current-image-preview img {
   max-width: 100%;
   max-height: 150px;
   border-radius: var(--radius-sm);
-  object-fit: cover;
-}
-
-.image-preview .remove-image {
-  position: absolute;
-  top: -8px;
-  right: -8px;
-  width: 24px;
-  height: 24px;
-  padding: 0;
-  background: var(--color-danger);
-  color: white;
-  border-radius: 50%;
-  font-size: 1rem;
-  line-height: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.image-preview .remove-image:hover {
-  background: #dc2626;
+  object-fit: contain;
 }

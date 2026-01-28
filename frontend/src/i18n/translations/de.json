@@ -101,10 +101,15 @@
     "addCard": "Karte hinzufügen",
     "editCard": "Karte bearbeiten",
     "deleteConfirm": "Möchtest du diese Karte wirklich löschen?",
-    "dropOrPaste": "Bild hierher ziehen oder aus Zwischenablage einfügen",
+    "dragDropHint": "Bild hierher ziehen",
     "chooseFile": "Datei wählen",
+    "pasteFromClipboard": "Aus Zwischenablage",
     "uploading": "Wird hochgeladen...",
-    "removeImage": "Bild entfernen"
+    "removeImage": "Bild entfernen",
+    "currentImage": "Aktuelles Bild",
+    "noImageInClipboard": "Kein Bild in der Zwischenablage gefunden",
+    "clipboardPermissionDenied": "Zugriff auf Zwischenablage verweigert. Bitte erlauben oder Drag & Drop verwenden.",
+    "clipboardError": "Zwischenablage konnte nicht gelesen werden"
   },
   "tierlist": {
     "unrankedCards": "Nicht gerankte Karten",
