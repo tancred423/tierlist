@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../stores/auth';
 import { useThemeStore } from '../stores/theme';
+import { useClockFormatStore } from '../stores/clockFormat';
 import { useI18n } from '../i18n';
 import './Header.css';
 
@@ -93,6 +94,24 @@ function MonitorIcon() {
   );
 }
 
+function ClockIcon() {
+  return (
+    <svg
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <circle cx="12" cy="12" r="10" />
+      <polyline points="12 6 12 12 16 14" />
+    </svg>
+  );
+}
+
 interface DropdownProps {
   trigger: React.ReactNode;
   children: React.ReactNode;
@@ -127,16 +146,19 @@ function Dropdown({ trigger, children, isOpen, onToggle, onClose }: DropdownProp
 export function Header() {
   const { user, login, logout } = useAuthStore();
   const { mode, setMode } = useThemeStore();
+  const { format: clockFormat, setFormat: setClockFormat } = useClockFormatStore();
   const { language, setLanguage, t } = useI18n();
   const navigate = useNavigate();
   const location = useLocation();
 
   const [langOpen, setLangOpen] = useState(false);
+  const [clockOpen, setClockOpen] = useState(false);
   const [themeOpen, setThemeOpen] = useState(false);
   const [userOpen, setUserOpen] = useState(false);
 
   const closeAll = () => {
     setLangOpen(false);
+    setClockOpen(false);
     setThemeOpen(false);
     setUserOpen(false);
   };
@@ -198,6 +220,49 @@ export function Header() {
               }}
             >
               {t('language.de')}
+            </button>
+          </Dropdown>
+
+          <Dropdown
+            trigger={
+              <>
+                <ClockIcon />
+                <span className="dropdown-label">{t(`clock.${clockFormat}`)}</span>
+              </>
+            }
+            isOpen={clockOpen}
+            onToggle={() => {
+              closeAll();
+              setClockOpen(!clockOpen);
+            }}
+            onClose={() => setClockOpen(false)}
+          >
+            <button
+              className={`dropdown-item ${clockFormat === 'system' ? 'active' : ''}`}
+              onClick={() => {
+                setClockFormat('system');
+                setClockOpen(false);
+              }}
+            >
+              <MonitorIcon /> {t('clock.system')}
+            </button>
+            <button
+              className={`dropdown-item ${clockFormat === '24h' ? 'active' : ''}`}
+              onClick={() => {
+                setClockFormat('24h');
+                setClockOpen(false);
+              }}
+            >
+              {t('clock.24h')}
+            </button>
+            <button
+              className={`dropdown-item ${clockFormat === '12h' ? 'active' : ''}`}
+              onClick={() => {
+                setClockFormat('12h');
+                setClockOpen(false);
+              }}
+            >
+              {t('clock.12h')}
             </button>
           </Dropdown>
 

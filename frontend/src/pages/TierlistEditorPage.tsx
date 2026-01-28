@@ -2,17 +2,32 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { api } from '../api/client';
 import { useAuthStore } from '../stores/auth';
+import { useClockFormatStore } from '../stores/clockFormat';
 import { useI18n } from '../i18n';
 import type { FilledTierlist, CardPlacement, PlacementData } from '../types';
 import { TierlistGrid } from '../components/TierlistGrid';
 import { ShareModal } from '../components/ShareModal';
 import './TierlistEditorPage.css';
 
+function formatDate(dateString: string, language: string, clockFormat: '12h' | '24h'): string {
+  const date = new Date(dateString);
+  return date.toLocaleDateString(language === 'de' ? 'de-DE' : 'en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: clockFormat === '12h',
+  });
+}
+
 export function TierlistEditorPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { user } = useAuthStore();
-  const { t } = useI18n();
+  const { t, language } = useI18n();
+  const { getEffectiveFormat } = useClockFormatStore();
+  const clockFormat = getEffectiveFormat();
 
   const [tierlist, setTierlist] = useState<FilledTierlist | null>(null);
   const [placements, setPlacements] = useState<CardPlacement[]>([]);
@@ -177,6 +192,12 @@ export function TierlistEditorPage() {
               : ''}
             {isCoOwner && <span className="co-owner-badge">{t('home.coOwner')}</span>}
           </p>
+          {tierlist.templateSnapshot?.snapshotAt && (
+            <p className="revision-info">
+              {t('template.revision')}:{' '}
+              {formatDate(tierlist.templateSnapshot.snapshotAt, language, clockFormat)}
+            </p>
+          )}
         </div>
         <div className="editor-actions">
           {canEdit && (

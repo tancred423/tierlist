@@ -39,6 +39,10 @@ cards.post("/:templateId", requireAuth, async (c) => {
     orderIndex: body.orderIndex ?? maxOrder,
   });
 
+  await db.update(schema.templates)
+    .set({ updatedAt: new Date() })
+    .where(eq(schema.templates.id, templateId));
+
   const card = await db.query.cards.findFirst({
     where: eq(schema.cards.id, cardId),
   });
@@ -75,6 +79,10 @@ cards.put("/:id", requireAuth, async (c) => {
     })
     .where(eq(schema.cards.id, id));
 
+  await db.update(schema.templates)
+    .set({ updatedAt: new Date() })
+    .where(eq(schema.templates.id, card.templateId));
+
   const updatedCard = await db.query.cards.findFirst({
     where: eq(schema.cards.id, id),
   });
@@ -101,7 +109,13 @@ cards.delete("/:id", requireAuth, async (c) => {
     return c.json({ error: "Access denied" }, 403);
   }
 
+  const templateId = card.templateId;
+
   await db.delete(schema.cards).where(eq(schema.cards.id, id));
+
+  await db.update(schema.templates)
+    .set({ updatedAt: new Date() })
+    .where(eq(schema.templates.id, templateId));
 
   return c.json({ success: true });
 });
@@ -130,6 +144,10 @@ cards.put("/:templateId/reorder", requireAuth, async (c) => {
       .set({ orderIndex })
       .where(and(eq(schema.cards.id, id), eq(schema.cards.templateId, templateId)));
   }
+
+  await db.update(schema.templates)
+    .set({ updatedAt: new Date() })
+    .where(eq(schema.templates.id, templateId));
 
   return c.json({ success: true });
 });

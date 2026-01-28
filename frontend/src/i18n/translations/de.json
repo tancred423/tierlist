@@ -39,6 +39,12 @@
     "en": "English",
     "de": "Deutsch"
   },
+  "clock": {
+    "clock": "Uhr",
+    "system": "System",
+    "24h": "24-Stunden",
+    "12h": "12-Stunden"
+  },
   "home": {
     "title": "Erstelle und teile Tierlisten",
     "subtitle": "Erstelle anpassbare Tierlisten mit Kategorien, Zeilen und Spalten. Füge Karten mit Titeln, Bildern und Beschreibungen hinzu.",
@@ -55,7 +61,7 @@
   },
   "template": {
     "by": "von",
-    "updated": "Aktualisiert",
+    "revision": "Version",
     "more": "mehr",
     "public": "Öffentlich",
     "private": "Privat",

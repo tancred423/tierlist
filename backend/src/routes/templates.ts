@@ -333,6 +333,7 @@ templates.put("/:id", requireAuth, async (c) => {
       title: body.title ?? template.title,
       description: body.description ?? template.description,
       isPublic: body.isPublic ?? template.isPublic,
+      updatedAt: new Date(),
     })
     .where(eq(schema.templates.id, id));
 

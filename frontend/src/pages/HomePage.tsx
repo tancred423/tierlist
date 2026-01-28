@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { api } from '../api/client';
 import { useAuthStore } from '../stores/auth';
+import { useClockFormatStore } from '../stores/clockFormat';
 import { useI18n } from '../i18n';
 import type { Template, FilledTierlist } from '../types';
 import './HomePage.css';
@@ -14,9 +15,10 @@ interface TemplateCardProps {
   isOwned?: boolean;
   t: (key: string) => string;
   language: string;
+  clockFormat: '12h' | '24h';
 }
 
-function formatDate(dateString: string, language: string): string {
+function formatDate(dateString: string, language: string, clockFormat: '12h' | '24h'): string {
   const date = new Date(dateString);
   return date.toLocaleDateString(language === 'de' ? 'de-DE' : 'en-US', {
     year: 'numeric',
@@ -24,6 +26,7 @@ function formatDate(dateString: string, language: string): string {
     day: 'numeric',
     hour: '2-digit',
     minute: '2-digit',
+    hour12: clockFormat === '12h',
   });
 }
 
@@ -35,6 +38,7 @@ function TemplateCard({
   isOwned,
   t,
   language,
+  clockFormat,
 }: TemplateCardProps) {
   const maxTiers = 5;
   const maxCols = 5;
@@ -67,8 +71,8 @@ function TemplateCard({
         )}
         {template.description && <p className="template-description">{template.description}</p>}
         {template.updatedAt && (
-          <span className="template-updated">
-            {t('template.updated')}: {formatDate(template.updatedAt, language)}
+          <span className="template-revision">
+            {t('template.revision')}: {formatDate(template.updatedAt, language, clockFormat)}
           </span>
         )}
       </div>
@@ -150,9 +154,11 @@ interface RankingWithCoOwner extends FilledTierlist {
 interface RankingCardProps {
   ranking: RankingWithCoOwner;
   t: (key: string) => string;
+  language: string;
+  clockFormat: '12h' | '24h';
 }
 
-function RankingCard({ ranking, t }: RankingCardProps) {
+function RankingCard({ ranking, t, language, clockFormat }: RankingCardProps) {
   const maxTiers = 5;
   const maxCols = 5;
   const maxUnranked = 5;
@@ -194,6 +200,12 @@ function RankingCard({ ranking, t }: RankingCardProps) {
           {t('home.basedOn')} "{template.title}"{' '}
           {template.owner ? `${t('template.by')} ${template.owner.username}` : ''}
         </span>
+        {ranking.templateSnapshot?.snapshotAt && (
+          <span className="ranking-revision">
+            {t('template.revision')}:{' '}
+            {formatDate(ranking.templateSnapshot.snapshotAt, language, clockFormat)}
+          </span>
+        )}
       </div>
 
       <div className="ranking-table-preview">
@@ -278,7 +290,9 @@ export function HomePage() {
   const [isLoading, setIsLoading] = useState(true);
   const { user, login } = useAuthStore();
   const { t, language } = useI18n();
+  const { getEffectiveFormat } = useClockFormatStore();
   const navigate = useNavigate();
+  const clockFormat = getEffectiveFormat();
 
   const loadData = useCallback(async () => {
     setIsLoading(true);
@@ -384,7 +398,13 @@ export function HomePage() {
           ) : (
             <div className="rankings-grid">
               {myRankings.map(ranking => (
-                <RankingCard key={ranking.id} ranking={ranking} t={t} />
+                <RankingCard
+                  key={ranking.id}
+                  ranking={ranking}
+                  t={t}
+                  language={language}
+                  clockFormat={clockFormat}
+                />
               ))}
             </div>
           )}
@@ -414,6 +434,7 @@ export function HomePage() {
                   isOwned
                   t={t}
                   language={language}
+                  clockFormat={clockFormat}
                 />
               ))}
             </div>
@@ -439,6 +460,7 @@ export function HomePage() {
                 isLoggedIn={!!user}
                 t={t}
                 language={language}
+                clockFormat={clockFormat}
               />
             ))}
           </div>

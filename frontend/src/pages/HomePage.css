@@ -130,6 +130,13 @@
   color: var(--color-text-muted);
 }
 
+.ranking-revision {
+  font-size: 0.7rem;
+  color: var(--color-text-muted);
+  display: block;
+  margin-top: 0.125rem;
+}
+
 .ranking-table-preview {
   background: var(--color-bg);
   border-radius: var(--radius-md);
@@ -205,11 +212,11 @@
   color: var(--color-text-muted);
 }
 
-.template-updated {
-  font-size: 0.75rem;
+.template-revision {
+  font-size: 0.7rem;
   color: var(--color-text-muted);
   display: block;
-  margin-top: 0.25rem;
+  margin-top: 0.125rem;
 }
 
 .template-description {

@@ -39,6 +39,12 @@
     "en": "English",
     "de": "Deutsch"
   },
+  "clock": {
+    "clock": "Clock",
+    "system": "System",
+    "24h": "24-hour",
+    "12h": "12-hour"
+  },
   "home": {
     "title": "Create and Share Tierlists",
     "subtitle": "Build customizable tierlists with categories, rows, and columns. Add cards with titles, images, and descriptions.",
@@ -55,7 +61,7 @@
   },
   "template": {
     "by": "by",
-    "updated": "Updated",
+    "revision": "Revision",
     "more": "more",
     "public": "Public",
     "private": "Private",
