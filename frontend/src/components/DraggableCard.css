@@ -38,21 +38,23 @@
 .draggable-card.show-details {
   width: 120px;
   height: auto;
-  min-height: 120px;
+  min-height: 160px;
 }
 
 .draggable-card.show-details.compact {
   width: 100px;
-  min-height: 80px;
+  min-height: 130px;
 }
 
 .draggable-card.show-details.compact .card-image {
-  height: 50px;
+  width: 100px;
+  height: 100px;
 }
 
 .draggable-card.show-details.compact .card-no-image {
-  height: 50px;
-  font-size: 1.25rem;
+  width: 100px;
+  height: 100px;
+  font-size: 2rem;
 }
 
 .draggable-card.show-details.compact .card-details {
@@ -74,7 +76,9 @@
 }
 
 .draggable-card.show-details .card-image {
-  height: 80px;
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
 }
 
 .card-no-image {
@@ -90,7 +94,9 @@
 }
 
 .draggable-card.show-details .card-no-image {
-  height: 80px;
+  width: 120px;
+  height: 120px;
+  font-size: 2.5rem;
 }
 
 .card-details {
@@ -178,21 +184,23 @@
 
   .draggable-card.show-details {
     width: 100px;
-    min-height: 100px;
+    min-height: 130px;
   }
 
   .draggable-card.show-details .card-image,
   .draggable-card.show-details .card-no-image {
-    height: 60px;
+    width: 100px;
+    height: 100px;
   }
 
   .draggable-card.show-details.compact {
     width: 80px;
-    min-height: 70px;
+    min-height: 105px;
   }
 
   .draggable-card.show-details.compact .card-image,
   .draggable-card.show-details.compact .card-no-image {
-    height: 40px;
+    width: 80px;
+    height: 80px;
   }
 }
