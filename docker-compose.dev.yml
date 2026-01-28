@@ -40,6 +40,7 @@ services:
       context: ./backend
       dockerfile: Dockerfile.dev
     container_name: tierlist-backend
+    user: root
     environment:
       DATABASE_URL: mysql://${MYSQL_USER:-tierlist}:${MYSQL_PASSWORD:-tierlistpassword}@mysql:3306/${MYSQL_DATABASE:-tierlist}
       DISCORD_CLIENT_ID: ${DISCORD_CLIENT_ID}

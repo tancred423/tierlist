@@ -8,7 +8,7 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /app
 
-RUN mkdir -p /app/uploads && chown -R deno:deno /app/uploads
+RUN mkdir -p /app/uploads
 
 COPY deno.json deno.lock* ./
 
@@ -19,7 +19,5 @@ COPY . .
 RUN deno cache src/main.ts
 
 EXPOSE 3000
-
-USER deno
 
 CMD ["deno", "task", "start"]

@@ -13,6 +13,25 @@ const MAX_OUTPUT_SIZE = parseInt(Deno.env.get("UPLOAD_MAX_OUTPUT_KB") || "100") 
 const MAX_DIMENSION = parseInt(Deno.env.get("UPLOAD_MAX_DIMENSION") || "200");
 const GLOBAL_STORAGE_LIMIT = parseInt(Deno.env.get("UPLOAD_STORAGE_LIMIT_GB") || "5") * 1024 * 1024 * 1024;
 
+const IMAGE_MAGIC_BYTES: Record<string, number[][]> = {
+  "image/jpeg": [[0xFF, 0xD8, 0xFF]],
+  "image/png": [[0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A]],
+  "image/gif": [[0x47, 0x49, 0x46, 0x38, 0x37, 0x61], [0x47, 0x49, 0x46, 0x38, 0x39, 0x61]],
+  "image/webp": [[0x52, 0x49, 0x46, 0x46]],
+};
+
+function isValidImageMagicBytes(buffer: ArrayBuffer): boolean {
+  const bytes = new Uint8Array(buffer);
+  for (const signatures of Object.values(IMAGE_MAGIC_BYTES)) {
+    for (const signature of signatures) {
+      if (signature.every((byte, i) => bytes[i] === byte)) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
 async function ensureDir(path: string) {
   try {
     await Deno.mkdir(path, { recursive: true });
@@ -154,6 +173,10 @@ uploads.post("/:templateId", requireAuth, async (c) => {
     return c.json({ error: "Unsupported content type" }, 400);
   }
 
+  if (!isValidImageMagicBytes(imageBuffer)) {
+    return c.json({ error: "Invalid image file. Only JPEG, PNG, GIF, and WebP are supported." }, 400);
+  }
+
   try {
     const processedImage = await sharp(imageBuffer)
       .resize(MAX_DIMENSION, MAX_DIMENSION, {
@@ -219,7 +242,17 @@ uploads.post("/:templateId", requireAuth, async (c) => {
     }, 201);
   } catch (err) {
     console.error("Image processing error:", err);
-    return c.json({ error: "Failed to process image" }, 500);
+
+    if (err instanceof Error) {
+      if (err.message.includes("unsupported image format") || err.message.includes("Input buffer")) {
+        return c.json({ error: "Invalid or corrupted image file" }, 400);
+      }
+      if (err.name === "PermissionDenied" || err.message.includes("Permission denied")) {
+        return c.json({ error: "Server storage configuration error. Please contact the administrator." }, 500);
+      }
+    }
+
+    return c.json({ error: "Failed to process image. Please try a different image." }, 500);
   }
 });
 

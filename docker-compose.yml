@@ -2,6 +2,7 @@ services:
   backend:
     image: ${BACKEND_IMAGE:-ghcr.io/tancred423/tierlist/backend:latest}
     container_name: tierlist-backend
+    user: root
     environment:
       DATABASE_URL: mysql://${MYSQL_USER:-tierlist}:${MYSQL_PASSWORD}@${MYSQL_HOST:-mysql}:3306/${MYSQL_DATABASE:-tierlist}
       DISCORD_CLIENT_ID: ${DISCORD_CLIENT_ID}
