@@ -248,8 +248,17 @@ class ApiClient {
     });
 
     if (!response.ok) {
-      const error = await response.json().catch(() => ({ error: 'Upload failed' }));
-      throw new Error(error.error || 'Upload failed');
+      if (response.status === 413) {
+        throw new Error('File too large for server. Try a smaller image or compress it first.');
+      }
+      if (response.status === 507) {
+        const error = await response.json().catch(() => ({}));
+        throw new Error(error.error || 'Server storage is full. Please use a URL instead.');
+      }
+      const error = await response
+        .json()
+        .catch(() => ({ error: `Upload failed (${response.status})` }));
+      throw new Error(error.error || `Upload failed (${response.status})`);
     }
 
     return response.json();
