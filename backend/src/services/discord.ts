@@ -26,13 +26,15 @@ export function getDiscordAuthUrl(state: string): string {
     client_id: DISCORD_CLIENT_ID,
     redirect_uri: DISCORD_REDIRECT_URI,
     response_type: "code",
-    scope: "identify email",
+    scope: "identify",
     state,
   });
   return `${DISCORD_OAUTH_URL}/authorize?${params.toString()}`;
 }
 
 export async function exchangeCodeForToken(code: string): Promise<DiscordTokenResponse> {
+  console.log("Exchanging code for token with redirect_uri:", DISCORD_REDIRECT_URI);
+
   const response = await fetch(`${DISCORD_OAUTH_URL}/token`, {
     method: "POST",
     headers: {
@@ -49,6 +51,9 @@ export async function exchangeCodeForToken(code: string): Promise<DiscordTokenRe
 
   if (!response.ok) {
     const error = await response.text();
+    console.error("Discord token exchange failed:", response.status, error);
+    console.error("Used client_id:", DISCORD_CLIENT_ID);
+    console.error("Used redirect_uri:", DISCORD_REDIRECT_URI);
     throw new Error(`Discord token exchange failed: ${error}`);
   }
 

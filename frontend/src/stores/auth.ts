@@ -28,6 +28,7 @@ export const useAuthStore = create<AuthState>(set => ({
 
   logout: () => {
     api.setToken(null);
+    localStorage.removeItem('auth_redirect');
     set({ user: null });
   },
 

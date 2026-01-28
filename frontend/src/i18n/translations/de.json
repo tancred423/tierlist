@@ -21,7 +21,8 @@
   },
   "auth": {
     "loginWithDiscord": "Mit Discord anmelden",
-    "loginToStartRanking": "Anmelden zum Ranken"
+    "loginToStartRanking": "Anmelden zum Ranken",
+    "authFailed": "Anmeldung fehlgeschlagen. Bitte versuche es erneut."
   },
   "login": {
     "title": "Anmeldung erforderlich",

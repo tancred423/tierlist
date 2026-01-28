@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { api } from '../api/client';
 import { useAuthStore } from '../stores/auth';
 import { useClockFormatStore } from '../stores/clockFormat';
@@ -288,11 +288,21 @@ export function HomePage() {
   const [myTemplates, setMyTemplates] = useState<Template[]>([]);
   const [myRankings, setMyRankings] = useState<RankingWithCoOwner[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [authError, setAuthError] = useState<string | null>(null);
   const { user, login } = useAuthStore();
   const { t, language } = useI18n();
   const { getEffectiveFormat } = useClockFormatStore();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const clockFormat = getEffectiveFormat();
+
+  useEffect(() => {
+    const error = searchParams.get('error');
+    if (error) {
+      setAuthError(error);
+      setSearchParams({}, { replace: true });
+    }
+  }, [searchParams, setSearchParams]);
 
   const loadData = useCallback(async () => {
     setIsLoading(true);
@@ -371,6 +381,17 @@ export function HomePage() {
 
   return (
     <div className="container home-page">
+      {authError && (
+        <div className="auth-error-toast">
+          <div className="auth-error-content">
+            <span>{t('auth.authFailed')}</span>
+            <button className="btn-icon" onClick={() => setAuthError(null)}>
+              ×
+            </button>
+          </div>
+        </div>
+      )}
+
       {!user && (
         <section className="hero">
           <h1>{t('home.title')}</h1>

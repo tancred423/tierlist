@@ -21,7 +21,8 @@
   },
   "auth": {
     "loginWithDiscord": "Login with Discord",
-    "loginToStartRanking": "Login to Start Ranking"
+    "loginToStartRanking": "Login to Start Ranking",
+    "authFailed": "Login failed. Please try again."
   },
   "login": {
     "title": "Login Required",
