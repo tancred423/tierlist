@@ -114,6 +114,48 @@ auth.get("/me", async (c) => {
       id: dbUser.id,
       discordId: dbUser.discordId,
       username: dbUser.username,
+      nickname: dbUser.nickname,
+      avatar: dbUser.avatar,
+      discriminator: dbUser.discriminator,
+      createdAt: dbUser.createdAt,
+    },
+  });
+});
+
+auth.put("/me", async (c) => {
+  const user = c.get("user");
+
+  if (!user) {
+    return c.json({ error: "Not authenticated" }, 401);
+  }
+
+  const body = await c.req.json();
+  const { nickname } = body;
+
+  if (nickname !== undefined && nickname !== null) {
+    const trimmed = nickname.trim();
+    if (trimmed.length > 255) {
+      return c.json({ error: "Nickname too long" }, 400);
+    }
+    await db.update(schema.users)
+      .set({ nickname: trimmed || null })
+      .where(eq(schema.users.id, user.userId));
+  }
+
+  const dbUser = await db.query.users.findFirst({
+    where: eq(schema.users.id, user.userId),
+  });
+
+  if (!dbUser) {
+    return c.json({ error: "User not found" }, 404);
+  }
+
+  return c.json({
+    user: {
+      id: dbUser.id,
+      discordId: dbUser.discordId,
+      username: dbUser.username,
+      nickname: dbUser.nickname,
       avatar: dbUser.avatar,
       discriminator: dbUser.discriminator,
       createdAt: dbUser.createdAt,

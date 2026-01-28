@@ -5,6 +5,7 @@ export const users = mysqlTable("users", {
   id: varchar("id", { length: 36 }).primaryKey(),
   discordId: varchar("discord_id", { length: 255 }).notNull().unique(),
   username: varchar("username", { length: 255 }).notNull(),
+  nickname: varchar("nickname", { length: 255 }),
   discriminator: varchar("discriminator", { length: 10 }),
   avatar: varchar("avatar", { length: 255 }),
   email: varchar("email", { length: 255 }),

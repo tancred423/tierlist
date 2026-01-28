@@ -2,9 +2,16 @@ export interface User {
   id: string;
   discordId: string;
   username: string;
+  nickname: string | null;
   avatar: string | null;
   discriminator: string | null;
   createdAt?: string;
+}
+
+export function getDisplayName(
+  user: User | { username: string; nickname?: string | null },
+): string {
+  return user.nickname || user.username;
 }
 
 export interface Tier {

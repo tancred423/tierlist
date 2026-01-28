@@ -4,6 +4,7 @@ import { useAuthStore } from '../stores/auth';
 import { useThemeStore } from '../stores/theme';
 import { useClockFormatStore } from '../stores/clockFormat';
 import { useI18n } from '../i18n';
+import { getDisplayName } from '../types';
 import './Header.css';
 
 function DiscordIcon() {
@@ -314,13 +315,13 @@ export function Header() {
               trigger={
                 <>
                   {getAvatarUrl() ? (
-                    <img src={getAvatarUrl()!} alt={user.username} className="avatar" />
+                    <img src={getAvatarUrl()!} alt={getDisplayName(user)} className="avatar" />
                   ) : (
                     <div className="avatar avatar-placeholder">
-                      {user.username[0].toUpperCase()}
+                      {getDisplayName(user)[0].toUpperCase()}
                     </div>
                   )}
-                  <span className="user-name">{user.username}</span>
+                  <span className="user-name">{getDisplayName(user)}</span>
                   <svg
                     className={`chevron ${userOpen ? 'open' : ''}`}
                     width="12"

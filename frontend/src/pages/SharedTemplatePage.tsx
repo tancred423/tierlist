@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { api } from '../api/client';
 import { useAuthStore } from '../stores/auth';
+import { getDisplayName } from '../types';
 import type { Template } from '../types';
 import './SharedTemplatePage.css';
 
@@ -98,7 +99,7 @@ export function SharedTemplatePage() {
       <div className="shared-template-card card">
         <div className="template-header">
           <h1>{template.title}</h1>
-          {template.owner && <p className="template-author">by {template.owner.username}</p>}
+          {template.owner && <p className="template-author">by {getDisplayName(template.owner)}</p>}
         </div>
 
         {template.description && <p className="template-description">{template.description}</p>}

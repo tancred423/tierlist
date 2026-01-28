@@ -187,6 +187,12 @@
   "account": {
     "title": "Konto",
     "memberSince": "Mitglied seit",
+    "discordName": "Discord",
+    "settings": "Einstellungen",
+    "nickname": "Spitzname",
+    "nicknameHint": "Lege einen eigenen Anzeigenamen fest. Leer lassen, um deinen Discord-Namen zu verwenden.",
+    "nicknameSaved": "Spitzname gespeichert!",
+    "nicknameError": "Fehler beim Speichern des Spitznamens",
     "dangerZone": "Gefahrenbereich",
     "deleteWarning": "Das Löschen deines Kontos entfernt alle deine Daten dauerhaft, einschließlich Vorlagen, Rankings und Mitbesitzerschaften. Diese Aktion kann nicht rückgängig gemacht werden.",
     "deleteAccount": "Konto löschen",

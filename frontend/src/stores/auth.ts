@@ -9,6 +9,7 @@ interface AuthState {
   login: () => Promise<void>;
   logout: () => void;
   setToken: (token: string) => void;
+  setUser: (user: User) => void;
   initialize: () => Promise<void>;
 }
 
@@ -34,6 +35,10 @@ export const useAuthStore = create<AuthState>(set => ({
 
   setToken: (token: string) => {
     api.setToken(token);
+  },
+
+  setUser: (user: User) => {
+    set({ user });
   },
 
   initialize: async () => {

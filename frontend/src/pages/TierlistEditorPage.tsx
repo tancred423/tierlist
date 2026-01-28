@@ -4,6 +4,7 @@ import { api } from '../api/client';
 import { useAuthStore } from '../stores/auth';
 import { useClockFormatStore } from '../stores/clockFormat';
 import { useI18n } from '../i18n';
+import { getDisplayName } from '../types';
 import type { FilledTierlist, CardPlacement, PlacementData } from '../types';
 import { TierlistGrid } from '../components/TierlistGrid';
 import { ShareModal } from '../components/ShareModal';
@@ -208,7 +209,7 @@ export function TierlistEditorPage() {
           <p className="text-muted">
             {t('home.basedOn')} "{tierlist.template.title}"{' '}
             {tierlist.template.owner
-              ? `${t('template.by')} ${tierlist.template.owner.username}`
+              ? `${t('template.by')} ${getDisplayName(tierlist.template.owner)}`
               : ''}
           </p>
           {tierlist.templateSnapshot?.snapshotAt && (

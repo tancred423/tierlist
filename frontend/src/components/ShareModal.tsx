@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { api } from '../api/client';
 import { useI18n } from '../i18n';
+import { getDisplayName } from '../types';
 import type { FilledTierlist } from '../types';
 import './ShareModal.css';
 
@@ -221,7 +222,7 @@ export function ShareModal({ tierlist, onClose, onUpdate }: ShareModalProps) {
                 </h4>
                 <ul>
                   {tierlist.coOwners.map(co => (
-                    <li key={co.userId}>{co.user.username}</li>
+                    <li key={co.userId}>{getDisplayName(co.user)}</li>
                   ))}
                 </ul>
               </div>

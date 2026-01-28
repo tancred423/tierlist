@@ -187,6 +187,12 @@
   "account": {
     "title": "Account",
     "memberSince": "Member since",
+    "discordName": "Discord",
+    "settings": "Settings",
+    "nickname": "Nickname",
+    "nicknameHint": "Set a custom display name. Leave empty to use your Discord name.",
+    "nicknameSaved": "Nickname saved!",
+    "nicknameError": "Failed to save nickname",
     "dangerZone": "Danger Zone",
     "deleteWarning": "Deleting your account will permanently remove all your data including templates, rankings, and co-ownerships. This action cannot be undone.",
     "deleteAccount": "Delete Account",

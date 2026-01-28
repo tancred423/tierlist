@@ -4,6 +4,7 @@ import { api } from '../api/client';
 import { useAuthStore } from '../stores/auth';
 import { useClockFormatStore } from '../stores/clockFormat';
 import { useI18n } from '../i18n';
+import { getDisplayName } from '../types';
 import type { FilledTierlist, CardPlacement, PlacementData } from '../types';
 import { TierlistGrid } from '../components/TierlistGrid';
 import './SharedTierlistPage.css';
@@ -182,8 +183,8 @@ export function SharedTierlistPage({ mode }: SharedTierlistPageProps) {
             {mode === 'edit' && canEdit && <span className="edit-badge">{t('home.coOwner')}</span>}
           </div>
           <p className="text-muted">
-            {t('template.by')} {tierlist.owner?.username} • {t('home.basedOn')} "
-            {tierlist.template.title}"
+            {t('template.by')} {tierlist.owner ? getDisplayName(tierlist.owner) : ''} •{' '}
+            {t('home.basedOn')} "{tierlist.template.title}"
           </p>
           {tierlist.templateSnapshot?.snapshotAt && (
             <p className="revision-info">

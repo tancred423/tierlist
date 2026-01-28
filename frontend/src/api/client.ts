@@ -223,6 +223,13 @@ class ApiClient {
   async deleteAccount(): Promise<{ success: boolean }> {
     return this.request('/api/auth/me', { method: 'DELETE' });
   }
+
+  async updateProfile(data: { nickname?: string }): Promise<{ user: import('../types').User }> {
+    return this.request('/api/auth/me', {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  }
 }
 
 export const api = new ApiClient();

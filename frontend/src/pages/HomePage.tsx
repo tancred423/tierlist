@@ -4,6 +4,7 @@ import { api } from '../api/client';
 import { useAuthStore } from '../stores/auth';
 import { useClockFormatStore } from '../stores/clockFormat';
 import { useI18n } from '../i18n';
+import { getDisplayName } from '../types';
 import type { Template, FilledTierlist } from '../types';
 import './HomePage.css';
 
@@ -66,7 +67,7 @@ function TemplateCard({
         )}
         {template.owner && (
           <span className="template-author">
-            {t('template.by')} {template.owner.username}
+            {t('template.by')} {getDisplayName(template.owner)}
           </span>
         )}
         {template.description && <p className="template-description">{template.description}</p>}
@@ -204,7 +205,7 @@ function RankingCard({ ranking, t, language, clockFormat }: RankingCardProps) {
         </div>
         <span className="ranking-template">
           {t('home.basedOn')} "{template.title}"{' '}
-          {template.owner ? `${t('template.by')} ${template.owner.username}` : ''}
+          {template.owner ? `${t('template.by')} ${getDisplayName(template.owner)}` : ''}
         </span>
         {ranking.templateSnapshot?.snapshotAt && (
           <span className="ranking-revision">
@@ -354,7 +355,7 @@ export function HomePage() {
     try {
       const { filledTierlist } = await api.createFilledTierlist({
         templateId: template.id,
-        title: `${template.title} - ${t('home.rankingBy')} ${user.username}`,
+        title: `${template.title} - ${t('home.rankingBy')} ${getDisplayName(user)}`,
       });
       navigate(`/tierlist/${filledTierlist.id}`);
     } catch (error) {
