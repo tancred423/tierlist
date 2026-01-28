@@ -187,22 +187,29 @@ export function TierlistEditorPage() {
     <div className="tierlist-editor-page">
       <div className="editor-header">
         <div className="header-title">
-          {isOwner ? (
-            <input
-              type="text"
-              value={tierlist.title}
-              onChange={e => handleTitleChange(e.target.value)}
-              className="title-input"
-            />
-          ) : (
-            <h1 className="title-text">{tierlist.title}</h1>
-          )}
+          <div className="title-row">
+            {isOwner ? (
+              <input
+                type="text"
+                value={tierlist.title}
+                onChange={e => handleTitleChange(e.target.value)}
+                className="title-input"
+              />
+            ) : (
+              <h1 className="title-text">{tierlist.title}</h1>
+            )}
+            {isCoOwner && <span className="co-owner-badge">{t('home.coOwner')}</span>}
+            {isOwner &&
+              (tierlist.editShareEnabled ||
+                (tierlist.coOwners && tierlist.coOwners.length > 0)) && (
+                <span className="shared-badge">{t('home.shared')}</span>
+              )}
+          </div>
           <p className="text-muted">
             {t('home.basedOn')} "{tierlist.template.title}"{' '}
             {tierlist.template.owner
               ? `${t('template.by')} ${tierlist.template.owner.username}`
               : ''}
-            {isCoOwner && <span className="co-owner-badge">{t('home.coOwner')}</span>}
           </p>
           {tierlist.templateSnapshot?.snapshotAt && (
             <p className="revision-info">

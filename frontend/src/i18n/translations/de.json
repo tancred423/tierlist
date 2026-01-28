@@ -58,7 +58,8 @@
     "basedOn": "Basiert auf",
     "noRankingsYet": "Noch keine Rankings. Starte ein Ranking von einer Vorlage!",
     "noTemplatesYet": "Noch keine Vorlagen. Erstelle deine erste Vorlage!",
-    "coOwner": "Mitbesitzer"
+    "coOwner": "Mitbesitzer",
+    "shared": "Geteilt"
   },
   "template": {
     "by": "von",

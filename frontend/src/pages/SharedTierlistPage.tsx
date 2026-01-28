@@ -176,12 +176,14 @@ export function SharedTierlistPage({ mode }: SharedTierlistPageProps) {
     <div className="shared-tierlist-page">
       <div className="page-header">
         <div className="header-info">
-          <h1>{tierlist.title}</h1>
+          <div className="title-row">
+            <h1>{tierlist.title}</h1>
+            {mode === 'view' && <span className="view-badge">{t('tierlist.viewOnly')}</span>}
+            {mode === 'edit' && canEdit && <span className="edit-badge">{t('home.coOwner')}</span>}
+          </div>
           <p className="text-muted">
             {t('template.by')} {tierlist.owner?.username} • {t('home.basedOn')} "
             {tierlist.template.title}"
-            {mode === 'view' && <span className="view-badge">{t('tierlist.viewOnly')}</span>}
-            {mode === 'edit' && canEdit && <span className="edit-badge">{t('home.coOwner')}</span>}
           </p>
           {tierlist.templateSnapshot?.snapshotAt && (
             <p className="revision-info">

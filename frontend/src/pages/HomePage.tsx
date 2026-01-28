@@ -189,12 +189,18 @@ function RankingCard({ ranking, t, language, clockFormat }: RankingCardProps) {
   const visibleUnranked = unrankedPlacements.slice(0, maxUnranked);
   const extraUnranked = unrankedPlacements.length - maxUnranked;
 
+  const isSharedForEdit =
+    ranking.editShareEnabled || (ranking.coOwners && ranking.coOwners.length > 0);
+
   return (
     <Link to={`/tierlist/${ranking.id}`} className="ranking-card card">
       <div className="ranking-header">
-        <div className="ranking-title-row">
-          <h4 className="ranking-title">{ranking.title}</h4>
+        <h4 className="ranking-title">{ranking.title}</h4>
+        <div className="ranking-badges">
           {ranking.isCoOwner && <span className="coowner-badge">{t('home.coOwner')}</span>}
+          {!ranking.isCoOwner && isSharedForEdit && (
+            <span className="shared-badge">{t('home.shared')}</span>
+          )}
         </div>
         <span className="ranking-template">
           {t('home.basedOn')} "{template.title}"{' '}

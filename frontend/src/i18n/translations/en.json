@@ -58,7 +58,8 @@
     "basedOn": "Based on",
     "noRankingsYet": "No rankings yet. Start ranking a template!",
     "noTemplatesYet": "No templates yet. Create your first template!",
-    "coOwner": "Co-owner"
+    "coOwner": "Co-owner",
+    "shared": "Shared"
   },
   "template": {
     "by": "by",
