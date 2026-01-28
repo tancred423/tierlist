@@ -14,13 +14,14 @@ filledTierlists.get("/my", requireAuth, async (c) => {
     with: {
       template: {
         with: {
-          owner: { columns: { id: true, username: true, avatar: true } },
+          owner: { columns: { id: true, username: true, nickname: true, avatar: true } },
           tiers: true,
           columns: true,
           cards: true,
         },
       },
       placements: true,
+      coOwners: true,
     },
     orderBy: [desc(schema.filledTierlists.updatedAt)],
   });
@@ -32,16 +33,17 @@ filledTierlists.get("/my", requireAuth, async (c) => {
         with: {
           template: {
             with: {
-              owner: { columns: { id: true, username: true, avatar: true } },
+              owner: { columns: { id: true, username: true, nickname: true, avatar: true } },
               tiers: true,
               columns: true,
               cards: true,
             },
           },
           owner: {
-            columns: { id: true, username: true, avatar: true },
+            columns: { id: true, username: true, nickname: true, avatar: true },
           },
           placements: true,
+          coOwners: true,
         },
       },
     },
@@ -138,7 +140,7 @@ filledTierlists.post("/", requireAuth, async (c) => {
     with: {
       template: {
         with: {
-          owner: { columns: { id: true, username: true, avatar: true } },
+          owner: { columns: { id: true, username: true, nickname: true, avatar: true } },
         },
       },
       placements: true,
@@ -157,17 +159,17 @@ filledTierlists.get("/:id", requireAuth, async (c) => {
     with: {
       template: {
         with: {
-          owner: { columns: { id: true, username: true, avatar: true } },
+          owner: { columns: { id: true, username: true, nickname: true, avatar: true } },
           tiers: { orderBy: [schema.tiers.orderIndex] },
           columns: { orderBy: [schema.columns.orderIndex] },
           cards: { orderBy: [schema.cards.orderIndex] },
         },
       },
-      owner: { columns: { id: true, username: true, avatar: true } },
+      owner: { columns: { id: true, username: true, nickname: true, avatar: true } },
       placements: true,
       coOwners: {
         with: {
-          user: { columns: { id: true, username: true, avatar: true } },
+          user: { columns: { id: true, username: true, nickname: true, avatar: true } },
         },
       },
     },
@@ -211,13 +213,13 @@ filledTierlists.get("/view/:token", async (c) => {
     with: {
       template: {
         with: {
-          owner: { columns: { id: true, username: true, avatar: true } },
+          owner: { columns: { id: true, username: true, nickname: true, avatar: true } },
           tiers: { orderBy: [schema.tiers.orderIndex] },
           columns: { orderBy: [schema.columns.orderIndex] },
           cards: { orderBy: [schema.cards.orderIndex] },
         },
       },
-      owner: { columns: { id: true, username: true, avatar: true } },
+      owner: { columns: { id: true, username: true, nickname: true, avatar: true } },
       placements: true,
     },
   });
@@ -254,13 +256,13 @@ filledTierlists.get("/edit/:token", requireAuth, async (c) => {
     with: {
       template: {
         with: {
-          owner: { columns: { id: true, username: true, avatar: true } },
+          owner: { columns: { id: true, username: true, nickname: true, avatar: true } },
           tiers: { orderBy: [schema.tiers.orderIndex] },
           columns: { orderBy: [schema.columns.orderIndex] },
           cards: { orderBy: [schema.cards.orderIndex] },
         },
       },
-      owner: { columns: { id: true, username: true, avatar: true } },
+      owner: { columns: { id: true, username: true, nickname: true, avatar: true } },
       placements: true,
       coOwners: true,
     },
@@ -507,7 +509,7 @@ filledTierlists.post("/:id/copy", requireAuth, async (c) => {
     with: {
       template: {
         with: {
-          owner: { columns: { id: true, username: true, avatar: true } },
+          owner: { columns: { id: true, username: true, nickname: true, avatar: true } },
         },
       },
       placements: true,

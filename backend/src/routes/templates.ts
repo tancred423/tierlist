@@ -21,7 +21,7 @@ templates.get("/public", async (c) => {
     where: eq(schema.templates.isPublic, true),
     with: {
       owner: {
-        columns: { id: true, username: true, avatar: true },
+        columns: { id: true, username: true, nickname: true, avatar: true },
       },
       tiers: true,
       columns: true,
@@ -106,7 +106,7 @@ templates.get("/:id", async (c) => {
     where: eq(schema.templates.id, id),
     with: {
       owner: {
-        columns: { id: true, username: true, avatar: true },
+        columns: { id: true, username: true, nickname: true, avatar: true },
       },
       tiers: {
         orderBy: [schema.tiers.orderIndex],
@@ -138,7 +138,7 @@ templates.get("/share/:token", async (c) => {
     where: eq(schema.templates.shareToken, token),
     with: {
       owner: {
-        columns: { id: true, username: true, avatar: true },
+        columns: { id: true, username: true, nickname: true, avatar: true },
       },
       tiers: {
         orderBy: [schema.tiers.orderIndex],
