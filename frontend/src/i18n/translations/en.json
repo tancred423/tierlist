@@ -55,6 +55,7 @@
   },
   "template": {
     "by": "by",
+    "updated": "Updated",
     "more": "more",
     "public": "Public",
     "private": "Private",

@@ -61,11 +61,25 @@ export interface CoOwner {
   joinedAt: string;
 }
 
+export interface TemplateSnapshot {
+  tiers: { id: string; name: string; color: string; orderIndex: number }[];
+  columns: { id: string; name: string | null; orderIndex: number }[];
+  cards: {
+    id: string;
+    title: string;
+    imageUrl: string | null;
+    description: string | null;
+    orderIndex: number;
+  }[];
+  snapshotAt: string;
+}
+
 export interface FilledTierlist {
   id: string;
   templateId: string;
   ownerId: string;
   title: string;
+  templateSnapshot?: TemplateSnapshot | null;
   viewShareToken: string | null;
   viewShareEnabled: boolean;
   editShareToken: string | null;

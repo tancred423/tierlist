@@ -13,6 +13,18 @@ interface TemplateCardProps {
   isLoggedIn: boolean;
   isOwned?: boolean;
   t: (key: string) => string;
+  language: string;
+}
+
+function formatDate(dateString: string, language: string): string {
+  const date = new Date(dateString);
+  return date.toLocaleDateString(language === 'de' ? 'de-DE' : 'en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
 }
 
 function TemplateCard({
@@ -22,6 +34,7 @@ function TemplateCard({
   isLoggedIn,
   isOwned,
   t,
+  language,
 }: TemplateCardProps) {
   const maxTiers = 5;
   const maxCols = 5;
@@ -53,6 +66,11 @@ function TemplateCard({
           </span>
         )}
         {template.description && <p className="template-description">{template.description}</p>}
+        {template.updatedAt && (
+          <span className="template-updated">
+            {t('template.updated')}: {formatDate(template.updatedAt, language)}
+          </span>
+        )}
       </div>
 
       <div className="template-table-preview">
@@ -259,7 +277,7 @@ export function HomePage() {
   const [myRankings, setMyRankings] = useState<RankingWithCoOwner[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { user, login } = useAuthStore();
-  const { t } = useI18n();
+  const { t, language } = useI18n();
   const navigate = useNavigate();
 
   const loadData = useCallback(async () => {
@@ -395,6 +413,7 @@ export function HomePage() {
                   isLoggedIn={!!user}
                   isOwned
                   t={t}
+                  language={language}
                 />
               ))}
             </div>
@@ -419,6 +438,7 @@ export function HomePage() {
                 onCopy={() => handleCopyTemplate(template)}
                 isLoggedIn={!!user}
                 t={t}
+                language={language}
               />
             ))}
           </div>

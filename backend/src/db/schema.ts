@@ -1,4 +1,4 @@
-import { boolean, int, mysqlTable, primaryKey, text, timestamp, varchar } from "drizzle-orm/mysql-core";
+import { boolean, int, json, mysqlTable, primaryKey, text, timestamp, varchar } from "drizzle-orm/mysql-core";
 import { relations } from "drizzle-orm";
 
 export const users = mysqlTable("users", {
@@ -51,11 +51,19 @@ export const cards = mysqlTable("cards", {
   updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
 });
 
+export interface TemplateSnapshot {
+  tiers: { id: string; name: string; color: string; orderIndex: number }[];
+  columns: { id: string; name: string | null; orderIndex: number }[];
+  cards: { id: string; title: string; imageUrl: string | null; description: string | null; orderIndex: number }[];
+  snapshotAt: string;
+}
+
 export const filledTierlists = mysqlTable("filled_tierlists", {
   id: varchar("id", { length: 36 }).primaryKey(),
   templateId: varchar("template_id", { length: 36 }).notNull().references(() => templates.id, { onDelete: "cascade" }),
   ownerId: varchar("owner_id", { length: 36 }).notNull().references(() => users.id, { onDelete: "cascade" }),
   title: varchar("title", { length: 255 }).notNull(),
+  templateSnapshot: json("template_snapshot").$type<TemplateSnapshot>(),
   viewShareToken: varchar("view_share_token", { length: 64 }).unique(),
   viewShareEnabled: boolean("view_share_enabled").default(false).notNull(),
   editShareToken: varchar("edit_share_token", { length: 64 }).unique(),

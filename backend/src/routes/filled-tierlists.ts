@@ -65,7 +65,9 @@ filledTierlists.post("/", requireAuth, async (c) => {
   const template = await db.query.templates.findFirst({
     where: eq(schema.templates.id, body.templateId),
     with: {
-      cards: true,
+      tiers: { orderBy: [schema.tiers.orderIndex] },
+      columns: { orderBy: [schema.columns.orderIndex] },
+      cards: { orderBy: [schema.cards.orderIndex] },
     },
   });
 
@@ -82,6 +84,28 @@ filledTierlists.post("/", requireAuth, async (c) => {
     }
   }
 
+  const templateSnapshot: schema.TemplateSnapshot = {
+    tiers: template.tiers.map((t) => ({
+      id: t.id,
+      name: t.name,
+      color: t.color,
+      orderIndex: t.orderIndex,
+    })),
+    columns: template.columns.map((c) => ({
+      id: c.id,
+      name: c.name,
+      orderIndex: c.orderIndex,
+    })),
+    cards: template.cards.map((c) => ({
+      id: c.id,
+      title: c.title,
+      imageUrl: c.imageUrl,
+      description: c.description,
+      orderIndex: c.orderIndex,
+    })),
+    snapshotAt: new Date().toISOString(),
+  };
+
   const filledId = generateId();
   const viewToken = generateToken();
   const editToken = generateToken();
@@ -91,6 +115,7 @@ filledTierlists.post("/", requireAuth, async (c) => {
     templateId: template.id,
     ownerId: user.userId,
     title: body.title || `${template.title} - My Ranking`,
+    templateSnapshot,
     viewShareToken: viewToken,
     viewShareEnabled: false,
     editShareToken: editToken,
@@ -113,9 +138,7 @@ filledTierlists.post("/", requireAuth, async (c) => {
     with: {
       template: {
         with: {
-          tiers: true,
-          columns: true,
-          cards: true,
+          owner: { columns: { id: true, username: true, avatar: true } },
         },
       },
       placements: true,
@@ -161,6 +184,19 @@ filledTierlists.get("/:id", requireAuth, async (c) => {
     return c.json({ error: "Access denied" }, 403);
   }
 
+  if (filledList.templateSnapshot) {
+    const result = {
+      ...filledList,
+      template: {
+        ...filledList.template,
+        tiers: filledList.templateSnapshot.tiers,
+        columns: filledList.templateSnapshot.columns,
+        cards: filledList.templateSnapshot.cards,
+      },
+    };
+    return c.json({ filledTierlist: result, canEdit: true });
+  }
+
   return c.json({ filledTierlist: filledList, canEdit: true });
 });
 
@@ -188,6 +224,19 @@ filledTierlists.get("/view/:token", async (c) => {
 
   if (!filledList) {
     return c.json({ error: "Tierlist not found or sharing disabled" }, 404);
+  }
+
+  if (filledList.templateSnapshot) {
+    const result = {
+      ...filledList,
+      template: {
+        ...filledList.template,
+        tiers: filledList.templateSnapshot.tiers,
+        columns: filledList.templateSnapshot.columns,
+        cards: filledList.templateSnapshot.cards,
+      },
+    };
+    return c.json({ filledTierlist: result, canEdit: false });
   }
 
   return c.json({ filledTierlist: filledList, canEdit: false });
@@ -229,6 +278,19 @@ filledTierlists.get("/edit/:token", requireAuth, async (c) => {
       listId: filledList.id,
       userId: user.userId,
     });
+  }
+
+  if (filledList.templateSnapshot) {
+    const result = {
+      ...filledList,
+      template: {
+        ...filledList.template,
+        tiers: filledList.templateSnapshot.tiers,
+        columns: filledList.templateSnapshot.columns,
+        cards: filledList.templateSnapshot.cards,
+      },
+    };
+    return c.json({ filledTierlist: result, canEdit: true });
   }
 
   return c.json({ filledTierlist: filledList, canEdit: true });
@@ -422,6 +484,7 @@ filledTierlists.post("/:id/copy", requireAuth, async (c) => {
     templateId: sourceList.templateId,
     ownerId: user.userId,
     title: `${sourceList.title} (Copy)`,
+    templateSnapshot: sourceList.templateSnapshot,
     viewShareToken: viewToken,
     viewShareEnabled: false,
     editShareToken: editToken,
@@ -445,9 +508,6 @@ filledTierlists.post("/:id/copy", requireAuth, async (c) => {
       template: {
         with: {
           owner: { columns: { id: true, username: true, avatar: true } },
-          tiers: true,
-          columns: true,
-          cards: true,
         },
       },
       placements: true,

@@ -205,6 +205,13 @@
   color: var(--color-text-muted);
 }
 
+.template-updated {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  display: block;
+  margin-top: 0.25rem;
+}
+
 .template-description {
   color: var(--color-text-muted);
   font-size: 0.8rem;
