@@ -114,6 +114,10 @@ jobs:
           labels: ${{ steps.meta-frontend.outputs.labels }}
           build-args: |
             VITE_API_URL=${{ secrets.VITE_API_URL }}
+            VITE_TERMS_URL=${{ secrets.VITE_TERMS_URL }}
+            VITE_PRIVACY_URL=${{ secrets.VITE_PRIVACY_URL }}
+            VITE_SUPPORT_URL=${{ secrets.VITE_SUPPORT_URL }}
+            VITE_GITHUB_URL=${{ secrets.VITE_GITHUB_URL }}
 
   deploy:
     name: Deploy to Server
@@ -151,7 +155,7 @@ jobs:
             # Restart services with new images
             docker compose up -d --force-recreate
             
-            # Wait for backend to be ready ... ugly, a fix for later
+            # Wait for backend to be ready
             sleep 5
             
             # Run database migrations

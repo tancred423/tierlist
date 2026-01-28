@@ -36,6 +36,7 @@ export function TierlistEditorPage() {
   const [showShareModal, setShowShareModal] = useState(false);
   const [canEdit, setCanEdit] = useState(false);
   const [isCopying, setIsCopying] = useState(false);
+  const [isCreatingTemplate, setIsCreatingTemplate] = useState(false);
 
   const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pendingPlacementsRef = useRef<PlacementData[] | null>(null);
@@ -150,6 +151,17 @@ export function TierlistEditorPage() {
     }
   }
 
+  async function handleCreateTemplate(tierlistId: string) {
+    setIsCreatingTemplate(true);
+    try {
+      const { template } = await api.createTemplateFromRanking(tierlistId);
+      navigate(`/template/${template.id}`);
+    } catch (error) {
+      console.error('Failed to create template:', error);
+      setIsCreatingTemplate(false);
+    }
+  }
+
   if (isLoading) {
     return (
       <div className="loading-container">
@@ -226,6 +238,17 @@ export function TierlistEditorPage() {
               <button onClick={() => handleDeleteRanking(tierlist.id)} className="btn btn-danger">
                 {t('common.delete')}
               </button>
+              {tierlist.templateSnapshot && (
+                <button
+                  onClick={() => handleCreateTemplate(tierlist.id)}
+                  className="btn btn-secondary"
+                  disabled={isCreatingTemplate}
+                >
+                  {isCreatingTemplate
+                    ? t('tierlist.creatingTemplate')
+                    : t('tierlist.createTemplate')}
+                </button>
+              )}
               <button onClick={() => setShowShareModal(true)} className="btn btn-secondary">
                 {t('common.share')}
               </button>

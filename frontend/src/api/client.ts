@@ -100,6 +100,12 @@ class ApiClient {
     return this.request(`/api/templates/${id}/copy`, { method: 'POST' });
   }
 
+  async createTemplateFromRanking(
+    rankingId: string,
+  ): Promise<{ template: import('../types').Template }> {
+    return this.request(`/api/templates/from-ranking/${rankingId}`, { method: 'POST' });
+  }
+
   async createCard(
     templateId: string,
     data: import('../types').CreateCardData,

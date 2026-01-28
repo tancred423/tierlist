@@ -121,7 +121,9 @@
     "leave": "Verlassen",
     "leaveConfirm": "Möchtest du wirklich als Mitbesitzer verlassen? Du kannst dieses Ranking dann nicht mehr bearbeiten.",
     "copyRanking": "Kopie erstellen",
-    "copying": "Kopiere..."
+    "copying": "Kopiere...",
+    "createTemplate": "Vorlage erstellen",
+    "creatingTemplate": "Erstelle..."
   },
   "share": {
     "shareTemplate": "Vorlage teilen",
@@ -146,7 +148,8 @@
     "faq": "FAQ",
     "terms": "Nutzungsbedingungen",
     "privacy": "Datenschutz",
-    "support": "Support"
+    "support": "Support Server",
+    "github": "GitHub"
   },
   "faq": {
     "title": "Häufig gestellte Fragen",

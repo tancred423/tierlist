@@ -9,6 +9,7 @@ export function Footer() {
   const termsUrl = import.meta.env.VITE_TERMS_URL;
   const privacyUrl = import.meta.env.VITE_PRIVACY_URL;
   const supportUrl = import.meta.env.VITE_SUPPORT_URL;
+  const githubUrl = import.meta.env.VITE_GITHUB_URL;
 
   return (
     <footer className="footer">
@@ -29,6 +30,11 @@ export function Footer() {
           {supportUrl && (
             <a href={supportUrl} target="_blank" rel="noopener noreferrer">
               {t('footer.support')}
+            </a>
+          )}
+          {githubUrl && (
+            <a href={githubUrl} target="_blank" rel="noopener noreferrer">
+              {t('footer.github')}
             </a>
           )}
         </nav>

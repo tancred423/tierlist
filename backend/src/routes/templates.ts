@@ -311,6 +311,84 @@ templates.post("/:id/copy", requireAuth, async (c) => {
   return c.json({ template: newTemplate }, 201);
 });
 
+templates.post("/from-ranking/:rankingId", requireAuth, async (c) => {
+  const user = c.get("user")!;
+  const rankingId = c.req.param("rankingId");
+
+  const ranking = await db.query.filledTierlists.findFirst({
+    where: eq(schema.filledTierlists.id, rankingId),
+    with: {
+      template: true,
+    },
+  });
+
+  if (!ranking) {
+    return c.json({ error: "Ranking not found" }, 404);
+  }
+
+  if (ranking.ownerId !== user.userId) {
+    return c.json({ error: "Access denied" }, 403);
+  }
+
+  const snapshot = ranking.templateSnapshot;
+  if (!snapshot) {
+    return c.json({ error: "This ranking has no template snapshot" }, 400);
+  }
+
+  const newTemplateId = generateId();
+  const newShareToken = generateToken();
+
+  await db.insert(schema.templates).values({
+    id: newTemplateId,
+    ownerId: user.userId,
+    title: `${ranking.template.title} (From Ranking)`,
+    description: ranking.template.description,
+    isPublic: false,
+    shareToken: newShareToken,
+  });
+
+  for (const tier of snapshot.tiers) {
+    await db.insert(schema.tiers).values({
+      id: generateId(),
+      templateId: newTemplateId,
+      name: tier.name,
+      color: tier.color,
+      orderIndex: tier.orderIndex,
+    });
+  }
+
+  for (const column of snapshot.columns) {
+    await db.insert(schema.columns).values({
+      id: generateId(),
+      templateId: newTemplateId,
+      name: column.name,
+      orderIndex: column.orderIndex,
+    });
+  }
+
+  for (const card of snapshot.cards) {
+    await db.insert(schema.cards).values({
+      id: generateId(),
+      templateId: newTemplateId,
+      title: card.title,
+      imageUrl: card.imageUrl,
+      description: card.description,
+      orderIndex: card.orderIndex,
+    });
+  }
+
+  const newTemplate = await db.query.templates.findFirst({
+    where: eq(schema.templates.id, newTemplateId),
+    with: {
+      tiers: true,
+      columns: true,
+      cards: true,
+    },
+  });
+
+  return c.json({ template: newTemplate }, 201);
+});
+
 templates.put("/:id", requireAuth, async (c) => {
   const id = c.req.param("id");
   const user = c.get("user")!;
