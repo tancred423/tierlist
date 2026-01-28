@@ -129,7 +129,7 @@ class ApiClient {
     cardOrders: { id: string; orderIndex: number }[],
   ): Promise<{ success: boolean }> {
     return this.request(`/api/cards/${templateId}/reorder`, {
-      method: 'PATCH',
+      method: 'PUT',
       body: JSON.stringify({ cardOrders }),
     });
   }
