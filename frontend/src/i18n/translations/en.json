@@ -175,7 +175,8 @@
     "copyRanking": "Make a Copy",
     "copying": "Copying...",
     "createTemplate": "Create Template",
-    "creatingTemplate": "Creating..."
+    "creatingTemplate": "Creating...",
+    "basedOnDeleted": "Based on a deleted template"
   },
   "share": {
     "shareTemplate": "Share Template",

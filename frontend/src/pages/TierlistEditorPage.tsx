@@ -5,7 +5,7 @@ import { useAuthStore } from '../stores/auth';
 import { useClockFormatStore } from '../stores/clockFormat';
 import { useI18n } from '../i18n';
 import { getDisplayName } from '../types';
-import type { FilledTierlist, CardPlacement, PlacementData } from '../types';
+import type { FilledTierlist, CardPlacement, PlacementData, Template } from '../types';
 import { TierlistGrid } from '../components/TierlistGrid';
 import { ShareModal } from '../components/ShareModal';
 import './TierlistEditorPage.css';
@@ -184,6 +184,20 @@ export function TierlistEditorPage() {
   const isOwner = tierlist.ownerId === user?.id;
   const isCoOwner = canEdit && !isOwner;
 
+  const effectiveTemplate: Template = tierlist.template ?? {
+    id: tierlist.templateId ?? 'deleted',
+    ownerId: '',
+    title: tierlist.title,
+    description: null,
+    isPublic: false,
+    shareToken: null,
+    createdAt: '',
+    updatedAt: '',
+    tiers: tierlist.templateSnapshot?.tiers.map(tier => ({ ...tier, templateId: '' })) ?? [],
+    columns: tierlist.templateSnapshot?.columns.map(col => ({ ...col, templateId: '' })) ?? [],
+    cards: tierlist.templateSnapshot?.cards.map(card => ({ ...card, templateId: '' })) ?? [],
+  };
+
   return (
     <div className="tierlist-editor-page">
       <div className="editor-header">
@@ -207,10 +221,16 @@ export function TierlistEditorPage() {
               )}
           </div>
           <p className="text-muted">
-            {t('home.basedOn')} "{tierlist.template.title}"{' '}
-            {tierlist.template.owner
-              ? `${t('template.by')} ${getDisplayName(tierlist.template.owner)}`
-              : ''}
+            {tierlist.template?.title ? (
+              <>
+                {t('home.basedOn')} "{tierlist.template.title}"{' '}
+                {tierlist.template.owner
+                  ? `${t('template.by')} ${getDisplayName(tierlist.template.owner)}`
+                  : ''}
+              </>
+            ) : (
+              t('tierlist.basedOnDeleted')
+            )}
           </p>
           {tierlist.templateSnapshot?.snapshotAt && (
             <p className="revision-info">
@@ -266,7 +286,7 @@ export function TierlistEditorPage() {
       </div>
 
       <TierlistGrid
-        template={tierlist.template}
+        template={effectiveTemplate}
         placements={placements}
         onPlacementsChange={handlePlacementsChange}
         readOnly={!canEdit}

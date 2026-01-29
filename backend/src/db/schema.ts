@@ -61,7 +61,7 @@ export interface TemplateSnapshot {
 
 export const filledTierlists = mysqlTable("filled_tierlists", {
   id: varchar("id", { length: 36 }).primaryKey(),
-  templateId: varchar("template_id", { length: 36 }).notNull().references(() => templates.id, { onDelete: "cascade" }),
+  templateId: varchar("template_id", { length: 36 }).references(() => templates.id, { onDelete: "set null" }),
   ownerId: varchar("owner_id", { length: 36 }).notNull().references(() => users.id, { onDelete: "cascade" }),
   title: varchar("title", { length: 255 }).notNull(),
   templateSnapshot: json("template_snapshot").$type<TemplateSnapshot>(),
@@ -84,9 +84,9 @@ export const filledTierlistCoOwners = mysqlTable("list_co_owners", {
 export const cardPlacements = mysqlTable("placements", {
   id: varchar("id", { length: 36 }).primaryKey(),
   listId: varchar("list_id", { length: 36 }).notNull().references(() => filledTierlists.id, { onDelete: "cascade" }),
-  cardId: varchar("card_id", { length: 36 }).notNull().references(() => cards.id, { onDelete: "cascade" }),
-  tierId: varchar("tier_id", { length: 36 }).references(() => tiers.id, { onDelete: "set null" }),
-  columnId: varchar("column_id", { length: 36 }).references(() => columns.id, { onDelete: "set null" }),
+  cardId: varchar("card_id", { length: 36 }).notNull(),
+  tierId: varchar("tier_id", { length: 36 }),
+  columnId: varchar("column_id", { length: 36 }),
   orderIndex: int("order_index").notNull().default(0),
 });
 

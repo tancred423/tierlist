@@ -435,11 +435,14 @@ templates.post("/from-ranking/:rankingId", requireAuth, async (c) => {
   const newTemplateId = generateId();
   const newShareToken = generateToken();
 
+  const templateTitle = ranking.template?.title ?? ranking.title;
+  const templateDescription = ranking.template?.description ?? null;
+
   await db.insert(schema.templates).values({
     id: newTemplateId,
     ownerId: user.userId,
-    title: `${ranking.template.title} (From Ranking)`,
-    description: ranking.template.description,
+    title: `${templateTitle} (From Ranking)`,
+    description: templateDescription,
     isPublic: false,
     shareToken: newShareToken,
   });

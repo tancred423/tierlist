@@ -31,6 +31,7 @@
 .tierlist-card:hover {
   border-color: var(--color-primary);
   transform: translateY(-2px);
+  color: inherit;
 }
 
 .tierlist-header {
@@ -72,9 +73,15 @@
   display: flex;
   gap: 0.25rem;
   flex-wrap: wrap;
+  align-items: center;
   padding: 0.5rem;
   background: var(--color-bg);
   border-radius: var(--radius-sm);
+}
+
+.tierlist-unranked-preview::before {
+  content: '';
+  height: 28px;
 }
 
 .empty-state {

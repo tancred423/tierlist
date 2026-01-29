@@ -5,7 +5,7 @@ import { useAuthStore } from '../stores/auth';
 import { useClockFormatStore } from '../stores/clockFormat';
 import { useI18n } from '../i18n';
 import { getDisplayName } from '../types';
-import type { FilledTierlist, CardPlacement, PlacementData } from '../types';
+import type { FilledTierlist, CardPlacement, PlacementData, Template } from '../types';
 import { TierlistGrid } from '../components/TierlistGrid';
 import './SharedTierlistPage.css';
 
@@ -173,6 +173,20 @@ export function SharedTierlistPage({ mode }: SharedTierlistPageProps) {
     );
   }
 
+  const effectiveTemplate: Template = tierlist.template ?? {
+    id: tierlist.templateId ?? 'deleted',
+    ownerId: '',
+    title: tierlist.title,
+    description: null,
+    isPublic: false,
+    shareToken: null,
+    createdAt: '',
+    updatedAt: '',
+    tiers: tierlist.templateSnapshot?.tiers.map(tier => ({ ...tier, templateId: '' })) ?? [],
+    columns: tierlist.templateSnapshot?.columns.map(col => ({ ...col, templateId: '' })) ?? [],
+    cards: tierlist.templateSnapshot?.cards.map(card => ({ ...card, templateId: '' })) ?? [],
+  };
+
   return (
     <div className="shared-tierlist-page">
       <div className="page-header">
@@ -184,7 +198,13 @@ export function SharedTierlistPage({ mode }: SharedTierlistPageProps) {
           </div>
           <p className="text-muted">
             {t('template.by')} {tierlist.owner ? getDisplayName(tierlist.owner) : ''} •{' '}
-            {t('home.basedOn')} "{tierlist.template.title}"
+            {tierlist.template?.title ? (
+              <>
+                {t('home.basedOn')} "{tierlist.template.title}"
+              </>
+            ) : (
+              t('tierlist.basedOnDeleted')
+            )}
           </p>
           {tierlist.templateSnapshot?.snapshotAt && (
             <p className="revision-info">
@@ -217,7 +237,7 @@ export function SharedTierlistPage({ mode }: SharedTierlistPageProps) {
       </div>
 
       <TierlistGrid
-        template={tierlist.template}
+        template={effectiveTemplate}
         placements={placements}
         onPlacementsChange={handlePlacementsChange}
         readOnly={!canEdit}

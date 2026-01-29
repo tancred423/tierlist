@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../stores/auth';
 import { useThemeStore } from '../stores/theme';
 import { useClockFormatStore } from '../stores/clockFormat';
@@ -145,11 +145,10 @@ function Dropdown({ trigger, children, isOpen, onToggle, onClose }: DropdownProp
 }
 
 export function Header() {
-  const { user, login, logout } = useAuthStore();
+  const { user, login } = useAuthStore();
   const { mode, setMode } = useThemeStore();
   const { format: clockFormat, setFormat: setClockFormat } = useClockFormatStore();
   const { language, setLanguage, t } = useI18n();
-  const navigate = useNavigate();
   const location = useLocation();
 
   const [langOpen, setLangOpen] = useState(false);
@@ -166,7 +165,8 @@ export function Header() {
 
   const handleLogin = () => {
     const currentPath = location.pathname + location.search;
-    localStorage.setItem('auth_redirect', currentPath);
+    const redirectPath = currentPath === '/' ? '/my-tierlists' : currentPath;
+    localStorage.setItem('auth_redirect', redirectPath);
     login();
   };
 
@@ -376,9 +376,9 @@ export function Header() {
               </Link>
               <button
                 onClick={() => {
-                  logout();
-                  setUserOpen(false);
-                  navigate('/');
+                  localStorage.removeItem('auth_token');
+                  localStorage.removeItem('auth_redirect');
+                  window.location.href = '/';
                 }}
                 className="dropdown-item"
               >

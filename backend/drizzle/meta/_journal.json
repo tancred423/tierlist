@@ -29,6 +29,13 @@
       "when": 1769700000000,
       "tag": "0003_template_votes",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "5",
+      "when": 1769800000000,
+      "tag": "0004_tierlist_preserve_on_template_delete",
+      "breakpoints": true
     }
   ]
 }

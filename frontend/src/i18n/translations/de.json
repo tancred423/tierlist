@@ -175,7 +175,8 @@
     "copyRanking": "Kopie erstellen",
     "copying": "Kopiere...",
     "createTemplate": "Vorlage erstellen",
-    "creatingTemplate": "Erstelle..."
+    "creatingTemplate": "Erstelle...",
+    "basedOnDeleted": "Basiert auf einer gelöschten Vorlage"
   },
   "share": {
     "shareTemplate": "Vorlage teilen",

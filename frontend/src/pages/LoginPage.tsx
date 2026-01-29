@@ -10,7 +10,8 @@ export function LoginPage() {
   const { user, login } = useAuthStore();
   const { t } = useI18n();
 
-  const redirectTo = searchParams.get('redirect') || '/';
+  const redirectParam = searchParams.get('redirect') || '/';
+  const redirectTo = redirectParam === '/' ? '/my-tierlists' : redirectParam;
 
   useEffect(() => {
     if (user) {

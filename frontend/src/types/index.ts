@@ -83,7 +83,7 @@ export interface TemplateSnapshot {
 
 export interface FilledTierlist {
   id: string;
-  templateId: string;
+  templateId: string | null;
   ownerId: string;
   title: string;
   templateSnapshot?: TemplateSnapshot | null;
@@ -93,7 +93,7 @@ export interface FilledTierlist {
   editShareEnabled: boolean;
   createdAt: string;
   updatedAt: string;
-  template: Template;
+  template: Template | null;
   owner?: User;
   placements: CardPlacement[];
   coOwners?: CoOwner[];

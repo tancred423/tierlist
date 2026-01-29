@@ -30,6 +30,7 @@ export const useAuthStore = create<AuthState>(set => ({
   logout: () => {
     api.setToken(null);
     localStorage.removeItem('auth_redirect');
+    localStorage.removeItem('auth_token');
     set({ user: null });
   },
 

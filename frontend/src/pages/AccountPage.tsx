@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { api } from '../api/client';
 import { useAuthStore } from '../stores/auth';
 import { useI18n } from '../i18n';
@@ -7,9 +6,8 @@ import { getDisplayName } from '../types';
 import './AccountPage.css';
 
 export function AccountPage() {
-  const { user, logout, setUser } = useAuthStore();
+  const { user, setUser } = useAuthStore();
   const { t } = useI18n();
-  const navigate = useNavigate();
   const [isDeleting, setIsDeleting] = useState(false);
   const [nickname, setNickname] = useState(user?.nickname || '');
   const [isSaving, setIsSaving] = useState(false);
@@ -48,8 +46,9 @@ export function AccountPage() {
     setIsDeleting(true);
     try {
       await api.deleteAccount();
-      logout();
-      navigate('/');
+      localStorage.removeItem('auth_token');
+      localStorage.removeItem('auth_redirect');
+      window.location.href = '/';
     } catch (error) {
       console.error('Failed to delete account:', error);
       setIsDeleting(false);
@@ -89,7 +88,14 @@ export function AccountPage() {
         </div>
 
         <div className="account-actions">
-          <button onClick={logout} className="btn btn-secondary">
+          <button
+            onClick={() => {
+              localStorage.removeItem('auth_token');
+              localStorage.removeItem('auth_redirect');
+              window.location.href = '/';
+            }}
+            className="btn btn-secondary"
+          >
             {t('common.logout')}
           </button>
         </div>

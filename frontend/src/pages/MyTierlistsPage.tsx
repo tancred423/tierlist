@@ -47,10 +47,16 @@ function TierlistCard({ tierlist, t, language, clockFormat }: TierlistCardProps)
   const maxUnranked = 5;
 
   const template = tierlist.template;
-  if (!template) return null;
+  const snapshot = tierlist.templateSnapshot;
 
-  const sortedTiers = [...template.tiers].sort((a, b) => a.orderIndex - b.orderIndex);
-  const sortedCols = [...template.columns].sort((a, b) => a.orderIndex - b.orderIndex);
+  const tiers = template?.tiers ?? snapshot?.tiers ?? [];
+  const cols = template?.columns ?? snapshot?.columns ?? [];
+  const cards = template?.cards ?? snapshot?.cards ?? [];
+
+  if (tiers.length === 0 && cols.length === 0) return null;
+
+  const sortedTiers = [...tiers].sort((a, b) => a.orderIndex - b.orderIndex);
+  const sortedCols = [...cols].sort((a, b) => a.orderIndex - b.orderIndex);
 
   const visibleTiers = sortedTiers.slice(0, maxTiers);
   const extraTiers = sortedTiers.length - maxTiers;
@@ -58,7 +64,7 @@ function TierlistCard({ tierlist, t, language, clockFormat }: TierlistCardProps)
   const extraCols = sortedCols.length - maxCols;
 
   const placements = tierlist.placements || [];
-  const cardMap = new Map(template.cards.map(c => [c.id, c]));
+  const cardMap = new Map(cards.map(c => [c.id, c]));
 
   const getCardForCell = (tierId: string, colId: string) => {
     const placement = placements.find(p => p.tierId === tierId && p.columnId === colId);
@@ -86,13 +92,18 @@ function TierlistCard({ tierlist, t, language, clockFormat }: TierlistCardProps)
           )}
         </div>
         <span className="tierlist-template">
-          {t('home.basedOn')} "{template.title}"{' '}
-          {template.owner ? `${t('template.by')} ${getDisplayName(template.owner)}` : ''}
+          {template?.title ? (
+            <>
+              {t('home.basedOn')} "{template.title}"{' '}
+              {template.owner ? `${t('template.by')} ${getDisplayName(template.owner)}` : ''}
+            </>
+          ) : (
+            t('tierlist.basedOnDeleted')
+          )}
         </span>
-        {tierlist.templateSnapshot?.snapshotAt && (
+        {snapshot?.snapshotAt && (
           <span className="tierlist-revision">
-            {t('template.revision')}:{' '}
-            {formatDate(tierlist.templateSnapshot.snapshotAt, language, clockFormat)}
+            {t('template.revision')}: {formatDate(snapshot.snapshotAt, language, clockFormat)}
           </span>
         )}
       </div>
@@ -148,26 +159,24 @@ function TierlistCard({ tierlist, t, language, clockFormat }: TierlistCardProps)
         </div>
       </div>
 
-      {visibleUnranked.length > 0 && (
-        <div className="tierlist-unranked-preview">
-          {visibleUnranked.map(placement => {
-            const card = cardMap.get(placement.cardId);
-            if (!card) return null;
-            return (
-              <div key={placement.cardId} className="preview-card" title={card.title}>
-                {card.imageUrl ? (
-                  <img src={getImageUrl(card.imageUrl)!} alt={card.title} />
-                ) : (
-                  <span>{card.title[0]}</span>
-                )}
-              </div>
-            );
-          })}
-          {extraUnranked > 0 && (
-            <div className="preview-card preview-card-extra">+{extraUnranked}</div>
-          )}
-        </div>
-      )}
+      <div className="tierlist-unranked-preview">
+        {visibleUnranked.map(placement => {
+          const card = cardMap.get(placement.cardId);
+          if (!card) return null;
+          return (
+            <div key={placement.cardId} className="preview-card" title={card.title}>
+              {card.imageUrl ? (
+                <img src={getImageUrl(card.imageUrl)!} alt={card.title} />
+              ) : (
+                <span>{card.title[0]}</span>
+              )}
+            </div>
+          );
+        })}
+        {extraUnranked > 0 && (
+          <div className="preview-card preview-card-extra">+{extraUnranked}</div>
+        )}
+      </div>
     </Link>
   );
 }
