@@ -96,8 +96,8 @@ export function TierlistGrid({
     }),
     useSensor(TouchSensor, {
       activationConstraint: {
-        delay: 200,
-        tolerance: 5,
+        delay: 350,
+        tolerance: 8,
       },
     }),
     useSensor(KeyboardSensor, {
