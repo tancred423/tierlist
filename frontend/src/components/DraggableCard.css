@@ -12,7 +12,6 @@
     border-color 150ms ease,
     box-shadow 150ms ease;
   flex-shrink: 0;
-  touch-action: none;
   user-select: none;
   -webkit-user-select: none;
   -webkit-touch-callout: none;
@@ -29,6 +28,7 @@
 
 .draggable-card.is-dragging {
   opacity: 0.5;
+  touch-action: none;
 }
 
 .draggable-card.disabled {
@@ -174,6 +174,7 @@
 }
 
 .card-overlay {
+  touch-action: none;
   box-shadow: var(--shadow-lg);
   border-color: var(--color-primary);
   transform: scale(1.05);
