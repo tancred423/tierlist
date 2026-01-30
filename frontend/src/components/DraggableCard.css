@@ -12,6 +12,7 @@
     border-color 150ms ease,
     box-shadow 150ms ease;
   flex-shrink: 0;
+  touch-action: none;
 }
 
 .draggable-card:hover {
