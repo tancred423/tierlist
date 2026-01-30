@@ -126,9 +126,13 @@
   color: var(--color-danger);
 }
 
-@media (max-width: 768px) {
+@media (max-width: 770px) {
   .editor-header {
     flex-direction: column;
+  }
+
+  .editor-header .header-title {
+    width: 100%;
   }
 
   .title-input {
@@ -137,9 +141,33 @@
 
   .editor-actions {
     width: 100%;
+    flex-direction: column-reverse;
   }
 
   .editor-actions .btn {
-    flex: 1;
+    width: 100%;
+  }
+}
+
+@media (max-width: 400px) {
+  .tierlist-editor-page {
+    gap: 1rem;
+  }
+
+  .tierlist-editor-page .editor-header {
+    padding: 0 0.5rem;
+  }
+
+  .title-input,
+  .title-text {
+    font-size: 1.125rem;
+  }
+
+  .text-muted {
+    font-size: 0.75rem;
+  }
+
+  .editor-actions {
+    gap: 0.5rem;
   }
 }

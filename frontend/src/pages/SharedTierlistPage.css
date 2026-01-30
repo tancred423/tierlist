@@ -6,7 +6,7 @@
   width: 100%;
 }
 
-.page-header {
+.shared-tierlist-page .page-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
@@ -29,6 +29,8 @@
 .header-info h1 {
   font-size: 1.5rem;
   margin: 0;
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 .text-muted {
@@ -39,6 +41,8 @@
   align-items: center;
   gap: 0.5rem;
   flex-wrap: wrap;
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 .revision-info {
@@ -90,7 +94,7 @@
   color: var(--color-danger);
 }
 
-@media (max-width: 768px) {
+@media (max-width: 770px) {
   .page-header {
     flex-direction: column;
   }
@@ -101,5 +105,27 @@
 
   .header-actions .btn {
     width: 100%;
+  }
+}
+
+@media (max-width: 400px) {
+  .shared-tierlist-page {
+    gap: 1rem;
+  }
+
+  .shared-tierlist-page .page-header {
+    padding: 0 0.5rem;
+  }
+
+  .header-info h1 {
+    font-size: 1.125rem;
+  }
+
+  .text-muted {
+    font-size: 0.75rem;
+  }
+
+  .header-actions {
+    gap: 0.5rem;
   }
 }

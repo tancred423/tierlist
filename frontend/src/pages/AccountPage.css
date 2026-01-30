@@ -87,7 +87,7 @@
   margin-bottom: 0;
 }
 
-.form-group label {
+.account-page .form-group label {
   display: block;
   font-weight: 500;
   margin-bottom: 0.25rem;
@@ -113,7 +113,7 @@
   color: var(--color-success);
 }
 
-@media (max-width: 480px) {
+@media (max-width: 770px) {
   .account-profile {
     flex-direction: column;
     text-align: center;

@@ -388,7 +388,8 @@ export function Header() {
             location.pathname !== '/login' && (
               <button onClick={handleLogin} className="btn btn-discord">
                 <DiscordIcon />
-                {t('auth.loginWithDiscord')}
+                <span className="discord-text-full">{t('auth.loginWithDiscord')}</span>
+                <span className="discord-text-short">{t('common.login')}</span>
               </button>
             )
           )}

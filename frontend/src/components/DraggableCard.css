@@ -167,7 +167,7 @@
   cursor: grabbing;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 770px) {
   .draggable-card {
     width: 56px;
     height: 56px;
@@ -202,5 +202,59 @@
   .draggable-card.show-details.compact .card-no-image {
     width: 80px;
     height: 80px;
+  }
+}
+
+@media (max-width: 400px) {
+  .draggable-card {
+    width: 48px;
+    height: 48px;
+  }
+
+  .draggable-card .card-image,
+  .card-no-image {
+    height: 48px;
+  }
+
+  .card-no-image {
+    font-size: 1.25rem;
+  }
+
+  .draggable-card.show-details {
+    width: 80px;
+    min-height: 105px;
+  }
+
+  .draggable-card.show-details .card-image,
+  .draggable-card.show-details .card-no-image {
+    width: 80px;
+    height: 80px;
+  }
+
+  .draggable-card.show-details .card-no-image {
+    font-size: 2rem;
+  }
+
+  .draggable-card.show-details.compact {
+    width: 64px;
+    min-height: 85px;
+  }
+
+  .draggable-card.show-details.compact .card-image,
+  .draggable-card.show-details.compact .card-no-image {
+    width: 64px;
+    height: 64px;
+  }
+
+  .card-details {
+    padding: 0.25rem;
+  }
+
+  .card-title {
+    font-size: 0.625rem;
+  }
+
+  .card-desc {
+    font-size: 0.5rem;
   }
 }
