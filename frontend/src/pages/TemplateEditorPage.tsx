@@ -215,18 +215,16 @@ export function TemplateEditorPage() {
   const [editingCard, setEditingCard] = useState<Card | null>(null);
   const [showCardModal, setShowCardModal] = useState(false);
 
-  const sensors = useSensors(
-    useSensor(PointerSensor),
-    useSensor(TouchSensor, {
-      activationConstraint: {
-        delay: 350,
-        tolerance: 8,
-      },
-    }),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
-    }),
-  );
+  const pointerSensor = useSensor(PointerSensor);
+  const touchSensor = useSensor(TouchSensor, {
+    activationConstraint: { delay: 350, tolerance: 8 },
+  });
+  const keyboardSensor = useSensor(KeyboardSensor, {
+    coordinateGetter: sortableKeyboardCoordinates,
+  });
+  const isTouchDevice =
+    typeof window !== 'undefined' && ('ontouchstart' in window || navigator.maxTouchPoints > 0);
+  const sensors = useSensors(isTouchDevice ? touchSensor : pointerSensor, keyboardSensor);
 
   const createNewTemplate = useCallback(async () => {
     try {
