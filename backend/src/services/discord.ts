@@ -1,5 +1,5 @@
-const DISCORD_CLIENT_ID = Deno.env.get("DISCORD_CLIENT_ID") || "";
-const DISCORD_CLIENT_SECRET = Deno.env.get("DISCORD_CLIENT_SECRET") || "";
+const DISCORD_CLIENT_ID = Deno.env.get("DISCORD_CLIENT_ID")!;
+const DISCORD_CLIENT_SECRET = Deno.env.get("DISCORD_CLIENT_SECRET")!;
 const DISCORD_REDIRECT_URI = Deno.env.get("DISCORD_REDIRECT_URI") || "http://localhost:3000/api/auth/discord/callback";
 
 const DISCORD_API_BASE = "https://discord.com/api/v10";

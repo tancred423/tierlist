@@ -1,4 +1,5 @@
 import { Hono } from "@hono/hono";
+import { deleteCookie, setCookie } from "@hono/hono/cookie";
 import { eq } from "drizzle-orm";
 import { db, schema } from "../db/index.ts";
 import { generateId } from "../utils/id.ts";
@@ -7,6 +8,8 @@ import { exchangeCodeForToken, getDiscordAuthUrl, getDiscordUser } from "../serv
 import { deleteUserImages } from "./uploads.ts";
 
 const FRONTEND_URL = Deno.env.get("FRONTEND_URL") || "http://localhost:5173";
+const IS_PRODUCTION = Deno.env.get("NODE_ENV") === "production";
+const COOKIE_MAX_AGE = 7 * 24 * 60 * 60;
 
 const auth = new Hono();
 
@@ -88,7 +91,15 @@ auth.get("/discord/callback", async (c) => {
       username: user.username,
     });
 
-    return c.redirect(`${FRONTEND_URL}/auth/callback?token=${jwt}`);
+    setCookie(c, "auth_token", jwt, {
+      httpOnly: true,
+      secure: IS_PRODUCTION,
+      sameSite: "Strict",
+      path: "/",
+      maxAge: COOKIE_MAX_AGE,
+    });
+
+    return c.redirect(`${FRONTEND_URL}/auth/callback`);
   } catch (err) {
     console.error("Discord auth error:", err);
     return c.redirect(`${FRONTEND_URL}/?error=auth_failed`);
@@ -134,9 +145,9 @@ auth.put("/me", async (c) => {
   const { nickname } = body;
 
   if (nickname !== undefined && nickname !== null) {
-    const trimmed = nickname.trim();
+    const trimmed = typeof nickname === "string" ? nickname.trim() : "";
     if (trimmed.length > 255) {
-      return c.json({ error: "Nickname too long" }, 400);
+      return c.json({ error: "Nickname must be at most 255 characters" }, 400);
     }
     await db.update(schema.users)
       .set({ nickname: trimmed || null })
@@ -174,6 +185,18 @@ auth.delete("/me", async (c) => {
   await deleteUserImages(user.userId);
 
   await db.delete(schema.users).where(eq(schema.users.id, user.userId));
+
+  deleteCookie(c, "auth_token", {
+    path: "/",
+  });
+
+  return c.json({ success: true });
+});
+
+auth.post("/logout", (c) => {
+  deleteCookie(c, "auth_token", {
+    path: "/",
+  });
 
   return c.json({ success: true });
 });

@@ -199,10 +199,32 @@
   },
   "footer": {
     "faq": "FAQ",
+    "cookies": "Cookies",
     "terms": "Terms of Service",
     "privacy": "Privacy Policy",
     "support": "Support Server",
     "github": "GitHub"
+  },
+  "cookies": {
+    "title": "Cookie Policy",
+    "whatAreCookies": "What are cookies?",
+    "whatAreCookiesAnswer": "Cookies are small text files that websites store on your device to remember information about you.",
+    "whatWeUse": "What cookies do we use?",
+    "whatWeUseAnswer": "We use only essential cookies required for the site to function:",
+    "authCookie": "Authentication Cookie",
+    "authCookieDesc": "Keeps you logged in between visits.",
+    "noThirdParty": "No third-party cookies",
+    "noThirdPartyAnswer": "We do not use any third-party cookies, analytics, tracking, or advertising. Your data stays with us and is not shared with anyone.",
+    "localStorage": "Local preferences",
+    "localStorageAnswer": "In addition to cookies, we store your preferences locally in your browser (localStorage). This data never leaves your device:",
+    "theme": "Theme preference",
+    "themeDesc": "Your chosen color scheme (light, dark, or system)",
+    "language": "Language",
+    "languageDesc": "Your preferred language",
+    "clockFormat": "Clock format",
+    "clockFormatDesc": "Your preferred time format (12h, 24h or system)",
+    "consent": "Consent",
+    "consentAnswer": "By using this site, you agree to our use of essential cookies for authentication. Since we only use functional cookies that are strictly necessary for the site to work, no cookie banner is required under GDPR."
   },
   "faq": {
     "title": "Frequently Asked Questions",

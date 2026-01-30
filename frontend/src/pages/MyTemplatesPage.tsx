@@ -165,9 +165,11 @@ export function MyTemplatesPage() {
     if (!user) return;
 
     try {
+      const generatedTitle =
+        `${template.title} - ${t('home.rankingBy')} ${getDisplayName(user)}`.slice(0, 255);
       const { filledTierlist } = await api.createFilledTierlist({
         templateId: template.id,
-        title: `${template.title} - ${t('home.rankingBy')} ${getDisplayName(user)}`,
+        title: generatedTitle,
       });
       navigate(`/tierlist/${filledTierlist.id}`);
     } catch (error) {

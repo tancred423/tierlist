@@ -17,6 +17,7 @@ export function Footer() {
         <span className="footer-copyright">© {currentYear} Tancred</span>
         <nav className="footer-links">
           <Link to="/faq">{t('footer.faq')}</Link>
+          <Link to="/cookies">{t('footer.cookies')}</Link>
           {termsUrl && (
             <a href={termsUrl} target="_blank" rel="noopener noreferrer">
               {t('footer.terms')}

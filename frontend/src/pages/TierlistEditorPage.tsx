@@ -209,6 +209,7 @@ export function TierlistEditorPage() {
                 value={tierlist.title}
                 onChange={e => handleTitleChange(e.target.value)}
                 className="title-input"
+                maxLength={255}
               />
             ) : (
               <h1 className="title-text">{tierlist.title}</h1>

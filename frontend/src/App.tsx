@@ -15,6 +15,7 @@ import { SharedTemplatePage } from './pages/SharedTemplatePage';
 import { SharedTierlistPage } from './pages/SharedTierlistPage';
 import { AccountPage } from './pages/AccountPage';
 import { FaqPage } from './pages/FaqPage';
+import { CookiesPage } from './pages/CookiesPage';
 import { NotFoundPage } from './pages/NotFoundPage';
 
 function App() {
@@ -98,6 +99,7 @@ function App() {
           }
         />
         <Route path="faq" element={<FaqPage />} />
+        <Route path="cookies" element={<CookiesPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Route>
     </Routes>

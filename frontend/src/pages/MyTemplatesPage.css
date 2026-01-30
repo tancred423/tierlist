@@ -1,5 +1,6 @@
 .my-templates-page {
   padding: 1.5rem 1rem;
+  overflow-x: hidden;
 }
 
 .page-header {
@@ -18,6 +19,7 @@
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 1rem;
+  min-width: 0;
 }
 
 .template-card {
@@ -36,6 +38,12 @@
 .template-title {
   font-size: 1rem;
   font-weight: 600;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .visibility-badge {
@@ -64,6 +72,8 @@
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 .template-revision {
@@ -220,5 +230,9 @@
 
   .templates-grid {
     grid-template-columns: 1fr;
+  }
+
+  .template-card {
+    min-width: 0;
   }
 }

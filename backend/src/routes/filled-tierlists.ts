@@ -3,13 +3,14 @@ import { and, desc, eq } from "drizzle-orm";
 import { db, schema } from "../db/index.ts";
 import { generateId, generateToken } from "../utils/id.ts";
 import { requireAuth } from "../middleware/auth.ts";
+import { clampPaginationLimit, LIMITS, validateOptionalString } from "../utils/validation.ts";
 
 const filledTierlists = new Hono();
 
 filledTierlists.get("/my", requireAuth, async (c) => {
   const user = c.get("user")!;
-  const page = parseInt(c.req.query("page") || "1");
-  const limit = parseInt(c.req.query("limit") || "10");
+  const page = Math.max(1, parseInt(c.req.query("page") || "1"));
+  const limit = clampPaginationLimit(parseInt(c.req.query("limit") || "12"));
   const offset = (page - 1) * limit;
 
   const ownedLists = await db.query.filledTierlists.findMany({
@@ -82,6 +83,11 @@ filledTierlists.post("/", requireAuth, async (c) => {
   const user = c.get("user")!;
   const body = await c.req.json();
 
+  if (body.title !== undefined) {
+    const titleResult = validateOptionalString(body.title, LIMITS.TITLE, "Title");
+    if (!titleResult.valid) return c.json({ error: titleResult.error }, 400);
+  }
+
   const template = await db.query.templates.findFirst({
     where: eq(schema.templates.id, body.templateId),
     with: {
@@ -130,11 +136,13 @@ filledTierlists.post("/", requireAuth, async (c) => {
   const viewToken = generateToken();
   const editToken = generateToken();
 
+  const defaultTitle = `${template.title} - My Ranking`.slice(0, LIMITS.TITLE);
+
   await db.insert(schema.filledTierlists).values({
     id: filledId,
     templateId: template.id,
     ownerId: user.userId,
-    title: body.title || `${template.title} - My Ranking`,
+    title: body.title || defaultTitle,
     templateSnapshot,
     viewShareToken: viewToken,
     viewShareEnabled: false,
@@ -321,6 +329,11 @@ filledTierlists.put("/:id", requireAuth, async (c) => {
   const user = c.get("user")!;
   const body = await c.req.json();
 
+  if (body.title !== undefined) {
+    const titleResult = validateOptionalString(body.title, LIMITS.TITLE, "Title");
+    if (!titleResult.valid) return c.json({ error: titleResult.error }, 400);
+  }
+
   const filledList = await db.query.filledTierlists.findFirst({
     where: eq(schema.filledTierlists.id, id),
     with: {
@@ -499,11 +512,13 @@ filledTierlists.post("/:id/copy", requireAuth, async (c) => {
   const viewToken = generateToken();
   const editToken = generateToken();
 
+  const copyTitle = `${sourceList.title} (Copy)`.slice(0, LIMITS.TITLE);
+
   await db.insert(schema.filledTierlists).values({
     id: newId,
     templateId: sourceList.templateId,
     ownerId: user.userId,
-    title: `${sourceList.title} (Copy)`,
+    title: copyTitle,
     templateSnapshot: sourceList.templateSnapshot,
     viewShareToken: viewToken,
     viewShareEnabled: false,

@@ -4,6 +4,13 @@ import { db, schema } from "../db/index.ts";
 import { generateId, generateToken } from "../utils/id.ts";
 import { requireAuth } from "../middleware/auth.ts";
 import { deleteTemplateImages } from "./uploads.ts";
+import {
+  clampPaginationLimit,
+  LIMITS,
+  validateArrayLength,
+  validateOptionalString,
+  validateString,
+} from "../utils/validation.ts";
 
 const templates = new Hono();
 
@@ -19,8 +26,8 @@ const DEFAULT_TIERS = [
 
 templates.get("/public", async (c) => {
   const search = c.req.query("search")?.trim() || "";
-  const page = parseInt(c.req.query("page") || "1");
-  const limit = parseInt(c.req.query("limit") || "10");
+  const page = Math.max(1, parseInt(c.req.query("page") || "1"));
+  const limit = clampPaginationLimit(parseInt(c.req.query("limit") || "12"));
   const sort = c.req.query("sort") || "popular";
   const offset = (page - 1) * limit;
 
@@ -112,8 +119,8 @@ templates.get("/public", async (c) => {
 
 templates.get("/my", requireAuth, async (c) => {
   const user = c.get("user")!;
-  const page = parseInt(c.req.query("page") || "1");
-  const limit = parseInt(c.req.query("limit") || "10");
+  const page = Math.max(1, parseInt(c.req.query("page") || "1"));
+  const limit = clampPaginationLimit(parseInt(c.req.query("limit") || "12"));
   const offset = (page - 1) * limit;
 
   const [userTemplates, countResult] = await Promise.all([
@@ -150,19 +157,44 @@ templates.post("/", requireAuth, async (c) => {
   const user = c.get("user")!;
   const body = await c.req.json();
 
+  const titleResult = validateString(body.title || "New Tierlist", LIMITS.TITLE, "Title");
+  if (!titleResult.valid) return c.json({ error: titleResult.error }, 400);
+
+  const descResult = validateOptionalString(body.description, LIMITS.DESCRIPTION, "Description");
+  if (!descResult.valid) return c.json({ error: descResult.error }, 400);
+
+  const tiers = body.tiers || DEFAULT_TIERS;
+  const tiersLimitResult = validateArrayLength(tiers, LIMITS.MAX_TIERS, "Tiers");
+  if (!tiersLimitResult.valid) return c.json({ error: tiersLimitResult.error }, 400);
+
+  const columns = body.columns || [{ name: null }];
+  const columnsLimitResult = validateArrayLength(columns, LIMITS.MAX_COLUMNS, "Columns");
+  if (!columnsLimitResult.valid) return c.json({ error: columnsLimitResult.error }, 400);
+
+  for (const tier of tiers) {
+    const nameResult = validateString(tier.name, LIMITS.TIER_NAME, "Tier name");
+    if (!nameResult.valid) return c.json({ error: nameResult.error }, 400);
+    const colorResult = validateString(tier.color, LIMITS.COLOR, "Tier color");
+    if (!colorResult.valid) return c.json({ error: colorResult.error }, 400);
+  }
+
+  for (const column of columns) {
+    const nameResult = validateOptionalString(column.name, LIMITS.COLUMN_NAME, "Column name");
+    if (!nameResult.valid) return c.json({ error: nameResult.error }, 400);
+  }
+
   const templateId = generateId();
   const shareToken = generateToken();
 
   await db.insert(schema.templates).values({
     id: templateId,
     ownerId: user.userId,
-    title: body.title || "New Tierlist",
-    description: body.description || null,
+    title: titleResult.value,
+    description: descResult.value,
     isPublic: body.isPublic ?? false,
     shareToken,
   });
 
-  const tiers = body.tiers || DEFAULT_TIERS;
   for (let i = 0; i < tiers.length; i++) {
     await db.insert(schema.tiers).values({
       id: generateId(),
@@ -173,7 +205,6 @@ templates.post("/", requireAuth, async (c) => {
     });
   }
 
-  const columns = body.columns || [{ name: null }];
   for (let i = 0; i < columns.length; i++) {
     await db.insert(schema.columns).values({
       id: generateId(),
@@ -275,11 +306,12 @@ templates.post("/share/:token/copy", requireAuth, async (c) => {
 
   const newTemplateId = generateId();
   const newShareToken = generateToken();
+  const copyTitle = `${sourceTemplate.title} (Copy)`.slice(0, LIMITS.TITLE);
 
   await db.insert(schema.templates).values({
     id: newTemplateId,
     ownerId: user.userId,
-    title: `${sourceTemplate.title} (Copy)`,
+    title: copyTitle,
     description: sourceTemplate.description,
     isPublic: false,
     shareToken: newShareToken,
@@ -356,11 +388,12 @@ templates.post("/:id/copy", requireAuth, async (c) => {
 
   const newTemplateId = generateId();
   const newShareToken = generateToken();
+  const copyTitle = `${sourceTemplate.title} (Copy)`.slice(0, LIMITS.TITLE);
 
   await db.insert(schema.templates).values({
     id: newTemplateId,
     ownerId: user.userId,
-    title: `${sourceTemplate.title} (Copy)`,
+    title: copyTitle,
     description: sourceTemplate.description,
     isPublic: false,
     shareToken: newShareToken,
@@ -437,11 +470,12 @@ templates.post("/from-ranking/:rankingId", requireAuth, async (c) => {
 
   const templateTitle = ranking.template?.title ?? ranking.title;
   const templateDescription = ranking.template?.description ?? null;
+  const newTitle = `${templateTitle} (From Ranking)`.slice(0, LIMITS.TITLE);
 
   await db.insert(schema.templates).values({
     id: newTemplateId,
     ownerId: user.userId,
-    title: `${templateTitle} (From Ranking)`,
+    title: newTitle,
     description: templateDescription,
     isPublic: false,
     shareToken: newShareToken,
@@ -509,6 +543,36 @@ templates.put("/:id", requireAuth, async (c) => {
 
   if (template.cards.length === 0) {
     return c.json({ error: "At least one card is required" }, 400);
+  }
+
+  if (body.title !== undefined) {
+    const titleResult = validateString(body.title, LIMITS.TITLE, "Title");
+    if (!titleResult.valid) return c.json({ error: titleResult.error }, 400);
+  }
+
+  if (body.description !== undefined) {
+    const descResult = validateOptionalString(body.description, LIMITS.DESCRIPTION, "Description");
+    if (!descResult.valid) return c.json({ error: descResult.error }, 400);
+  }
+
+  if (body.tiers) {
+    const tiersLimitResult = validateArrayLength(body.tiers, LIMITS.MAX_TIERS, "Tiers");
+    if (!tiersLimitResult.valid) return c.json({ error: tiersLimitResult.error }, 400);
+    for (const tier of body.tiers) {
+      const nameResult = validateString(tier.name, LIMITS.TIER_NAME, "Tier name");
+      if (!nameResult.valid) return c.json({ error: nameResult.error }, 400);
+      const colorResult = validateString(tier.color, LIMITS.COLOR, "Tier color");
+      if (!colorResult.valid) return c.json({ error: colorResult.error }, 400);
+    }
+  }
+
+  if (body.columns) {
+    const columnsLimitResult = validateArrayLength(body.columns, LIMITS.MAX_COLUMNS, "Columns");
+    if (!columnsLimitResult.valid) return c.json({ error: columnsLimitResult.error }, 400);
+    for (const column of body.columns) {
+      const nameResult = validateOptionalString(column.name, LIMITS.COLUMN_NAME, "Column name");
+      if (!nameResult.valid) return c.json({ error: nameResult.error }, 400);
+    }
   }
 
   await db.update(schema.templates)

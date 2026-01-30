@@ -25,6 +25,8 @@
   font-size: 0.875rem;
   text-align: center;
   color: var(--color-text-muted);
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 .unassigned-section {

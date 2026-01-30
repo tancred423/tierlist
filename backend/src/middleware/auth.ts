@@ -1,4 +1,5 @@
 import { Context, Next } from "@hono/hono";
+import { getCookie } from "@hono/hono/cookie";
 import { verifyJWT } from "../utils/jwt.ts";
 
 export interface AuthUser {
@@ -14,14 +15,13 @@ declare module "@hono/hono" {
 }
 
 export async function authMiddleware(c: Context, next: Next) {
-  const authHeader = c.req.header("Authorization");
+  const token = getCookie(c, "auth_token");
 
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+  if (!token) {
     c.set("user", null);
     return next();
   }
 
-  const token = authHeader.slice(7);
   const payload = await verifyJWT(token);
 
   if (!payload) {

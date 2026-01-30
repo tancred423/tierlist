@@ -1,4 +1,4 @@
-const JWT_SECRET = Deno.env.get("JWT_SECRET") || "your-super-secret-jwt-key";
+const JWT_SECRET = Deno.env.get("JWT_SECRET")!;
 
 interface JWTPayload {
   userId: string;

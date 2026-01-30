@@ -203,6 +203,7 @@ export function CardEditorModal({ card, templateId, onClose, onSave }: CardEdito
                   onChange={e => setImageUrl(e.target.value)}
                   className="form-input"
                   placeholder={t('card.imageUrlPlaceholder')}
+                  maxLength={2000}
                 />
               ) : (
                 <div
@@ -285,6 +286,7 @@ export function CardEditorModal({ card, templateId, onClose, onSave }: CardEdito
                 className="form-input"
                 placeholder={t('card.descriptionPlaceholder')}
                 rows={3}
+                maxLength={2000}
               />
             </div>
           </div>

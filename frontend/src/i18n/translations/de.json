@@ -199,10 +199,32 @@
   },
   "footer": {
     "faq": "FAQ",
+    "cookies": "Cookies",
     "terms": "Nutzungsbedingungen",
     "privacy": "Datenschutz",
     "support": "Support Server",
     "github": "GitHub"
+  },
+  "cookies": {
+    "title": "Cookie-Richtlinie",
+    "whatAreCookies": "Was sind Cookies?",
+    "whatAreCookiesAnswer": "Cookies sind kleine Textdateien, die Websites auf deinem Gerät speichern, um Informationen über dich zu merken.",
+    "whatWeUse": "Welche Cookies verwenden wir?",
+    "whatWeUseAnswer": "Wir verwenden nur essentielle Cookies, die für die Funktion der Seite erforderlich sind:",
+    "authCookie": "Authentifizierungs-Cookie",
+    "authCookieDesc": "Hält dich zwischen Besuchen eingeloggt.",
+    "noThirdParty": "Keine Drittanbieter-Cookies",
+    "noThirdPartyAnswer": "Wir verwenden keine Drittanbieter-Cookies, Analysen, Tracking oder Werbung. Deine Daten bleiben bei uns und werden mit niemandem geteilt.",
+    "localStorage": "Lokale Einstellungen",
+    "localStorageAnswer": "Zusätzlich zu Cookies speichern wir deine Einstellungen lokal in deinem Browser (localStorage). Diese Daten verlassen nie dein Gerät:",
+    "theme": "Design-Einstellung",
+    "themeDesc": "Dein gewähltes Farbschema (Hell, Dunkel oder System)",
+    "language": "Sprache",
+    "languageDesc": "Deine bevorzugte Sprache",
+    "clockFormat": "Uhrzeitformat",
+    "clockFormatDesc": "Dein bevorzugtes Zeitformat (12h, 24h oder System)",
+    "consent": "Einwilligung",
+    "consentAnswer": "Durch die Nutzung dieser Seite stimmst du der Verwendung essentieller Cookies für die Authentifizierung zu. Da wir nur funktionale Cookies verwenden, die für den Betrieb der Seite unbedingt erforderlich sind, ist nach DSGVO kein Cookie-Banner erforderlich."
   },
   "faq": {
     "title": "Häufig gestellte Fragen",

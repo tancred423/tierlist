@@ -6,7 +6,7 @@ import { getDisplayName } from '../types';
 import './AccountPage.css';
 
 export function AccountPage() {
-  const { user, setUser } = useAuthStore();
+  const { user, setUser, logout } = useAuthStore();
   const { t } = useI18n();
   const [isDeleting, setIsDeleting] = useState(false);
   const [nickname, setNickname] = useState(user?.nickname || '');
@@ -46,8 +46,6 @@ export function AccountPage() {
     setIsDeleting(true);
     try {
       await api.deleteAccount();
-      localStorage.removeItem('auth_token');
-      localStorage.removeItem('auth_redirect');
       window.location.href = '/';
     } catch (error) {
       console.error('Failed to delete account:', error);
@@ -89,9 +87,8 @@ export function AccountPage() {
 
         <div className="account-actions">
           <button
-            onClick={() => {
-              localStorage.removeItem('auth_token');
-              localStorage.removeItem('auth_redirect');
+            onClick={async () => {
+              await logout();
               window.location.href = '/';
             }}
             className="btn btn-secondary"

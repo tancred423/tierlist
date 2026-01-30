@@ -527,6 +527,7 @@ export function TemplateEditorPage() {
               className="form-input"
               placeholder={t('template.descriptionPlaceholder')}
               rows={2}
+              maxLength={2000}
             />
           </div>
           <div className="form-group">

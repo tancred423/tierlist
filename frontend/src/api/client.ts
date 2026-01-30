@@ -1,38 +1,16 @@
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
 class ApiClient {
-  private token: string | null = null;
-
-  setToken(token: string | null) {
-    this.token = token;
-    if (token) {
-      localStorage.setItem('auth_token', token);
-    } else {
-      localStorage.removeItem('auth_token');
-    }
-  }
-
-  getToken(): string | null {
-    if (!this.token) {
-      this.token = localStorage.getItem('auth_token');
-    }
-    return this.token;
-  }
-
   private async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
-    const token = this.getToken();
     const headers: HeadersInit = {
       'Content-Type': 'application/json',
       ...(options.headers || {}),
     };
 
-    if (token) {
-      (headers as Record<string, string>)['Authorization'] = `Bearer ${token}`;
-    }
-
     const response = await fetch(`${API_URL}${endpoint}`, {
       ...options,
       headers,
+      credentials: 'include',
     });
 
     if (!response.ok) {
@@ -41,6 +19,10 @@ class ApiClient {
     }
 
     return response.json();
+  }
+
+  async logout(): Promise<{ success: boolean }> {
+    return this.request('/api/auth/logout', { method: 'POST' });
   }
 
   async getDiscordAuthUrl(): Promise<{ url: string }> {
@@ -272,16 +254,13 @@ class ApiClient {
     templateId: string,
     file: File | Blob,
   ): Promise<{ imageUrl: string; size: number }> {
-    const token = this.getToken();
     const formData = new FormData();
     formData.append('image', file);
 
     const response = await fetch(`${API_URL}/api/uploads/${templateId}`, {
       method: 'POST',
-      headers: {
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      },
       body: formData,
+      credentials: 'include',
     });
 
     if (!response.ok) {

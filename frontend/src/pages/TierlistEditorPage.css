@@ -33,6 +33,8 @@
   transition:
     border-color var(--transition),
     background var(--transition);
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 .title-input:hover:not(:disabled) {
@@ -59,6 +61,8 @@
   font-size: 1.5rem;
   font-weight: 600;
   margin: 0;
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 .co-owner-badge {
@@ -86,6 +90,9 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  flex-wrap: wrap;
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 .revision-info {

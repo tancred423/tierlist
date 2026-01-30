@@ -145,7 +145,7 @@ function Dropdown({ trigger, children, isOpen, onToggle, onClose }: DropdownProp
 }
 
 export function Header() {
-  const { user, login } = useAuthStore();
+  const { user, login, logout } = useAuthStore();
   const { mode, setMode } = useThemeStore();
   const { format: clockFormat, setFormat: setClockFormat } = useClockFormatStore();
   const { language, setLanguage, t } = useI18n();
@@ -375,9 +375,8 @@ export function Header() {
                 {t('account.title')}
               </Link>
               <button
-                onClick={() => {
-                  localStorage.removeItem('auth_token');
-                  localStorage.removeItem('auth_redirect');
+                onClick={async () => {
+                  await logout();
                   window.location.href = '/';
                 }}
                 className="dropdown-item"

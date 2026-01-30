@@ -7,10 +7,9 @@ interface AuthState {
   isLoading: boolean;
   isInitialized: boolean;
   login: () => Promise<void>;
-  logout: () => void;
-  setToken: (token: string) => void;
+  logout: () => Promise<void>;
   setUser: (user: User) => void;
-  initialize: () => Promise<void>;
+  initialize: () => Promise<User | null>;
 }
 
 export const useAuthStore = create<AuthState>(set => ({
@@ -27,15 +26,14 @@ export const useAuthStore = create<AuthState>(set => ({
     }
   },
 
-  logout: () => {
-    api.setToken(null);
+  logout: async () => {
+    try {
+      await api.logout();
+    } catch {
+      // Ignore
+    }
     localStorage.removeItem('auth_redirect');
-    localStorage.removeItem('auth_token');
     set({ user: null });
-  },
-
-  setToken: (token: string) => {
-    api.setToken(token);
   },
 
   setUser: (user: User) => {
@@ -43,19 +41,14 @@ export const useAuthStore = create<AuthState>(set => ({
   },
 
   initialize: async () => {
-    const token = api.getToken();
-    if (!token) {
-      set({ isInitialized: true, isLoading: false });
-      return;
-    }
-
     set({ isLoading: true });
     try {
       const { user } = await api.getCurrentUser();
       set({ user, isInitialized: true, isLoading: false });
+      return user;
     } catch {
-      api.setToken(null);
       set({ user: null, isInitialized: true, isLoading: false });
+      return null;
     }
   },
 }));
