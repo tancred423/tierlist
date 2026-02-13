@@ -149,7 +149,7 @@ export function SharedTierlistPage({ mode }: SharedTierlistPageProps) {
       const { filledTierlist: newList } = await api.copyFilledTierlist(tierlistId);
       navigate(`/tierlist/${newList.id}`);
     } catch (error) {
-      console.error('Failed to copy ranking:', error);
+      console.error('Failed to copy tierlist:', error);
       setIsCopying(false);
     }
   }
@@ -215,10 +215,10 @@ export function SharedTierlistPage({ mode }: SharedTierlistPageProps) {
         </div>
         <div className="header-actions">
           {canEdit && (
-            <span className={`save-status ${saveStatus}`}>
-              {saveStatus === 'saving' && t('tierlist.saving')}
-              {saveStatus === 'saved' && t('tierlist.saved')}
-              {saveStatus === 'error' && t('tierlist.saveError')}
+            <span className={`save-status-pill ${saveStatus}`}>
+              {saveStatus === 'saving' && `⟳ ${t('tierlist.saving')}`}
+              {saveStatus === 'saved' && `✓ ${t('tierlist.saved')}`}
+              {saveStatus === 'error' && `✕ ${t('tierlist.saveError')}`}
             </span>
           )}
           <button

@@ -10,6 +10,37 @@ import { TierlistGrid } from '../components/TierlistGrid';
 import { ShareModal } from '../components/ShareModal';
 import './TierlistEditorPage.css';
 
+function ShareIcon() {
+  return (
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <circle cx="18" cy="5" r="3" />
+      <circle cx="6" cy="12" r="3" />
+      <circle cx="18" cy="19" r="3" />
+      <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
+      <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
+    </svg>
+  );
+}
+
+function MoreIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+      <circle cx="12" cy="5" r="2" />
+      <circle cx="12" cy="12" r="2" />
+      <circle cx="12" cy="19" r="2" />
+    </svg>
+  );
+}
+
 function formatDate(dateString: string, language: string, clockFormat: '12h' | '24h'): string {
   const date = new Date(dateString);
   return date.toLocaleDateString(language === 'de' ? 'de-DE' : 'en-US', {
@@ -38,9 +69,21 @@ export function TierlistEditorPage() {
   const [canEdit, setCanEdit] = useState(false);
   const [isCopying, setIsCopying] = useState(false);
   const [isCreatingTemplate, setIsCreatingTemplate] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pendingPlacementsRef = useRef<PlacementData[] | null>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setMenuOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const loadTierlist = useCallback(async () => {
     if (!id) return;
@@ -117,14 +160,14 @@ export function TierlistEditorPage() {
     }
   }
 
-  async function handleDeleteRanking(tierlistId: string) {
+  async function handleDeleteTierlist(tierlistId: string) {
     if (!confirm(t('tierlist.deleteConfirm'))) return;
 
     try {
       await api.deleteFilledTierlist(tierlistId);
       navigate('/');
     } catch (error) {
-      console.error('Failed to delete ranking:', error);
+      console.error('Failed to delete tierlist:', error);
       alert(t('errors.failedToDelete'));
     }
   }
@@ -147,7 +190,7 @@ export function TierlistEditorPage() {
       const { filledTierlist: newList } = await api.copyFilledTierlist(tierlistId);
       navigate(`/tierlist/${newList.id}`);
     } catch (error) {
-      console.error('Failed to copy ranking:', error);
+      console.error('Failed to copy tierlist:', error);
       setIsCopying(false);
     }
   }
@@ -155,8 +198,8 @@ export function TierlistEditorPage() {
   async function handleCreateTemplate(tierlistId: string) {
     setIsCreatingTemplate(true);
     try {
-      const { template } = await api.createTemplateFromRanking(tierlistId);
-      navigate(`/template/${template.id}`);
+      const { template } = await api.createTemplateFromTierlist(tierlistId);
+      navigate(`/template/${template.id}/edit`);
     } catch (error) {
       console.error('Failed to create template:', error);
       setIsCreatingTemplate(false);
@@ -242,45 +285,70 @@ export function TierlistEditorPage() {
         </div>
         <div className="editor-actions">
           {canEdit && (
-            <span className={`save-status ${saveStatus}`}>
-              {saveStatus === 'saving' && t('tierlist.saving')}
-              {saveStatus === 'saved' && t('tierlist.saved')}
-              {saveStatus === 'error' && t('tierlist.saveError')}
+            <span className={`save-status-pill ${saveStatus}`}>
+              {saveStatus === 'saving' && `⟳ ${t('tierlist.saving')}`}
+              {saveStatus === 'saved' && `✓ ${t('tierlist.saved')}`}
+              {saveStatus === 'error' && `✕ ${t('tierlist.saveError')}`}
             </span>
           )}
           {isCoOwner && (
             <>
               <button
                 onClick={() => handleCopy(tierlist.id)}
-                className="btn btn-secondary"
+                className="btn btn-secondary btn-sm"
                 disabled={isCopying}
               >
                 {isCopying ? t('tierlist.copying') : t('tierlist.copyRanking')}
               </button>
-              <button onClick={() => handleLeave(tierlist.id)} className="btn btn-secondary">
+              <button onClick={() => handleLeave(tierlist.id)} className="btn btn-secondary btn-sm">
                 {t('tierlist.leave')}
               </button>
             </>
           )}
           {isOwner && (
             <>
-              <button onClick={() => handleDeleteRanking(tierlist.id)} className="btn btn-danger">
-                {t('common.delete')}
+              <button
+                onClick={() => setShowShareModal(true)}
+                className="btn-icon-action"
+                title={t('common.share')}
+              >
+                <ShareIcon />
               </button>
-              {tierlist.templateSnapshot && (
+              <div className="actions-menu" ref={menuRef}>
                 <button
-                  onClick={() => handleCreateTemplate(tierlist.id)}
-                  className="btn btn-secondary"
-                  disabled={isCreatingTemplate}
+                  onClick={() => setMenuOpen(!menuOpen)}
+                  className="btn-icon-action"
+                  title="More"
                 >
-                  {isCreatingTemplate
-                    ? t('tierlist.creatingTemplate')
-                    : t('tierlist.createTemplate')}
+                  <MoreIcon />
                 </button>
-              )}
-              <button onClick={() => setShowShareModal(true)} className="btn btn-secondary">
-                {t('common.share')}
-              </button>
+                {menuOpen && (
+                  <div className="actions-menu-dropdown">
+                    {tierlist.templateSnapshot && (
+                      <button
+                        onClick={() => {
+                          setMenuOpen(false);
+                          handleCreateTemplate(tierlist.id);
+                        }}
+                        disabled={isCreatingTemplate}
+                      >
+                        {isCreatingTemplate
+                          ? t('tierlist.creatingTemplate')
+                          : t('tierlist.createTemplate')}
+                      </button>
+                    )}
+                    <button
+                      className="danger"
+                      onClick={() => {
+                        setMenuOpen(false);
+                        handleDeleteTierlist(tierlist.id);
+                      }}
+                    >
+                      {t('common.delete')}
+                    </button>
+                  </div>
+                )}
+              </div>
             </>
           )}
         </div>

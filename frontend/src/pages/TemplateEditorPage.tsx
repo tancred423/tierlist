@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import {
   DndContext,
   closestCenter,
@@ -171,14 +171,16 @@ function SortableCardItem({ card, onEdit, onDelete, t }: SortableCardItemProps) 
       <div className="card-drag-handle" {...attributes} {...listeners}>
         ⋮⋮
       </div>
-      {card.imageUrl ? (
-        <img src={getImageUrl(card.imageUrl)!} alt={card.title} className="card-image" />
-      ) : (
-        <div className="card-image-placeholder">No Image</div>
-      )}
-      <div className="card-content">
-        <h4>{card.title}</h4>
-        {card.description && <p className="card-description">{card.description}</p>}
+      <div className="card-square">
+        {card.imageUrl ? (
+          <img src={getImageUrl(card.imageUrl)!} alt={card.title} className="card-image" />
+        ) : (
+          <div className="card-no-image">{card.title[0]}</div>
+        )}
+        <div className="card-details">
+          <span className="card-title">{card.title}</span>
+          {card.description && <span className="card-desc">{card.description}</span>}
+        </div>
       </div>
       <div className="card-actions">
         <button onClick={() => onEdit(card)} className="btn btn-secondary btn-sm">
@@ -201,9 +203,13 @@ export function TemplateEditorPage() {
 
   const [template, setTemplate] = useState<Template | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [isSaving, setIsSaving] = useState(false);
-  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
+  const [saveStatus, setSaveStatus] = useState<'saved' | 'saving' | 'error'>('saved');
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [isCopying, setIsCopying] = useState(false);
   const isCreatingRef = useRef(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isLoadedRef = useRef(false);
 
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -233,7 +239,7 @@ export function TemplateEditorPage() {
         tiers: DEFAULT_TIERS.map(tier => ({ name: tier.name, color: tier.color })),
         columns: [{ name: '' }],
       });
-      navigate(`/template/${newTemplate.id}`, { replace: true });
+      navigate(`/template/${newTemplate.id}/edit`, { replace: true });
     } catch (error) {
       console.error('Failed to create template:', error);
       navigate('/');
@@ -252,6 +258,7 @@ export function TemplateEditorPage() {
       setTiers(template.tiers);
       setColumns(template.columns);
       setCards(template.cards);
+      isLoadedRef.current = true;
     } catch (error) {
       console.error('Failed to load template:', error);
       navigate('/');
@@ -271,20 +278,28 @@ export function TemplateEditorPage() {
     }
   }, [isNewTemplate, createNewTemplate, loadTemplate]);
 
-  async function handleSave() {
-    if (!title.trim()) {
-      alert(t('template.templateTitle') + ' required');
-      return;
+  useEffect(() => {
+    return () => {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setMenuOpen(false);
+      }
     }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
-    if (cards.length === 0) {
-      alert(t('template.atLeastOneCard'));
-      return;
-    }
+  const autoSave = useCallback(async () => {
+    if (!id || !template || !isLoadedRef.current) return;
+    if (!title.trim()) return;
 
-    if (!id || !template) return;
-
-    setIsSaving(true);
     setSaveStatus('saving');
     try {
       await api.updateTemplate(id, {
@@ -303,15 +318,24 @@ export function TemplateEditorPage() {
       }
 
       setSaveStatus('saved');
-      setTimeout(() => setSaveStatus('idle'), 2000);
     } catch (error) {
       console.error('Failed to save template:', error);
       setSaveStatus('error');
-      setTimeout(() => setSaveStatus('idle'), 3000);
-    } finally {
-      setIsSaving(false);
     }
-  }
+  }, [id, template, title, description, isPublic, tiers, columns, cards]);
+
+  useEffect(() => {
+    if (!isLoadedRef.current || !template) return;
+
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
+    }
+
+    setSaveStatus('saving');
+    saveTimeoutRef.current = setTimeout(() => {
+      autoSave();
+    }, 800);
+  }, [title, description, isPublic, tiers, columns, cards, autoSave, template]);
 
   function updateTier(index: number, field: 'name' | 'color', value: string) {
     const newTiers = [...tiers];
@@ -438,16 +462,16 @@ export function TemplateEditorPage() {
     }
   }
 
-  async function handleStartRanking() {
+  async function handleCopyTemplate() {
     if (!template) return;
-
+    setIsCopying(true);
     try {
-      const { filledTierlist } = await api.createFilledTierlist({
-        templateId: template.id,
-      });
-      navigate(`/tierlist/${filledTierlist.id}`);
+      const { template: newTemplate } = await api.copyTemplate(template.id);
+      navigate(`/template/${newTemplate.id}/edit`);
     } catch (error) {
-      console.error('Failed to create tierlist:', error);
+      console.error('Failed to copy template:', error);
+    } finally {
+      setIsCopying(false);
     }
   }
 
@@ -489,25 +513,45 @@ export function TemplateEditorPage() {
           <h1>{t('template.editTemplate')}</h1>
         </div>
         <div className="editor-actions">
-          <button onClick={handleDeleteTemplate} className="btn btn-danger">
-            {t('common.delete')}
-          </button>
-          <button onClick={handleStartRanking} className="btn btn-secondary">
-            {t('home.startRanking')}
-          </button>
-          <button
-            onClick={handleSave}
-            className={`btn ${saveStatus === 'saved' ? 'btn-success' : saveStatus === 'error' ? 'btn-danger' : 'btn-primary'}`}
-            disabled={isSaving}
-          >
-            {saveStatus === 'saving'
-              ? t('common.saving')
-              : saveStatus === 'saved'
-                ? t('common.saved')
-                : saveStatus === 'error'
-                  ? t('errors.failedToSave')
-                  : t('common.save')}
-          </button>
+          <span className={`save-status-pill ${saveStatus}`}>
+            {saveStatus === 'saving' && `⟳ ${t('tierlist.saving')}`}
+            {saveStatus === 'saved' && `✓ ${t('tierlist.saved')}`}
+            {saveStatus === 'error' && `✕ ${t('tierlist.saveError')}`}
+          </span>
+          <Link to={`/template/${id}/preview`} className="btn btn-secondary btn-sm">
+            {t('template.preview')}
+          </Link>
+          <div className="actions-menu" ref={menuRef}>
+            <button onClick={() => setMenuOpen(!menuOpen)} className="btn-icon-action" title="More">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <circle cx="12" cy="5" r="2" />
+                <circle cx="12" cy="12" r="2" />
+                <circle cx="12" cy="19" r="2" />
+              </svg>
+            </button>
+            {menuOpen && (
+              <div className="actions-menu-dropdown">
+                <button
+                  onClick={() => {
+                    setMenuOpen(false);
+                    handleCopyTemplate();
+                  }}
+                  disabled={isCopying}
+                >
+                  {isCopying ? t('common.loading') : t('template.copyTemplate')}
+                </button>
+                <button
+                  className="danger"
+                  onClick={() => {
+                    setMenuOpen(false);
+                    handleDeleteTemplate();
+                  }}
+                >
+                  {t('common.delete')}
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 

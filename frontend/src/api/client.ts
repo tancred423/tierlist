@@ -113,10 +113,10 @@ class ApiClient {
     });
   }
 
-  async createTemplateFromRanking(
-    rankingId: string,
+  async createTemplateFromTierlist(
+    tierlistId: string,
   ): Promise<{ template: import('../types').Template }> {
-    return this.request(`/api/templates/from-ranking/${rankingId}`, { method: 'POST' });
+    return this.request(`/api/templates/from-tierlist/${tierlistId}`, { method: 'POST' });
   }
 
   async createCard(

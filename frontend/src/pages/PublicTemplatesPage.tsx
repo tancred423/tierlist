@@ -1,11 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { api } from '../api/client';
 import { useAuthStore } from '../stores/auth';
 import { useClockFormatStore } from '../stores/clockFormat';
 import { useI18n } from '../i18n';
 import { getDisplayName } from '../types';
-import type { Template, Pagination as PaginationType } from '../types';
+import type { Pagination as PaginationType, Template } from '../types';
 import { Pagination } from '../components/Pagination';
 import './PublicTemplatesPage.css';
 
@@ -37,8 +37,6 @@ interface TemplateWithLikes extends Template {
 
 interface TemplateCardProps {
   template: TemplateWithLikes;
-  onStartRanking: () => void;
-  onCopy?: () => void;
   onToggleLike: () => void;
   liked: boolean;
   isLoggedIn: boolean;
@@ -49,8 +47,6 @@ interface TemplateCardProps {
 
 function TemplateCard({
   template,
-  onStartRanking,
-  onCopy,
   onToggleLike,
   liked,
   isLoggedIn,
@@ -74,13 +70,17 @@ function TemplateCard({
   const extraCards = sortedCards.length - maxCards;
 
   return (
-    <div className="template-card card">
+    <Link to={`/template/${template.id}/preview`} className="template-card card template-card-link">
       <div className="template-header">
         <div className="template-header-top">
           <h3 className="template-title">{template.title}</h3>
           <button
             className={`like-btn ${liked ? 'active' : ''}`}
-            onClick={() => isLoggedIn && onToggleLike()}
+            onClick={e => {
+              e.preventDefault();
+              e.stopPropagation();
+              if (isLoggedIn) onToggleLike();
+            }}
             title={
               !isLoggedIn
                 ? t('auth.loginToStartRanking')
@@ -157,18 +157,7 @@ function TemplateCard({
         ))}
         {extraCards > 0 && <div className="preview-card preview-card-extra">+{extraCards}</div>}
       </div>
-
-      <div className="template-actions">
-        {isLoggedIn && onCopy && (
-          <button onClick={onCopy} className="btn btn-secondary template-cta">
-            {t('template.copy')}
-          </button>
-        )}
-        <button onClick={onStartRanking} className="btn btn-primary template-cta">
-          {isLoggedIn ? t('home.startRanking') : t('auth.loginToStartRanking')}
-        </button>
-      </div>
-    </div>
+    </Link>
   );
 }
 
@@ -181,12 +170,12 @@ export function PublicTemplatesPage() {
   const [search, setSearch] = useState('');
   const [searchInput, setSearchInput] = useState('');
   const [sort, setSort] = useState<SortOption>('popular');
+  const [showLikedOnly, setShowLikedOnly] = useState(false);
   const [userLikes, setUserLikes] = useState<Set<string>>(new Set());
   const [isLoading, setIsLoading] = useState(true);
-  const { user, login } = useAuthStore();
+  const { user } = useAuthStore();
   const { t, language } = useI18n();
   const { getEffectiveFormat } = useClockFormatStore();
-  const navigate = useNavigate();
   const clockFormat = getEffectiveFormat();
 
   const loadData = useCallback(async () => {
@@ -254,44 +243,6 @@ export function PublicTemplatesPage() {
     }
   }
 
-  function loginWithRedirect() {
-    localStorage.setItem('auth_redirect', '/public-templates');
-    login();
-  }
-
-  async function handleStartRanking(template: Template) {
-    if (!user) {
-      loginWithRedirect();
-      return;
-    }
-
-    try {
-      const generatedTitle =
-        `${template.title} - ${t('home.rankingBy')} ${getDisplayName(user)}`.slice(0, 255);
-      const { filledTierlist } = await api.createFilledTierlist({
-        templateId: template.id,
-        title: generatedTitle,
-      });
-      navigate(`/tierlist/${filledTierlist.id}`);
-    } catch (error) {
-      console.error('Failed to create tierlist:', error);
-    }
-  }
-
-  async function handleCopyTemplate(template: Template) {
-    if (!user) {
-      loginWithRedirect();
-      return;
-    }
-
-    try {
-      const { template: newTemplate } = await api.copyTemplate(template.id);
-      navigate(`/template/${newTemplate.id}`);
-    } catch (error) {
-      console.error('Failed to copy template:', error);
-    }
-  }
-
   if (isLoading) {
     return (
       <div className="loading-container">
@@ -336,44 +287,70 @@ export function PublicTemplatesPage() {
             <option value="newest">{t('publicTemplates.sortNewest')}</option>
             <option value="oldest">{t('publicTemplates.sortOldest')}</option>
           </select>
+          {user && (
+            <button
+              className={`btn ${showLikedOnly ? 'btn-primary' : 'btn-secondary'} liked-filter-btn`}
+              onClick={() => setShowLikedOnly(!showLikedOnly)}
+              title={t('publicTemplates.showLikedOnly')}
+            >
+              <span className="liked-filter-icon">{showLikedOnly ? '♥' : '♡'}</span>
+              {t('publicTemplates.showLikedOnly')}
+            </button>
+          )}
         </div>
       </div>
 
-      {templates.length === 0 ? (
-        <div className="empty-state">
-          <p>{search ? t('publicTemplates.empty') : t('publicTemplates.empty')}</p>
-          {!search && <p>{t('publicTemplates.beFirst')}</p>}
-        </div>
-      ) : (
-        <>
-          <div className="templates-grid">
-            {templates.map(template => (
-              <TemplateCard
-                key={template.id}
-                template={template}
-                onStartRanking={() => handleStartRanking(template)}
-                onCopy={() => handleCopyTemplate(template)}
-                onToggleLike={() => handleToggleLike(template.id)}
-                liked={userLikes.has(template.id)}
-                isLoggedIn={!!user}
-                t={t}
-                language={language}
-                clockFormat={clockFormat}
-              />
-            ))}
-          </div>
+      {(() => {
+        const displayTemplates = showLikedOnly
+          ? templates.filter(t => userLikes.has(t.id))
+          : templates;
 
-          {pagination && (
-            <Pagination
-              page={pagination.page}
-              totalPages={pagination.totalPages}
-              total={pagination.total}
-              limit={pagination.limit}
-              onPageChange={setPage}
-            />
-          )}
-        </>
-      )}
+        if (templates.length === 0) {
+          return (
+            <div className="empty-state">
+              <p>{t('publicTemplates.empty')}</p>
+              {!search && <p>{t('publicTemplates.beFirst')}</p>}
+            </div>
+          );
+        }
+
+        if (displayTemplates.length === 0 && showLikedOnly) {
+          return (
+            <div className="empty-state">
+              <p>{t('publicTemplates.noLikedTemplates')}</p>
+            </div>
+          );
+        }
+
+        return (
+          <>
+            <div className="templates-grid">
+              {displayTemplates.map(template => (
+                <TemplateCard
+                  key={template.id}
+                  template={template}
+                  onToggleLike={() => handleToggleLike(template.id)}
+                  liked={userLikes.has(template.id)}
+                  isLoggedIn={!!user}
+                  t={t}
+                  language={language}
+                  clockFormat={clockFormat}
+                />
+              ))}
+            </div>
+
+            {pagination && (
+              <Pagination
+                page={pagination.page}
+                totalPages={pagination.totalPages}
+                total={pagination.total}
+                limit={pagination.limit}
+                onPageChange={setPage}
+              />
+            )}
+          </>
+        );
+      })()}
     </div>
   );
 }

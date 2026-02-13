@@ -155,6 +155,7 @@ export function Header() {
   const [clockOpen, setClockOpen] = useState(false);
   const [themeOpen, setThemeOpen] = useState(false);
   const [userOpen, setUserOpen] = useState(false);
+  const [navOpen, setNavOpen] = useState(false);
 
   const closeAll = () => {
     setLangOpen(false);
@@ -189,18 +190,57 @@ export function Header() {
           <span className="logo-text">Tierlist</span>
         </Link>
 
-        <nav className="header-main-nav">
+        <button
+          className="nav-burger"
+          onClick={() => setNavOpen(!navOpen)}
+          aria-label="Toggle navigation"
+        >
+          {navOpen ? (
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+          ) : (
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <line x1="3" y1="12" x2="21" y2="12" />
+              <line x1="3" y1="6" x2="21" y2="6" />
+              <line x1="3" y1="18" x2="21" y2="18" />
+            </svg>
+          )}
+        </button>
+
+        <nav className={`header-main-nav ${navOpen ? 'open' : ''}`}>
           {user && (
             <>
               <Link
                 to="/my-tierlists"
                 className={`nav-link ${location.pathname === '/my-tierlists' ? 'active' : ''}`}
+                onClick={() => setNavOpen(false)}
               >
                 {t('nav.myTierlists')}
               </Link>
               <Link
                 to="/my-templates"
                 className={`nav-link ${location.pathname === '/my-templates' ? 'active' : ''}`}
+                onClick={() => setNavOpen(false)}
               >
                 {t('nav.myTemplates')}
               </Link>
@@ -209,6 +249,7 @@ export function Header() {
           <Link
             to="/public-templates"
             className={`nav-link ${location.pathname === '/public-templates' ? 'active' : ''}`}
+            onClick={() => setNavOpen(false)}
           >
             {t('nav.publicTemplates')}
           </Link>

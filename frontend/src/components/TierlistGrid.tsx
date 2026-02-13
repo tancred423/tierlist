@@ -368,39 +368,39 @@ export function TierlistGrid({
             </TierRow>
           ))}
         </div>
+      </div>
 
-        <div className="unassigned-section">
-          <h3 className="unassigned-header">
-            {t('tierlist.unrankedCards')} ({unassignedCards.length})
-          </h3>
-          <DroppableCell
-            id={getUnassignedId()}
-            isOver={shouldHighlightUnassigned()}
-            className="unassigned-area"
+      <div className="unassigned-section">
+        <span className="unassigned-header">
+          {t('tierlist.unrankedCards')} ({unassignedCards.length})
+        </span>
+        <DroppableCell
+          id={getUnassignedId()}
+          isOver={shouldHighlightUnassigned()}
+          className="unassigned-area"
+        >
+          <SortableContext
+            items={unassignedCards.map(p => `card-${p.cardId}`)}
+            strategy={rectSortingStrategy}
           >
-            <SortableContext
-              items={unassignedCards.map(p => `card-${p.cardId}`)}
-              strategy={rectSortingStrategy}
-            >
-              {unassignedCards.map(placement => {
-                const card = cardMap.get(placement.cardId);
-                if (!card) return null;
-                return (
-                  <DraggableCard
-                    key={placement.cardId}
-                    card={card}
-                    disabled={readOnly}
-                    isActive={activeId === `card-${placement.cardId}`}
-                    showDetails
-                  />
-                );
-              })}
-            </SortableContext>
-            {unassignedCards.length === 0 && (
-              <div className="empty-unassigned">{t('tierlist.allCardsRanked')}</div>
-            )}
-          </DroppableCell>
-        </div>
+            {unassignedCards.map(placement => {
+              const card = cardMap.get(placement.cardId);
+              if (!card) return null;
+              return (
+                <DraggableCard
+                  key={placement.cardId}
+                  card={card}
+                  disabled={readOnly}
+                  isActive={activeId === `card-${placement.cardId}`}
+                  showDetails
+                />
+              );
+            })}
+          </SortableContext>
+          {unassignedCards.length === 0 && (
+            <div className="empty-unassigned">{t('tierlist.allCardsRanked')}</div>
+          )}
+        </DroppableCell>
       </div>
 
       <DragOverlay dropAnimation={null}>

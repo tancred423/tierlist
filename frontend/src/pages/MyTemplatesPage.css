@@ -29,6 +29,21 @@
   height: 100%;
 }
 
+.template-card-link {
+  color: inherit;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    border-color var(--transition),
+    transform var(--transition);
+}
+
+.template-card-link:hover {
+  color: inherit;
+  border-color: var(--color-primary);
+  transform: translateY(-2px);
+}
+
 .template-header {
   display: flex;
   flex-direction: column;
@@ -96,16 +111,6 @@
   padding: 0.5rem;
   background: var(--color-bg);
   border-radius: var(--radius-sm);
-}
-
-.template-actions {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.template-cta {
-  text-align: center;
 }
 
 .empty-state {
@@ -271,9 +276,5 @@
   .template-meta {
     gap: 0.5rem;
     font-size: 0.6875rem;
-  }
-
-  .template-actions {
-    gap: 0.5rem;
   }
 }

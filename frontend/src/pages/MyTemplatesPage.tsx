@@ -1,10 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { api } from '../api/client';
-import { useAuthStore } from '../stores/auth';
 import { useClockFormatStore } from '../stores/clockFormat';
 import { useI18n } from '../i18n';
-import { getDisplayName } from '../types';
 import type { Template, Pagination as PaginationType } from '../types';
 import { Pagination } from '../components/Pagination';
 import './MyTemplatesPage.css';
@@ -33,13 +31,12 @@ function formatDate(dateString: string, language: string, clockFormat: '12h' | '
 
 interface TemplateCardProps {
   template: Template;
-  onStartRanking: () => void;
   t: (key: string) => string;
   language: string;
   clockFormat: '12h' | '24h';
 }
 
-function TemplateCard({ template, onStartRanking, t, language, clockFormat }: TemplateCardProps) {
+function TemplateCard({ template, t, language, clockFormat }: TemplateCardProps) {
   const maxTiers = 5;
   const maxCols = 5;
   const maxCards = 5;
@@ -56,7 +53,7 @@ function TemplateCard({ template, onStartRanking, t, language, clockFormat }: Te
   const extraCards = sortedCards.length - maxCards;
 
   return (
-    <div className="template-card card">
+    <Link to={`/template/${template.id}/preview`} className="template-card card template-card-link">
       <div className="template-header">
         <h3 className="template-title">{template.title}</h3>
         <span className={`visibility-badge ${template.isPublic ? 'public' : 'private'}`}>
@@ -120,16 +117,7 @@ function TemplateCard({ template, onStartRanking, t, language, clockFormat }: Te
         ))}
         {extraCards > 0 && <div className="preview-card preview-card-extra">+{extraCards}</div>}
       </div>
-
-      <div className="template-actions">
-        <Link to={`/template/${template.id}`} className="btn btn-secondary template-cta">
-          {t('common.edit')}
-        </Link>
-        <button onClick={onStartRanking} className="btn btn-primary template-cta">
-          {t('home.startRanking')}
-        </button>
-      </div>
-    </div>
+    </Link>
   );
 }
 
@@ -138,10 +126,8 @@ export function MyTemplatesPage() {
   const [pagination, setPagination] = useState<PaginationType | null>(null);
   const [page, setPage] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
-  const { user } = useAuthStore();
   const { t, language } = useI18n();
   const { getEffectiveFormat } = useClockFormatStore();
-  const navigate = useNavigate();
   const clockFormat = getEffectiveFormat();
 
   const loadData = useCallback(async () => {
@@ -161,22 +147,6 @@ export function MyTemplatesPage() {
     loadData();
   }, [loadData]);
 
-  async function handleStartRanking(template: Template) {
-    if (!user) return;
-
-    try {
-      const generatedTitle =
-        `${template.title} - ${t('home.rankingBy')} ${getDisplayName(user)}`.slice(0, 255);
-      const { filledTierlist } = await api.createFilledTierlist({
-        templateId: template.id,
-        title: generatedTitle,
-      });
-      navigate(`/tierlist/${filledTierlist.id}`);
-    } catch (error) {
-      console.error('Failed to create tierlist:', error);
-    }
-  }
-
   if (isLoading) {
     return (
       <div className="loading-container">
@@ -189,7 +159,7 @@ export function MyTemplatesPage() {
     <div className="container my-templates-page">
       <div className="page-header">
         <h1>{t('myTemplates.title')}</h1>
-        <Link to="/template/new" className="btn btn-primary">
+        <Link to="/template/new" className="btn btn-secondary">
           + {t('home.createNewTemplate')}
         </Link>
       </div>
@@ -198,7 +168,7 @@ export function MyTemplatesPage() {
         <div className="empty-state">
           <p>{t('myTemplates.empty')}</p>
           <p>{t('myTemplates.createFirst')}</p>
-          <Link to="/template/new" className="btn btn-primary" style={{ marginTop: '1rem' }}>
+          <Link to="/template/new" className="btn btn-secondary" style={{ marginTop: '1rem' }}>
             + {t('home.createNewTemplate')}
           </Link>
         </div>
@@ -209,7 +179,6 @@ export function MyTemplatesPage() {
               <TemplateCard
                 key={template.id}
                 template={template}
-                onStartRanking={() => handleStartRanking(template)}
                 t={t}
                 language={language}
                 clockFormat={clockFormat}

@@ -1,6 +1,6 @@
 # Terms of Service
 
-**Effective Date:** 26 January 2026
+**Effective Date:** 13 Februrary 2026
 
 ## Acceptance
 
@@ -8,7 +8,7 @@ By using Tierlist, you agree to these terms. If you disagree, do not use the ser
 
 ## Service Description
 
-Tierlist is a tool for creating and sharing tierlists. You can create templates, rank items, and share your rankings with others.
+Tierlist is a tool for creating and sharing tierlists. You can create templates, rank items, and share your tierlists with others.
 
 ## User Accounts
 

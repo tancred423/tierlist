@@ -170,7 +170,7 @@ export function CardEditorModal({ card, templateId, onClose, onSave }: CardEdito
                 onChange={e => setTitle(e.target.value)}
                 className="form-input"
                 placeholder={t('card.title')}
-                maxLength={255}
+                maxLength={25}
                 required
               />
             </div>
@@ -280,13 +280,13 @@ export function CardEditorModal({ card, templateId, onClose, onSave }: CardEdito
 
             <div className="form-group">
               <label className="form-label">{t('card.description')}</label>
-              <textarea
+              <input
+                type="text"
                 value={description}
                 onChange={e => setDescription(e.target.value)}
                 className="form-input"
                 placeholder={t('card.descriptionPlaceholder')}
-                rows={3}
-                maxLength={2000}
+                maxLength={40}
               />
             </div>
           </div>

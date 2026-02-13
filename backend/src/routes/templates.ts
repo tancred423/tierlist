@@ -441,36 +441,36 @@ templates.post("/:id/copy", requireAuth, async (c) => {
   return c.json({ template: newTemplate }, 201);
 });
 
-templates.post("/from-ranking/:rankingId", requireAuth, async (c) => {
+templates.post("/from-tierlist/:tierlistId", requireAuth, async (c) => {
   const user = c.get("user")!;
-  const rankingId = c.req.param("rankingId");
+  const tierlistId = c.req.param("tierlistId");
 
-  const ranking = await db.query.filledTierlists.findFirst({
-    where: eq(schema.filledTierlists.id, rankingId),
+  const tierlist = await db.query.filledTierlists.findFirst({
+    where: eq(schema.filledTierlists.id, tierlistId),
     with: {
       template: true,
     },
   });
 
-  if (!ranking) {
-    return c.json({ error: "Ranking not found" }, 404);
+  if (!tierlist) {
+    return c.json({ error: "Tierlist not found" }, 404);
   }
 
-  if (ranking.ownerId !== user.userId) {
+  if (tierlist.ownerId !== user.userId) {
     return c.json({ error: "Access denied" }, 403);
   }
 
-  const snapshot = ranking.templateSnapshot;
+  const snapshot = tierlist.templateSnapshot;
   if (!snapshot) {
-    return c.json({ error: "This ranking has no template snapshot" }, 400);
+    return c.json({ error: "This tierlist has no template snapshot" }, 400);
   }
 
   const newTemplateId = generateId();
   const newShareToken = generateToken();
 
-  const templateTitle = ranking.template?.title ?? ranking.title;
-  const templateDescription = ranking.template?.description ?? null;
-  const newTitle = `${templateTitle} (From Ranking)`.slice(0, LIMITS.TITLE);
+  const templateTitle = tierlist.template?.title ?? tierlist.title;
+  const templateDescription = tierlist.template?.description ?? null;
+  const newTitle = `${templateTitle} (From Tierlist)`.slice(0, LIMITS.TITLE);
 
   await db.insert(schema.templates).values({
     id: newTemplateId,

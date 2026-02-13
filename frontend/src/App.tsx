@@ -10,6 +10,7 @@ import { PublicTemplatesPage } from './pages/PublicTemplatesPage';
 import { AuthCallbackPage } from './pages/AuthCallbackPage';
 import { LoginPage } from './pages/LoginPage';
 import { TemplateEditorPage } from './pages/TemplateEditorPage';
+import { TemplatePreviewPage } from './pages/TemplatePreviewPage';
 import { TierlistEditorPage } from './pages/TierlistEditorPage';
 import { SharedTemplatePage } from './pages/SharedTemplatePage';
 import { SharedTierlistPage } from './pages/SharedTierlistPage';
@@ -58,6 +59,15 @@ function App() {
         <Route path="auth/callback" element={<AuthCallbackPage />} />
         <Route
           path="template/new"
+          element={
+            <RequireAuth>
+              <TemplateEditorPage />
+            </RequireAuth>
+          }
+        />
+        <Route path="template/:id/preview" element={<TemplatePreviewPage />} />
+        <Route
+          path="template/:id/edit"
           element={
             <RequireAuth>
               <TemplateEditorPage />

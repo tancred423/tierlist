@@ -47,7 +47,7 @@ export function SharedTemplatePage() {
     setIsCopying(true);
     try {
       const { template: newTemplate } = await api.copyTemplateByShareToken(token);
-      navigate(`/template/${newTemplate.id}`);
+      navigate(`/template/${newTemplate.id}/edit`);
     } catch (error) {
       console.error('Failed to copy template:', error);
       alert('Failed to copy template');
@@ -56,7 +56,7 @@ export function SharedTemplatePage() {
     }
   }
 
-  async function handleStartRanking() {
+  async function handleStartTierlist() {
     if (!template) return;
 
     if (!user) {
@@ -131,8 +131,8 @@ export function SharedTemplatePage() {
         </div>
 
         <div className="template-actions">
-          <button onClick={handleStartRanking} className="btn btn-primary">
-            Start Ranking
+          <button onClick={handleStartTierlist} className="btn btn-primary">
+            Start Tierlist
           </button>
           <button onClick={handleCopy} className="btn btn-secondary" disabled={isCopying}>
             {isCopying ? 'Copying...' : 'Copy Template to My Account'}
@@ -140,7 +140,9 @@ export function SharedTemplatePage() {
         </div>
 
         {!user && (
-          <p className="login-hint">Login with Discord to create rankings or copy this template.</p>
+          <p className="login-hint">
+            Login with Discord to create tierlists or copy this template.
+          </p>
         )}
       </div>
     </div>

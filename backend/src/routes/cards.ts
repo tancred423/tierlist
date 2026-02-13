@@ -13,10 +13,10 @@ cards.post("/:templateId", requireAuth, async (c) => {
   const user = c.get("user")!;
   const body = await c.req.json();
 
-  const titleResult = validateString(body.title || "New Card", LIMITS.TITLE, "Title");
+  const titleResult = validateString(body.title || "New Card", LIMITS.CARD_TITLE, "Title");
   if (!titleResult.valid) return c.json({ error: titleResult.error }, 400);
 
-  const descResult = validateOptionalString(body.description, LIMITS.DESCRIPTION, "Description");
+  const descResult = validateOptionalString(body.description, LIMITS.CARD_DESCRIPTION, "Description");
   if (!descResult.valid) return c.json({ error: descResult.error }, 400);
 
   const imageResult = validateOptionalString(body.imageUrl, LIMITS.IMAGE_URL, "Image URL");
@@ -71,12 +71,12 @@ cards.put("/:id", requireAuth, async (c) => {
   const body = await c.req.json();
 
   if (body.title !== undefined) {
-    const titleResult = validateString(body.title, LIMITS.TITLE, "Title");
+    const titleResult = validateString(body.title, LIMITS.CARD_TITLE, "Title");
     if (!titleResult.valid) return c.json({ error: titleResult.error }, 400);
   }
 
   if (body.description !== undefined) {
-    const descResult = validateOptionalString(body.description, LIMITS.DESCRIPTION, "Description");
+    const descResult = validateOptionalString(body.description, LIMITS.CARD_DESCRIPTION, "Description");
     if (!descResult.valid) return c.json({ error: descResult.error }, 400);
   }
 

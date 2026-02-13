@@ -136,7 +136,7 @@ filledTierlists.post("/", requireAuth, async (c) => {
   const viewToken = generateToken();
   const editToken = generateToken();
 
-  const defaultTitle = `${template.title} - My Ranking`.slice(0, LIMITS.TITLE);
+  const defaultTitle = `${template.title} - My Tierlist`.slice(0, LIMITS.TITLE);
 
   await db.insert(schema.filledTierlists).values({
     id: filledId,

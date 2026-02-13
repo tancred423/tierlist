@@ -1,6 +1,6 @@
 # Privacy Policy
 
-**Effective Date:** 26 January 2026
+**Effective Date:** 13 February 2026
 
 ## Data We Collect
 
@@ -12,7 +12,7 @@ When you log in with Discord, we receive and store:
 
 ### User Content
 - Tierlist templates you create (tiers, columns, cards)
-- Rankings you create (card placements)
+- Tierlists you create (card placements)
 - Sharing settings and tokens
 
 ## How We Use Data
@@ -24,13 +24,13 @@ When you log in with Discord, we receive and store:
 ## Data Storage
 
 - All data is stored in our database
-- Shared rankings are accessible via unique tokens
+- Shared tierlists are accessible via unique tokens
 - We do not sell or share your data with third parties
 
 ## Data Retention
 
 - Account data is retained while your account exists
-- You can delete your templates and rankings at any time
+- You can delete your templates and tierlists at any time
 - Deleted content is permanently removed from our database
 
 ## Third-Party Services
@@ -40,9 +40,9 @@ When you log in with Discord, we receive and store:
 ## Your Rights
 
 You can:
-- View all your templates and rankings in the application
-- Delete your templates and rankings through the application
-- Leave shared rankings you are a co-owner of
+- View all your templates and tierlists in the application
+- Delete your templates and tierlists through the application
+- Leave shared tierlists you are a co-owner of
 - Delete your account and all associated data from the Account page
 
 ## Changes

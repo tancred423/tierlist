@@ -112,6 +112,7 @@ select:focus {
 .btn-primary {
   background: var(--color-primary);
   color: white;
+  border: 1px solid transparent;
 }
 
 .btn-primary:hover {
@@ -129,9 +130,18 @@ select:focus {
   background: var(--color-bg-card);
 }
 
+a.btn-secondary {
+  color: var(--color-text);
+}
+
+a.btn-secondary:hover {
+  color: var(--color-text);
+}
+
 .btn-danger {
   background: var(--color-danger);
   color: white;
+  border: 1px solid transparent;
 }
 
 .btn-danger:hover {
@@ -141,6 +151,7 @@ select:focus {
 .btn-success {
   background: var(--color-success, #22c55e);
   color: white;
+  border: 1px solid transparent;
 }
 
 .btn-success:hover {

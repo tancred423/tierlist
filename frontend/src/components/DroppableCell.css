@@ -1,10 +1,10 @@
 .droppable-cell {
   background: var(--color-bg-elevated);
-  min-height: 100px;
-  padding: 0.5rem;
+  min-height: 88px;
+  padding: 2px;
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
+  gap: 2px;
   align-content: flex-start;
   transition: background-color 150ms ease;
 }
@@ -13,4 +13,16 @@
   background: rgba(99, 102, 241, 0.15);
   outline: 2px dashed var(--color-primary);
   outline-offset: -2px;
+}
+
+@media (max-width: 770px) {
+  .droppable-cell {
+    min-height: 76px;
+  }
+}
+
+@media (max-width: 400px) {
+  .droppable-cell {
+    min-height: 64px;
+  }
 }
