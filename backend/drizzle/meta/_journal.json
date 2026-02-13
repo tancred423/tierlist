@@ -36,6 +36,20 @@
       "when": 1769800000000,
       "tag": "0004_tierlist_preserve_on_template_delete",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "5",
+      "when": 1769900000000,
+      "tag": "0005_display_settings",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "5",
+      "when": 1770000000000,
+      "tag": "0006_column_color",
+      "breakpoints": true
     }
   ]
 }

@@ -4,22 +4,13 @@ import { api } from '../api/client';
 import { useAuthStore } from '../stores/auth';
 import { useClockFormatStore } from '../stores/clockFormat';
 import { useI18n } from '../i18n';
+import { usePageTitle } from '../hooks/usePageTitle';
 import { getDisplayName } from '../types';
-import type { FilledTierlist, CardPlacement, PlacementData, Template } from '../types';
+import type { FilledTierlist, CardPlacement, PlacementData } from '../types';
+import { hasQuickEdits, buildEffectiveTemplate } from '../utils/tierlist';
+import { formatDate } from '../utils/format';
 import { TierlistGrid } from '../components/TierlistGrid';
 import './SharedTierlistPage.css';
-
-function formatDate(dateString: string, language: string, clockFormat: '12h' | '24h'): string {
-  const date = new Date(dateString);
-  return date.toLocaleDateString(language === 'de' ? 'de-DE' : 'en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: clockFormat === '12h',
-  });
-}
 
 interface SharedTierlistPageProps {
   mode: 'view' | 'edit';
@@ -41,6 +32,7 @@ export function SharedTierlistPage({ mode }: SharedTierlistPageProps) {
   const [canEdit, setCanEdit] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isCopying, setIsCopying] = useState(false);
+  usePageTitle(tierlist ? `${t('pageTitle.tierlist')}: ${tierlist.title}` : '');
 
   const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pendingPlacementsRef = useRef<PlacementData[] | null>(null);
@@ -77,10 +69,17 @@ export function SharedTierlistPage({ mode }: SharedTierlistPageProps) {
     loadTierlist();
   }, [loadTierlist]);
 
+  const tierlistIdRef = useRef(tierlist?.id);
+  tierlistIdRef.current = tierlist?.id;
+
   useEffect(() => {
     return () => {
       if (saveTimeoutRef.current) {
         clearTimeout(saveTimeoutRef.current);
+      }
+      if (pendingPlacementsRef.current && tierlistIdRef.current) {
+        api.updatePlacements(tierlistIdRef.current, pendingPlacementsRef.current);
+        pendingPlacementsRef.current = null;
       }
     };
   }, []);
@@ -173,19 +172,7 @@ export function SharedTierlistPage({ mode }: SharedTierlistPageProps) {
     );
   }
 
-  const effectiveTemplate: Template = tierlist.template ?? {
-    id: tierlist.templateId ?? 'deleted',
-    ownerId: '',
-    title: tierlist.title,
-    description: null,
-    isPublic: false,
-    shareToken: null,
-    createdAt: '',
-    updatedAt: '',
-    tiers: tierlist.templateSnapshot?.tiers.map(tier => ({ ...tier, templateId: '' })) ?? [],
-    columns: tierlist.templateSnapshot?.columns.map(col => ({ ...col, templateId: '' })) ?? [],
-    cards: tierlist.templateSnapshot?.cards.map(card => ({ ...card, templateId: '' })) ?? [],
-  };
+  const effectiveTemplate = buildEffectiveTemplate(tierlist);
 
   return (
     <div className="shared-tierlist-page">
@@ -201,9 +188,13 @@ export function SharedTierlistPage({ mode }: SharedTierlistPageProps) {
             {tierlist.template?.title ? (
               <>
                 {t('home.basedOn')} "{tierlist.template.title}"
+                {hasQuickEdits(tierlist.displaySettings) && ` ${t('tierlist.edited')}`}
               </>
             ) : (
-              t('tierlist.basedOnDeleted')
+              <>
+                {t('tierlist.basedOnDeleted')}
+                {hasQuickEdits(tierlist.displaySettings) && ` ${t('tierlist.edited')}`}
+              </>
             )}
           </p>
           {tierlist.templateSnapshot?.snapshotAt && (
@@ -241,6 +232,7 @@ export function SharedTierlistPage({ mode }: SharedTierlistPageProps) {
         placements={placements}
         onPlacementsChange={handlePlacementsChange}
         readOnly={!canEdit}
+        displaySettings={tierlist.displaySettings}
       />
     </div>
   );

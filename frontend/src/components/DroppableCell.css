@@ -1,12 +1,13 @@
 .droppable-cell {
   background: var(--color-bg-elevated);
-  min-height: 88px;
+  min-height: 116px;
   padding: 2px;
   display: flex;
   flex-wrap: wrap;
   gap: 2px;
   align-content: flex-start;
   transition: background-color 150ms ease;
+  position: relative;
 }
 
 .droppable-cell.is-over {
@@ -15,14 +16,18 @@
   outline-offset: -2px;
 }
 
+.droppable-cell.blocked {
+  pointer-events: none;
+}
+
 @media (max-width: 770px) {
   .droppable-cell {
-    min-height: 76px;
+    min-height: 102px;
   }
 }
 
 @media (max-width: 400px) {
   .droppable-cell {
-    min-height: 64px;
+    min-height: 90px;
   }
 }

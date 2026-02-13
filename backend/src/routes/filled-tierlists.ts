@@ -120,6 +120,7 @@ filledTierlists.post("/", requireAuth, async (c) => {
     columns: template.columns.map((c) => ({
       id: c.id,
       name: c.name,
+      color: c.color,
       orderIndex: c.orderIndex,
     })),
     cards: template.cards.map((c) => ({
@@ -366,6 +367,15 @@ filledTierlists.put("/:id", requireAuth, async (c) => {
       .where(eq(schema.filledTierlists.id, id));
   }
 
+  if (body.displaySettings !== undefined) {
+    const settings = body.displaySettings;
+    if (settings === null || (typeof settings === "object" && !Array.isArray(settings))) {
+      await db.update(schema.filledTierlists)
+        .set({ displaySettings: settings })
+        .where(eq(schema.filledTierlists.id, id));
+    }
+  }
+
   return c.json({ success: true });
 });
 
@@ -520,6 +530,7 @@ filledTierlists.post("/:id/copy", requireAuth, async (c) => {
     ownerId: user.userId,
     title: copyTitle,
     templateSnapshot: sourceList.templateSnapshot,
+    displaySettings: sourceList.displaySettings,
     viewShareToken: viewToken,
     viewShareEnabled: false,
     editShareToken: editToken,

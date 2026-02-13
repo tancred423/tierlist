@@ -47,8 +47,8 @@
 }
 
 .draggable-card.show-details.compact {
-  width: 84px;
-  height: 84px;
+  width: 96px;
+  height: 110px;
 }
 
 .draggable-card .card-image {
@@ -128,6 +128,11 @@
 
 .draggable-card.show-details.compact .card-title {
   font-size: 0.6875rem;
+  white-space: normal;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .draggable-card.show-details.compact .card-desc {
@@ -172,6 +177,44 @@
   margin: 0;
 }
 
+.card-hover-actions {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  display: flex;
+  gap: 1px;
+  opacity: 0;
+  transition: opacity 150ms ease;
+  z-index: 15;
+}
+
+.draggable-card:hover .card-hover-actions {
+  opacity: 1;
+}
+
+.card-action-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  padding: 0;
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  transition: background 150ms ease;
+}
+
+.card-action-btn:hover {
+  background: rgba(0, 0, 0, 0.85);
+}
+
+.card-delete-action:hover {
+  background: rgba(239, 68, 68, 0.9);
+}
+
 .card-overlay {
   touch-action: none;
   box-shadow: var(--shadow-lg);
@@ -201,8 +244,8 @@
   }
 
   .draggable-card.show-details.compact {
-    width: 72px;
-    height: 72px;
+    width: 80px;
+    height: 96px;
   }
 }
 
@@ -231,8 +274,8 @@
   }
 
   .draggable-card.show-details.compact {
-    width: 60px;
-    height: 60px;
+    width: 68px;
+    height: 84px;
   }
 
   .draggable-card.show-details.compact .card-no-image {

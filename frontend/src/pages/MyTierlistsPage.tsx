@@ -3,8 +3,11 @@ import { Link } from 'react-router-dom';
 import { api } from '../api/client';
 import { useClockFormatStore } from '../stores/clockFormat';
 import { useI18n } from '../i18n';
+import { usePageTitle } from '../hooks/usePageTitle';
 import { getDisplayName } from '../types';
 import type { FilledTierlist, Pagination as PaginationType } from '../types';
+import { formatDate } from '../utils/format';
+import { sortByOrder } from '../utils/tierlist';
 import { Pagination } from '../components/Pagination';
 import './MyTierlistsPage.css';
 
@@ -18,18 +21,6 @@ function getImageUrl(url: string | null): string | null {
   return url;
 }
 
-function formatDate(dateString: string, language: string, clockFormat: '12h' | '24h'): string {
-  const date = new Date(dateString);
-  return date.toLocaleDateString(language === 'de' ? 'de-DE' : 'en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: clockFormat === '12h',
-  });
-}
-
 interface TierlistWithCoOwner extends FilledTierlist {
   isCoOwner: boolean;
 }
@@ -41,6 +32,8 @@ interface TierlistCardProps {
   clockFormat: '12h' | '24h';
 }
 
+import { hasQuickEdits } from '../utils/tierlist';
+
 function TierlistCard({ tierlist, t, language, clockFormat }: TierlistCardProps) {
   const maxTiers = 5;
   const maxCols = 5;
@@ -48,15 +41,28 @@ function TierlistCard({ tierlist, t, language, clockFormat }: TierlistCardProps)
 
   const template = tierlist.template;
   const snapshot = tierlist.templateSnapshot;
+  const ds = tierlist.displaySettings;
 
-  const tiers = template?.tiers ?? snapshot?.tiers ?? [];
-  const cols = template?.columns ?? snapshot?.columns ?? [];
-  const cards = template?.cards ?? snapshot?.cards ?? [];
+  const rawTiers = template?.tiers ?? snapshot?.tiers ?? [];
+  const rawCols = template?.columns ?? snapshot?.columns ?? [];
+  const cards = [
+    ...(template?.cards ?? snapshot?.cards ?? []),
+    ...(ds?.additionalCards?.map(c => ({ ...c, templateId: '', orderIndex: 99999 })) ?? []),
+  ];
 
-  if (tiers.length === 0 && cols.length === 0) return null;
+  if (rawTiers.length === 0 && rawCols.length === 0) return null;
 
-  const sortedTiers = [...tiers].sort((a, b) => a.orderIndex - b.orderIndex);
-  const sortedCols = [...cols].sort((a, b) => a.orderIndex - b.orderIndex);
+  const tiers = rawTiers.map(tier => {
+    const ov = ds?.tierOverrides?.[tier.id];
+    return ov ? { ...tier, name: ov.name ?? tier.name, color: ov.color ?? tier.color } : tier;
+  });
+  const cols = rawCols.map(col => {
+    const ov = ds?.columnOverrides?.[col.id];
+    return ov ? { ...col, name: ov.name ?? col.name } : col;
+  });
+
+  const sortedTiers = sortByOrder(tiers, ds?.tierOrder);
+  const sortedCols = sortByOrder(cols, ds?.columnOrder);
 
   const visibleTiers = sortedTiers.slice(0, maxTiers);
   const extraTiers = sortedTiers.length - maxTiers;
@@ -96,9 +102,13 @@ function TierlistCard({ tierlist, t, language, clockFormat }: TierlistCardProps)
             <>
               {t('home.basedOn')} "{template.title}"{' '}
               {template.owner ? `${t('template.by')} ${getDisplayName(template.owner)}` : ''}
+              {hasQuickEdits(tierlist.displaySettings) && ` ${t('tierlist.edited')}`}
             </>
           ) : (
-            t('tierlist.basedOnDeleted')
+            <>
+              {t('tierlist.basedOnDeleted')}
+              {hasQuickEdits(tierlist.displaySettings) && ` ${t('tierlist.edited')}`}
+            </>
           )}
         </span>
         {snapshot?.snapshotAt && (
@@ -189,6 +199,7 @@ export function MyTierlistsPage() {
   const { t, language } = useI18n();
   const { getEffectiveFormat } = useClockFormatStore();
   const clockFormat = getEffectiveFormat();
+  usePageTitle(t('myTierlists.title'));
 
   const loadData = useCallback(async () => {
     setIsLoading(true);

@@ -6,13 +6,23 @@ interface DroppableCellProps {
   isOver: boolean;
   className?: string;
   children: React.ReactNode;
+  blocked?: boolean;
 }
 
-export function DroppableCell({ id, isOver, className = '', children }: DroppableCellProps) {
-  const { setNodeRef } = useDroppable({ id });
+export function DroppableCell({
+  id,
+  isOver,
+  className = '',
+  children,
+  blocked,
+}: DroppableCellProps) {
+  const { setNodeRef } = useDroppable({ id, disabled: blocked });
 
   return (
-    <div ref={setNodeRef} className={`droppable-cell ${isOver ? 'is-over' : ''} ${className}`}>
+    <div
+      ref={setNodeRef}
+      className={`droppable-cell ${isOver && !blocked ? 'is-over' : ''} ${blocked ? 'blocked' : ''} ${className}`}
+    >
       {children}
     </div>
   );

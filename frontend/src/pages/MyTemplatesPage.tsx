@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { api } from '../api/client';
 import { useClockFormatStore } from '../stores/clockFormat';
 import { useI18n } from '../i18n';
+import { usePageTitle } from '../hooks/usePageTitle';
 import type { Template, Pagination as PaginationType } from '../types';
 import { Pagination } from '../components/Pagination';
 import './MyTemplatesPage.css';
@@ -53,7 +54,7 @@ function TemplateCard({ template, t, language, clockFormat }: TemplateCardProps)
   const extraCards = sortedCards.length - maxCards;
 
   return (
-    <Link to={`/template/${template.id}/preview`} className="template-card card template-card-link">
+    <Link to={`/template/${template.id}`} className="template-card card template-card-link">
       <div className="template-header">
         <h3 className="template-title">{template.title}</h3>
         <span className={`visibility-badge ${template.isPublic ? 'public' : 'private'}`}>
@@ -129,6 +130,7 @@ export function MyTemplatesPage() {
   const { t, language } = useI18n();
   const { getEffectiveFormat } = useClockFormatStore();
   const clockFormat = getEffectiveFormat();
+  usePageTitle(t('myTemplates.title'));
 
   const loadData = useCallback(async () => {
     setIsLoading(true);
@@ -168,9 +170,6 @@ export function MyTemplatesPage() {
         <div className="empty-state">
           <p>{t('myTemplates.empty')}</p>
           <p>{t('myTemplates.createFirst')}</p>
-          <Link to="/template/new" className="btn btn-secondary" style={{ marginTop: '1rem' }}>
-            + {t('home.createNewTemplate')}
-          </Link>
         </div>
       ) : (
         <>

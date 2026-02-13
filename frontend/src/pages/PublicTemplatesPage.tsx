@@ -4,6 +4,7 @@ import { api } from '../api/client';
 import { useAuthStore } from '../stores/auth';
 import { useClockFormatStore } from '../stores/clockFormat';
 import { useI18n } from '../i18n';
+import { usePageTitle } from '../hooks/usePageTitle';
 import { getDisplayName } from '../types';
 import type { Pagination as PaginationType, Template } from '../types';
 import { Pagination } from '../components/Pagination';
@@ -70,7 +71,7 @@ function TemplateCard({
   const extraCards = sortedCards.length - maxCards;
 
   return (
-    <Link to={`/template/${template.id}/preview`} className="template-card card template-card-link">
+    <Link to={`/template/${template.id}`} className="template-card card template-card-link">
       <div className="template-header">
         <div className="template-header-top">
           <h3 className="template-title">{template.title}</h3>
@@ -177,6 +178,7 @@ export function PublicTemplatesPage() {
   const { t, language } = useI18n();
   const { getEffectiveFormat } = useClockFormatStore();
   const clockFormat = getEffectiveFormat();
+  usePageTitle(t('publicTemplates.title'));
 
   const loadData = useCallback(async () => {
     setIsLoading(true);

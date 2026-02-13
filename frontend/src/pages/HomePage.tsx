@@ -2,12 +2,14 @@ import { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../stores/auth';
 import { useI18n } from '../i18n';
+import { usePageTitle } from '../hooks/usePageTitle';
 import './HomePage.css';
 
 export function HomePage() {
   const [authError, setAuthError] = useState<string | null>(null);
   const { user, login } = useAuthStore();
   const { t } = useI18n();
+  usePageTitle('Tierlist');
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
 

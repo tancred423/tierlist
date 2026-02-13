@@ -4,54 +4,16 @@ import { api } from '../api/client';
 import { useAuthStore } from '../stores/auth';
 import { useClockFormatStore } from '../stores/clockFormat';
 import { useI18n } from '../i18n';
+import { usePageTitle } from '../hooks/usePageTitle';
 import { getDisplayName } from '../types';
-import type { FilledTierlist, CardPlacement, PlacementData, Template } from '../types';
+import type { FilledTierlist, CardPlacement, PlacementData } from '../types';
+import { hasQuickEdits, buildEffectiveTemplate } from '../utils/tierlist';
+import { formatDate } from '../utils/format';
 import { TierlistGrid } from '../components/TierlistGrid';
 import { ShareModal } from '../components/ShareModal';
+import { ShareIcon } from '../components/icons/ShareIcon';
+import { MoreIcon } from '../components/icons/MoreIcon';
 import './TierlistEditorPage.css';
-
-function ShareIcon() {
-  return (
-    <svg
-      width="16"
-      height="16"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <circle cx="18" cy="5" r="3" />
-      <circle cx="6" cy="12" r="3" />
-      <circle cx="18" cy="19" r="3" />
-      <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
-      <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
-    </svg>
-  );
-}
-
-function MoreIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-      <circle cx="12" cy="5" r="2" />
-      <circle cx="12" cy="12" r="2" />
-      <circle cx="12" cy="19" r="2" />
-    </svg>
-  );
-}
-
-function formatDate(dateString: string, language: string, clockFormat: '12h' | '24h'): string {
-  const date = new Date(dateString);
-  return date.toLocaleDateString(language === 'de' ? 'de-DE' : 'en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: clockFormat === '12h',
-  });
-}
 
 export function TierlistEditorPage() {
   const { id } = useParams<{ id: string }>();
@@ -70,6 +32,7 @@ export function TierlistEditorPage() {
   const [isCopying, setIsCopying] = useState(false);
   const [isCreatingTemplate, setIsCreatingTemplate] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  usePageTitle(tierlist ? `${t('pageTitle.tierlist')}: ${tierlist.title}` : '');
 
   const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pendingPlacementsRef = useRef<PlacementData[] | null>(null);
@@ -110,8 +73,12 @@ export function TierlistEditorPage() {
       if (saveTimeoutRef.current) {
         clearTimeout(saveTimeoutRef.current);
       }
+      if (pendingPlacementsRef.current && id) {
+        api.updatePlacements(id, pendingPlacementsRef.current);
+        pendingPlacementsRef.current = null;
+      }
     };
-  }, []);
+  }, [id]);
 
   const savePlacements = useCallback(
     async (placementData: PlacementData[]) => {
@@ -160,6 +127,165 @@ export function TierlistEditorPage() {
     }
   }
 
+  const handleDisplaySettingsChange = useCallback(
+    (displaySettings: import('../types').DisplaySettings) => {
+      if (!id || !tierlist) return;
+
+      setTierlist(prev => (prev ? { ...prev, displaySettings } : prev));
+
+      setSaveStatus('saving');
+      api
+        .updateFilledTierlist(id, { displaySettings })
+        .then(() => setSaveStatus('saved'))
+        .catch(() => setSaveStatus('error'));
+    },
+    [id, tierlist],
+  );
+
+  const handleTierAdd = useCallback(() => {
+    if (!tierlist) return;
+    const ds = tierlist.displaySettings || {};
+    const baseTiers = tierlist.template?.tiers ?? tierlist.templateSnapshot?.tiers ?? [];
+    const totalTiers =
+      baseTiers.length + (ds.additionalTiers?.length || 0) - (ds.hiddenTierIds?.length || 0);
+    const newTier = {
+      id: `qe-tier-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+      name: `Tier ${totalTiers + 1}`,
+      color: '#888888',
+      orderIndex: baseTiers.length + (ds.additionalTiers?.length || 0),
+    };
+    const additionalTiers = [...(ds.additionalTiers || []), newTier];
+    handleDisplaySettingsChange({ ...ds, additionalTiers });
+  }, [tierlist, handleDisplaySettingsChange]);
+
+  const handleTierDelete = useCallback(
+    (tierId: string) => {
+      if (!tierlist) return;
+      if (!confirm(t('template.deleteTierConfirm'))) return;
+      const ds = tierlist.displaySettings || {};
+      const isAdditional = (ds.additionalTiers || []).some(t => t.id === tierId);
+      const newDs = { ...ds };
+      if (isAdditional) {
+        newDs.additionalTiers = (ds.additionalTiers || []).filter(t => t.id !== tierId);
+      } else {
+        newDs.hiddenTierIds = [...(ds.hiddenTierIds || []), tierId];
+      }
+      const newPlacements = placements.map(p => {
+        if (p.tierId === tierId) {
+          return { ...p, tierId: null, columnId: null, orderIndex: 999 };
+        }
+        return p;
+      });
+      handleDisplaySettingsChange(newDs);
+      handlePlacementsChange(
+        newPlacements.map(p => ({
+          cardId: p.cardId,
+          tierId: p.tierId,
+          columnId: p.columnId,
+          orderIndex: p.orderIndex,
+        })),
+      );
+    },
+    [tierlist, placements, handleDisplaySettingsChange, handlePlacementsChange, t],
+  );
+
+  const handleColumnAdd = useCallback(() => {
+    if (!tierlist) return;
+    const ds = tierlist.displaySettings || {};
+    const baseCols = tierlist.template?.columns ?? tierlist.templateSnapshot?.columns ?? [];
+    const newCol = {
+      id: `qe-col-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+      name: '',
+      orderIndex: baseCols.length + (ds.additionalColumns?.length || 0),
+    };
+    const additionalColumns = [...(ds.additionalColumns || []), newCol];
+    handleDisplaySettingsChange({ ...ds, additionalColumns });
+  }, [tierlist, handleDisplaySettingsChange]);
+
+  const handleColumnDelete = useCallback(
+    (colId: string) => {
+      if (!tierlist) return;
+      if (!confirm(t('template.deleteColumnConfirm'))) return;
+      const ds = tierlist.displaySettings || {};
+      const isAdditional = (ds.additionalColumns || []).some(c => c.id === colId);
+      const newDs = { ...ds };
+      if (isAdditional) {
+        newDs.additionalColumns = (ds.additionalColumns || []).filter(c => c.id !== colId);
+      } else {
+        newDs.hiddenColumnIds = [...(ds.hiddenColumnIds || []), colId];
+      }
+      const newPlacements = placements.map(p => {
+        if (p.columnId === colId) {
+          return { ...p, tierId: null, columnId: null, orderIndex: 999 };
+        }
+        return p;
+      });
+      handleDisplaySettingsChange(newDs);
+      handlePlacementsChange(
+        newPlacements.map(p => ({
+          cardId: p.cardId,
+          tierId: p.tierId,
+          columnId: p.columnId,
+          orderIndex: p.orderIndex,
+        })),
+      );
+    },
+    [tierlist, placements, handleDisplaySettingsChange, handlePlacementsChange, t],
+  );
+
+  const handleCardEdit = useCallback(
+    (cardId: string, data: { title: string; imageUrl?: string; description?: string }) => {
+      if (!tierlist) return;
+      const ds = tierlist.displaySettings || {};
+      const additionalCards = ds.additionalCards || [];
+      const isAdditional = additionalCards.some(c => c.id === cardId);
+      if (isAdditional) {
+        const updatedCards = additionalCards.map(c =>
+          c.id === cardId
+            ? {
+                ...c,
+                title: data.title,
+                imageUrl: data.imageUrl || null,
+                description: data.description || null,
+              }
+            : c,
+        );
+        handleDisplaySettingsChange({ ...ds, additionalCards: updatedCards });
+      } else {
+        const cardOverrides = { ...(ds.cardOverrides || {}), [cardId]: data };
+        handleDisplaySettingsChange({ ...ds, cardOverrides });
+      }
+    },
+    [tierlist, handleDisplaySettingsChange],
+  );
+
+  const handleCardDelete = useCallback(
+    (cardId: string) => {
+      if (!tierlist) return;
+      if (!confirm(t('card.deleteConfirm'))) return;
+      const ds = tierlist.displaySettings || {};
+      const additionalCards = ds.additionalCards || [];
+      const isAdditional = additionalCards.some(c => c.id === cardId);
+      const newDs = { ...ds };
+      if (isAdditional) {
+        newDs.additionalCards = additionalCards.filter(c => c.id !== cardId);
+      } else {
+        newDs.removedCardIds = [...(ds.removedCardIds || []), cardId];
+      }
+      const newPlacements = placements.filter(p => p.cardId !== cardId);
+      handleDisplaySettingsChange(newDs);
+      handlePlacementsChange(
+        newPlacements.map(p => ({
+          cardId: p.cardId,
+          tierId: p.tierId,
+          columnId: p.columnId,
+          orderIndex: p.orderIndex,
+        })),
+      );
+    },
+    [tierlist, placements, handleDisplaySettingsChange, handlePlacementsChange, t],
+  );
+
   async function handleDeleteTierlist(tierlistId: string) {
     if (!confirm(t('tierlist.deleteConfirm'))) return;
 
@@ -199,7 +325,7 @@ export function TierlistEditorPage() {
     setIsCreatingTemplate(true);
     try {
       const { template } = await api.createTemplateFromTierlist(tierlistId);
-      navigate(`/template/${template.id}/edit`);
+      navigate(`/template/${template.id}`);
     } catch (error) {
       console.error('Failed to create template:', error);
       setIsCreatingTemplate(false);
@@ -227,19 +353,7 @@ export function TierlistEditorPage() {
   const isOwner = tierlist.ownerId === user?.id;
   const isCoOwner = canEdit && !isOwner;
 
-  const effectiveTemplate: Template = tierlist.template ?? {
-    id: tierlist.templateId ?? 'deleted',
-    ownerId: '',
-    title: tierlist.title,
-    description: null,
-    isPublic: false,
-    shareToken: null,
-    createdAt: '',
-    updatedAt: '',
-    tiers: tierlist.templateSnapshot?.tiers.map(tier => ({ ...tier, templateId: '' })) ?? [],
-    columns: tierlist.templateSnapshot?.columns.map(col => ({ ...col, templateId: '' })) ?? [],
-    cards: tierlist.templateSnapshot?.cards.map(card => ({ ...card, templateId: '' })) ?? [],
-  };
+  const effectiveTemplate = buildEffectiveTemplate(tierlist);
 
   return (
     <div className="tierlist-editor-page">
@@ -271,9 +385,13 @@ export function TierlistEditorPage() {
                 {tierlist.template.owner
                   ? `${t('template.by')} ${getDisplayName(tierlist.template.owner)}`
                   : ''}
+                {hasQuickEdits(tierlist.displaySettings) && ` ${t('tierlist.edited')}`}
               </>
             ) : (
-              t('tierlist.basedOnDeleted')
+              <>
+                {t('tierlist.basedOnDeleted')}
+                {hasQuickEdits(tierlist.displaySettings) && ` ${t('tierlist.edited')}`}
+              </>
             )}
           </p>
           {tierlist.templateSnapshot?.snapshotAt && (
@@ -357,8 +475,16 @@ export function TierlistEditorPage() {
       <TierlistGrid
         template={effectiveTemplate}
         placements={placements}
-        onPlacementsChange={handlePlacementsChange}
+        onPlacementsChange={canEdit ? handlePlacementsChange : undefined}
         readOnly={!canEdit}
+        displaySettings={tierlist.displaySettings}
+        onDisplaySettingsChange={canEdit ? handleDisplaySettingsChange : undefined}
+        onTierAdd={canEdit ? handleTierAdd : undefined}
+        onTierDelete={canEdit ? handleTierDelete : undefined}
+        onColumnAdd={canEdit ? handleColumnAdd : undefined}
+        onColumnDelete={canEdit ? handleColumnDelete : undefined}
+        onCardEdit={canEdit ? handleCardEdit : undefined}
+        onCardDelete={canEdit ? handleCardDelete : undefined}
       />
 
       {showShareModal && tierlist && (

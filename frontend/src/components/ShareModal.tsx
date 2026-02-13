@@ -104,6 +104,15 @@ export function ShareModal({ tierlist, onClose, onUpdate }: ShareModalProps) {
           getComputedStyle(document.documentElement).getPropertyValue('--color-bg').trim() ||
           '#0f0f0f',
         scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        onclone: (clonedDoc: Document) => {
+          clonedDoc
+            .querySelectorAll('.tier-move-btn, .col-move-btn, .tier-edit-btn, .col-edit-btn')
+            .forEach(el => {
+              (el as HTMLElement).style.display = 'none';
+            });
+        },
       });
 
       const link = document.createElement('a');

@@ -210,6 +210,7 @@ templates.post("/", requireAuth, async (c) => {
       id: generateId(),
       templateId,
       name: columns[i].name || null,
+      color: columns[i].color || null,
       orderIndex: i,
     });
   }
@@ -338,6 +339,7 @@ templates.post("/share/:token/copy", requireAuth, async (c) => {
       id: newColumnId,
       templateId: newTemplateId,
       name: column.name,
+      color: column.color,
       orderIndex: column.orderIndex,
     });
   }
@@ -414,6 +416,7 @@ templates.post("/:id/copy", requireAuth, async (c) => {
       id: generateId(),
       templateId: newTemplateId,
       name: column.name,
+      color: column.color,
       orderIndex: column.orderIndex,
     });
   }
@@ -496,6 +499,7 @@ templates.post("/from-tierlist/:tierlistId", requireAuth, async (c) => {
       id: generateId(),
       templateId: newTemplateId,
       name: column.name,
+      color: column.color || null,
       orderIndex: column.orderIndex,
     });
   }
@@ -606,6 +610,7 @@ templates.put("/:id", requireAuth, async (c) => {
         id: column.id || generateId(),
         templateId: id,
         name: column.name,
+        color: column.color || null,
         orderIndex: i,
       });
     }

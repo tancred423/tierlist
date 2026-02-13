@@ -2,8 +2,11 @@ import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { api } from '../api/client';
 import { useAuthStore } from '../stores/auth';
+import { useI18n } from '../i18n';
+import { usePageTitle } from '../hooks/usePageTitle';
 import { getDisplayName } from '../types';
-import type { Template } from '../types';
+import type { Template, CardPlacement } from '../types';
+import { TierlistGrid } from '../components/TierlistGrid';
 import './SharedTemplatePage.css';
 
 export function SharedTemplatePage() {
@@ -11,10 +14,12 @@ export function SharedTemplatePage() {
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useAuthStore();
+  const { t } = useI18n();
 
   const [template, setTemplate] = useState<Template | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isCopying, setIsCopying] = useState(false);
+  usePageTitle(template ? `${t('pageTitle.template')}: ${template.title}` : '');
 
   const loadTemplate = useCallback(async () => {
     if (!token) return;
@@ -47,7 +52,7 @@ export function SharedTemplatePage() {
     setIsCopying(true);
     try {
       const { template: newTemplate } = await api.copyTemplateByShareToken(token);
-      navigate(`/template/${newTemplate.id}/edit`);
+      navigate(`/template/${newTemplate.id}`);
     } catch (error) {
       console.error('Failed to copy template:', error);
       alert('Failed to copy template');
@@ -94,57 +99,53 @@ export function SharedTemplatePage() {
     );
   }
 
+  const allUnrankedPlacements: CardPlacement[] = template.cards.map((card, index) => ({
+    id: `placement-${card.id}`,
+    filledTierlistId: '',
+    cardId: card.id,
+    tierId: null,
+    columnId: null,
+    orderIndex: index,
+  }));
+
+  const gridOverlayContent = (
+    <div className="grid-overlay-content">
+      <p className="grid-overlay-text">{t('template.cellBlockedVisitor')}</p>
+      <button className="btn btn-primary btn-sm" onClick={handleCopy} disabled={isCopying}>
+        {isCopying ? t('common.loading') : t('template.copyTemplate')}
+      </button>
+    </div>
+  );
+
   return (
-    <div className="container shared-template-page">
-      <div className="shared-template-card card">
-        <div className="template-header">
+    <div className="shared-template-page-grid">
+      <div className="shared-template-header">
+        <div className="shared-template-header-info">
           <h1>{template.title}</h1>
-          {template.owner && <p className="template-author">by {getDisplayName(template.owner)}</p>}
+          {template.owner && (
+            <p className="text-muted">
+              {t('template.by')} {getDisplayName(template.owner)}
+            </p>
+          )}
+          {template.description && <p className="text-muted">{template.description}</p>}
         </div>
-
-        {template.description && <p className="template-description">{template.description}</p>}
-
-        <div className="template-stats">
-          <div className="stat">
-            <span className="stat-value">{template.tiers.length}</span>
-            <span className="stat-label">Tiers</span>
-          </div>
-          <div className="stat">
-            <span className="stat-value">{template.columns.length}</span>
-            <span className="stat-label">Columns</span>
-          </div>
-          <div className="stat">
-            <span className="stat-value">{template.cards.length}</span>
-            <span className="stat-label">Cards</span>
-          </div>
-        </div>
-
-        <div className="template-preview">
-          <h3>Tiers</h3>
-          <div className="tiers-preview">
-            {template.tiers.map(tier => (
-              <div key={tier.id} className="tier-chip" style={{ backgroundColor: tier.color }}>
-                {tier.name}
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="template-actions">
-          <button onClick={handleStartTierlist} className="btn btn-primary">
-            Start Tierlist
+        <div className="shared-template-header-actions">
+          <button onClick={handleCopy} className="btn btn-secondary btn-sm" disabled={isCopying}>
+            {isCopying ? t('common.loading') : t('template.copyTemplate')}
           </button>
-          <button onClick={handleCopy} className="btn btn-secondary" disabled={isCopying}>
-            {isCopying ? 'Copying...' : 'Copy Template to My Account'}
+          <button onClick={handleStartTierlist} className="btn btn-primary btn-sm">
+            {user ? t('home.startRanking') : t('auth.loginToStartRanking')}
           </button>
         </div>
-
-        {!user && (
-          <p className="login-hint">
-            Login with Discord to create tierlists or copy this template.
-          </p>
-        )}
       </div>
+
+      <TierlistGrid
+        template={template}
+        placements={allUnrankedPlacements}
+        cellsBlocked
+        gridOverlay={gridOverlayContent}
+        readOnly
+      />
     </div>
   );
 }

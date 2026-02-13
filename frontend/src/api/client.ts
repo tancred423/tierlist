@@ -153,6 +153,74 @@ class ApiClient {
     });
   }
 
+  async addTier(
+    templateId: string,
+    data: { name?: string; color?: string; orderIndex?: number },
+  ): Promise<{ tier: import('../types').Tier }> {
+    return this.request(`/api/tiers/${templateId}`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async updateTier(
+    id: string,
+    data: { name?: string; color?: string },
+  ): Promise<{ tier: import('../types').Tier }> {
+    return this.request(`/api/tiers/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async deleteTier(id: string): Promise<{ success: boolean }> {
+    return this.request(`/api/tiers/${id}`, { method: 'DELETE' });
+  }
+
+  async reorderTiers(
+    templateId: string,
+    tierOrders: { id: string; orderIndex: number }[],
+  ): Promise<{ success: boolean }> {
+    return this.request(`/api/tiers/${templateId}/reorder`, {
+      method: 'PUT',
+      body: JSON.stringify({ tierOrders }),
+    });
+  }
+
+  async addColumn(
+    templateId: string,
+    data: { name?: string; color?: string; orderIndex?: number },
+  ): Promise<{ column: import('../types').Column }> {
+    return this.request(`/api/columns/${templateId}`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async updateColumn(
+    id: string,
+    data: { name?: string; color?: string },
+  ): Promise<{ column: import('../types').Column }> {
+    return this.request(`/api/columns/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async deleteColumn(id: string): Promise<{ success: boolean }> {
+    return this.request(`/api/columns/${id}`, { method: 'DELETE' });
+  }
+
+  async reorderColumns(
+    templateId: string,
+    columnOrders: { id: string; orderIndex: number }[],
+  ): Promise<{ success: boolean }> {
+    return this.request(`/api/columns/${templateId}/reorder`, {
+      method: 'PUT',
+      body: JSON.stringify({ columnOrders }),
+    });
+  }
+
   async getMyFilledTierlists(params?: { page?: number; limit?: number }): Promise<{
     tierlists: (import('../types').FilledTierlist & { isCoOwner: boolean })[];
     owned: import('../types').FilledTierlist[];
@@ -197,7 +265,12 @@ class ApiClient {
 
   async updateFilledTierlist(
     id: string,
-    data: { title?: string; viewShareEnabled?: boolean; editShareEnabled?: boolean },
+    data: {
+      title?: string;
+      viewShareEnabled?: boolean;
+      editShareEnabled?: boolean;
+      displaySettings?: import('../types').DisplaySettings | null;
+    },
   ): Promise<{ success: boolean }> {
     return this.request(`/api/filled-tierlists/${id}`, {
       method: 'PUT',

@@ -37,6 +37,7 @@ export const columns = mysqlTable("columns", {
   id: varchar("id", { length: 36 }).primaryKey(),
   templateId: varchar("template_id", { length: 36 }).notNull().references(() => templates.id, { onDelete: "cascade" }),
   name: varchar("name", { length: 255 }),
+  color: varchar("color", { length: 7 }),
   orderIndex: int("order_index").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
@@ -52,9 +53,23 @@ export const cards = mysqlTable("cards", {
   updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
 });
 
+export interface DisplaySettings {
+  tierOrder?: string[];
+  columnOrder?: string[];
+  tierOverrides?: Record<string, { name?: string; color?: string }>;
+  columnOverrides?: Record<string, { name?: string }>;
+  additionalCards?: { id: string; title: string; imageUrl?: string | null; description?: string | null }[];
+  additionalTiers?: { id: string; name: string; color: string; orderIndex: number }[];
+  hiddenTierIds?: string[];
+  additionalColumns?: { id: string; name: string; orderIndex: number }[];
+  hiddenColumnIds?: string[];
+  removedCardIds?: string[];
+  cardOverrides?: Record<string, { title?: string; imageUrl?: string; description?: string }>;
+}
+
 export interface TemplateSnapshot {
   tiers: { id: string; name: string; color: string; orderIndex: number }[];
-  columns: { id: string; name: string | null; orderIndex: number }[];
+  columns: { id: string; name: string | null; color?: string | null; orderIndex: number }[];
   cards: { id: string; title: string; imageUrl: string | null; description: string | null; orderIndex: number }[];
   snapshotAt: string;
 }
@@ -65,6 +80,7 @@ export const filledTierlists = mysqlTable("filled_tierlists", {
   ownerId: varchar("owner_id", { length: 36 }).notNull().references(() => users.id, { onDelete: "cascade" }),
   title: varchar("title", { length: 255 }).notNull(),
   templateSnapshot: json("template_snapshot").$type<TemplateSnapshot>(),
+  displaySettings: json("display_settings").$type<DisplaySettings>(),
   viewShareToken: varchar("view_share_token", { length: 64 }).unique(),
   viewShareEnabled: boolean("view_share_enabled").default(false).notNull(),
   editShareToken: varchar("edit_share_token", { length: 64 }).unique(),

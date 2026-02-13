@@ -26,6 +26,7 @@ export interface Column {
   id: string;
   templateId: string;
   name: string | null;
+  color: string | null;
   orderIndex: number;
 }
 
@@ -70,7 +71,7 @@ export interface CoOwner {
 
 export interface TemplateSnapshot {
   tiers: { id: string; name: string; color: string; orderIndex: number }[];
-  columns: { id: string; name: string | null; orderIndex: number }[];
+  columns: { id: string; name: string | null; color?: string | null; orderIndex: number }[];
   cards: {
     id: string;
     title: string;
@@ -81,12 +82,34 @@ export interface TemplateSnapshot {
   snapshotAt: string;
 }
 
+export interface AdditionalCard {
+  id: string;
+  title: string;
+  imageUrl?: string | null;
+  description?: string | null;
+}
+
+export interface DisplaySettings {
+  tierOrder?: string[];
+  columnOrder?: string[];
+  tierOverrides?: Record<string, { name?: string; color?: string }>;
+  columnOverrides?: Record<string, { name?: string }>;
+  additionalCards?: AdditionalCard[];
+  additionalTiers?: Array<{ id: string; name: string; color: string; orderIndex: number }>;
+  hiddenTierIds?: string[];
+  additionalColumns?: Array<{ id: string; name: string; orderIndex: number }>;
+  hiddenColumnIds?: string[];
+  removedCardIds?: string[];
+  cardOverrides?: Record<string, { title?: string; imageUrl?: string; description?: string }>;
+}
+
 export interface FilledTierlist {
   id: string;
   templateId: string | null;
   ownerId: string;
   title: string;
   templateSnapshot?: TemplateSnapshot | null;
+  displaySettings?: DisplaySettings | null;
   viewShareToken: string | null;
   viewShareEnabled: boolean;
   editShareToken: string | null;

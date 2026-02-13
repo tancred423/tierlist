@@ -109,6 +109,8 @@
     "createTemplate": "Create Template",
     "editTemplate": "Edit Template",
     "newTemplate": "New Template",
+    "defaultCardTitle": "My first card",
+    "defaultCardDescription": "Edit me",
     "templateTitle": "Template Title",
     "description": "Description",
     "descriptionPlaceholder": "Optional description...",
@@ -127,12 +129,22 @@
     "sortAlphabeticallyConfirm": "Sort cards alphabetically? This will overwrite your manual sorting.",
     "unsavedChanges": "You have unsaved changes. Are you sure you want to close?",
     "deleteConfirm": "Are you sure you want to delete this template? This cannot be undone.",
+    "deleteTierConfirm": "Are you sure you want to delete this tier?",
+    "deleteColumnConfirm": "Are you sure you want to delete this column?",
     "copy": "Make a Copy",
     "copyTemplate": "Copy this Template",
     "atLeastOneCard": "At least one card is required",
     "previewTitle": "Template Preview",
     "previewHint": "This is a preview of the template. Start a tierlist to rank the cards!",
-    "preview": "Preview"
+    "preview": "Preview",
+    "cellBlockedTitle": "This is a template.",
+    "cellBlockedOwner": "Start a tierlist to rank cards.",
+    "cellBlockedVisitor": "Start a tierlist to rank cards.",
+    "cellBlockedCopyHint": "Or copy this template to make your own",
+    "shareTemplate": "Share Template",
+    "shareLink": "Share Link",
+    "shareLinkHint": "Anyone with this link can view and copy this template",
+    "linkCopied": "Link copied!"
   },
   "card": {
     "title": "Title",
@@ -154,10 +166,11 @@
     "squareImageHint": "Square images are recommended for best results",
     "noImageInClipboard": "No image found in clipboard",
     "clipboardPermissionDenied": "Clipboard access denied. Please allow access or use drag & drop.",
-    "clipboardError": "Could not read clipboard"
+    "clipboardError": "Could not read clipboard",
+    "edit": "Edit Card"
   },
   "tierlist": {
-    "unrankedCards": "Unranked Cards",
+    "unrankedCards": "Cards",
     "allCardsRanked": "All cards have been ranked!",
     "shareRanking": "Share Tierlist",
     "viewOnly": "View Only",
@@ -182,7 +195,16 @@
     "copying": "Copying...",
     "createTemplate": "Create Template",
     "creatingTemplate": "Creating...",
-    "basedOnDeleted": "Based on a deleted template"
+    "basedOnDeleted": "Based on a deleted template",
+    "moveRowUp": "Move row up",
+    "moveRowDown": "Move row down",
+    "moveColumnLeft": "Move column left",
+    "moveColumnRight": "Move column right",
+    "editRow": "Edit row",
+    "editColumn": "Edit column",
+    "edited": "(Edited)",
+    "addNewCard": "Add Card",
+    "column": "Column"
   },
   "share": {
     "shareTemplate": "Share Template",
@@ -278,6 +300,10 @@
     "deleteConfirm": "Are you sure you want to delete your account? This will permanently delete all your templates, tierlists, and data.",
     "deleteDoubleConfirm": "This is your FINAL confirmation. All your data will be permanently deleted. Are you absolutely sure?",
     "deleting": "Deleting..."
+  },
+  "pageTitle": {
+    "tierlist": "Tierlist",
+    "template": "Template"
   },
   "notFound": {
     "title": "Page Not Found",

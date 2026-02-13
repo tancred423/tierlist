@@ -9,8 +9,7 @@ import { MyTemplatesPage } from './pages/MyTemplatesPage';
 import { PublicTemplatesPage } from './pages/PublicTemplatesPage';
 import { AuthCallbackPage } from './pages/AuthCallbackPage';
 import { LoginPage } from './pages/LoginPage';
-import { TemplateEditorPage } from './pages/TemplateEditorPage';
-import { TemplatePreviewPage } from './pages/TemplatePreviewPage';
+import { TemplatePage } from './pages/TemplatePage';
 import { TierlistEditorPage } from './pages/TierlistEditorPage';
 import { SharedTemplatePage } from './pages/SharedTemplatePage';
 import { SharedTierlistPage } from './pages/SharedTierlistPage';
@@ -61,27 +60,11 @@ function App() {
           path="template/new"
           element={
             <RequireAuth>
-              <TemplateEditorPage />
+              <TemplatePage />
             </RequireAuth>
           }
         />
-        <Route path="template/:id/preview" element={<TemplatePreviewPage />} />
-        <Route
-          path="template/:id/edit"
-          element={
-            <RequireAuth>
-              <TemplateEditorPage />
-            </RequireAuth>
-          }
-        />
-        <Route
-          path="template/:id"
-          element={
-            <RequireAuth>
-              <TemplateEditorPage />
-            </RequireAuth>
-          }
-        />
+        <Route path="template/:id" element={<TemplatePage />} />
         <Route
           path="tierlist/:id"
           element={

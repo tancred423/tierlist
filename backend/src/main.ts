@@ -8,6 +8,8 @@ import templatesRoutes from "./routes/templates.ts";
 import cardsRoutes from "./routes/cards.ts";
 import filledTierlistsRoutes from "./routes/filled-tierlists.ts";
 import uploadsRoutes from "./routes/uploads.ts";
+import tiersRoutes from "./routes/tiers.ts";
+import columnsRoutes from "./routes/columns.ts";
 
 const app = new Hono();
 
@@ -47,6 +49,8 @@ app.route("/api/templates", templatesRoutes);
 app.route("/api/cards", cardsRoutes);
 app.route("/api/filled-tierlists", filledTierlistsRoutes);
 app.route("/api/uploads", uploadsRoutes);
+app.route("/api/tiers", tiersRoutes);
+app.route("/api/columns", columnsRoutes);
 
 app.notFound((c) => {
   return c.json({ error: "Not found" }, 404);

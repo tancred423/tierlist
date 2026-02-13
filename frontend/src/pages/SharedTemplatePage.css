@@ -1,95 +1,56 @@
-.shared-template-page {
-  display: flex;
-  justify-content: center;
-  padding-top: 2rem;
-}
-
-.shared-template-card {
-  max-width: 600px;
-  width: 100%;
-}
-
-.template-header {
-  margin-bottom: 1rem;
-}
-
-.template-header h1 {
-  font-size: 1.75rem;
-  margin-bottom: 0.25rem;
-}
-
-.template-author {
-  color: var(--color-text-muted);
-}
-
-.shared-template-page .template-description {
-  color: var(--color-text-muted);
-  margin-bottom: 1.5rem;
-  display: block;
-  -webkit-line-clamp: unset;
-  -webkit-box-orient: unset;
-  overflow: visible;
-}
-
-.template-stats {
-  display: flex;
-  gap: 2rem;
-  margin-bottom: 1.5rem;
-  padding: 1rem;
-  background: var(--color-bg);
-  border-radius: var(--radius-md);
-}
-
-.stat {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.stat-value {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--color-primary);
-}
-
-.stat-label {
-  font-size: 0.75rem;
-  color: var(--color-text-muted);
-}
-
-.template-preview {
-  margin-bottom: 1.5rem;
-}
-
-.template-preview h3 {
-  font-size: 0.875rem;
-  color: var(--color-text-muted);
-  margin-bottom: 0.75rem;
-}
-
-.tiers-preview {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-}
-
-.tier-chip {
-  padding: 0.375rem 0.75rem;
-  border-radius: var(--radius-sm);
-  font-weight: 600;
-  font-size: 0.875rem;
-  color: #000;
-}
-
-.template-actions {
+.shared-template-page-grid {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
+  padding-bottom: 1rem;
+  width: 100%;
 }
 
-.login-hint {
-  text-align: center;
-  margin-top: 1rem;
-  font-size: 0.875rem;
+.shared-template-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0 1rem;
+}
+
+.shared-template-header-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.shared-template-header-info h1 {
+  font-size: 1.25rem;
+  margin: 0;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+.shared-template-header-info .text-muted {
   color: var(--color-text-muted);
+  font-size: 0.8125rem;
+  margin-top: 0.125rem;
+}
+
+.shared-template-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+@media (max-width: 770px) {
+  .shared-template-header-info h1 {
+    font-size: 1.125rem;
+  }
+}
+
+@media (max-width: 400px) {
+  .shared-template-header {
+    padding: 0 0.5rem;
+  }
+
+  .shared-template-header-info h1 {
+    font-size: 1rem;
+  }
 }

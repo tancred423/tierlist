@@ -109,6 +109,8 @@
     "createTemplate": "Vorlage erstellen",
     "editTemplate": "Vorlage bearbeiten",
     "newTemplate": "Neue Vorlage",
+    "defaultCardTitle": "Meine erste Karte",
+    "defaultCardDescription": "Bearbeite mich",
     "templateTitle": "Vorlagentitel",
     "description": "Beschreibung",
     "descriptionPlaceholder": "Optionale Beschreibung...",
@@ -127,12 +129,22 @@
     "sortAlphabeticallyConfirm": "Karten alphabetisch sortieren? Dies wird deine manuelle Sortierung überschreiben.",
     "unsavedChanges": "Du hast ungespeicherte Änderungen. Möchtest du wirklich schließen?",
     "deleteConfirm": "Möchtest du diese Vorlage wirklich löschen? Dies kann nicht rückgängig gemacht werden.",
+    "deleteTierConfirm": "Möchtest du diese Stufe wirklich löschen?",
+    "deleteColumnConfirm": "Möchtest du diese Spalte wirklich löschen?",
     "copy": "Kopie erstellen",
     "copyTemplate": "Vorlage kopieren",
     "atLeastOneCard": "Mindestens eine Karte ist erforderlich",
     "previewTitle": "Vorlagen-Vorschau",
     "previewHint": "Dies ist eine Vorschau der Vorlage. Starte eine Tierlist, um die Karten zu bewerten!",
-    "preview": "Vorschau"
+    "preview": "Vorschau",
+    "cellBlockedTitle": "Dies ist eine Vorlage.",
+    "cellBlockedOwner": "Starte eine Tierlist, um Karten zu bewerten.",
+    "cellBlockedVisitor": "Starte eine Tierlist, um Karten zu bewerten.",
+    "cellBlockedCopyHint": "Oder kopiere diese Vorlage, um deine eigene zu erstellen",
+    "shareTemplate": "Vorlage teilen",
+    "shareLink": "Teilen-Link",
+    "shareLinkHint": "Jeder mit diesem Link kann diese Vorlage ansehen und kopieren",
+    "linkCopied": "Link kopiert!"
   },
   "card": {
     "title": "Titel",
@@ -154,10 +166,11 @@
     "squareImageHint": "Quadratische Bilder werden für beste Ergebnisse empfohlen",
     "noImageInClipboard": "Kein Bild in der Zwischenablage gefunden",
     "clipboardPermissionDenied": "Zugriff auf Zwischenablage verweigert. Bitte erlauben oder Drag & Drop verwenden.",
-    "clipboardError": "Zwischenablage konnte nicht gelesen werden"
+    "clipboardError": "Zwischenablage konnte nicht gelesen werden",
+    "edit": "Karte bearbeiten"
   },
   "tierlist": {
-    "unrankedCards": "Nicht gerankte Karten",
+    "unrankedCards": "Karten",
     "allCardsRanked": "Alle Karten wurden gerankt!",
     "shareRanking": "Tierlist teilen",
     "viewOnly": "Nur ansehen",
@@ -182,7 +195,16 @@
     "copying": "Kopiere...",
     "createTemplate": "Vorlage erstellen",
     "creatingTemplate": "Erstelle...",
-    "basedOnDeleted": "Basiert auf einer gelöschten Vorlage"
+    "basedOnDeleted": "Basiert auf einer gelöschten Vorlage",
+    "moveRowUp": "Zeile nach oben",
+    "moveRowDown": "Zeile nach unten",
+    "moveColumnLeft": "Spalte nach links",
+    "moveColumnRight": "Spalte nach rechts",
+    "editRow": "Zeile bearbeiten",
+    "editColumn": "Spalte bearbeiten",
+    "edited": "(Bearbeitet)",
+    "addNewCard": "Karte hinzufügen",
+    "column": "Spalte"
   },
   "share": {
     "shareTemplate": "Vorlage teilen",
@@ -278,6 +300,10 @@
     "deleteConfirm": "Bist du sicher, dass du dein Konto löschen möchtest? Dies wird alle deine Vorlagen, Tierlists und Daten dauerhaft löschen.",
     "deleteDoubleConfirm": "Dies ist deine LETZTE Bestätigung. Alle deine Daten werden dauerhaft gelöscht. Bist du dir absolut sicher?",
     "deleting": "Wird gelöscht..."
+  },
+  "pageTitle": {
+    "tierlist": "Tierlist",
+    "template": "Vorlage"
   },
   "notFound": {
     "title": "Seite nicht gefunden",
