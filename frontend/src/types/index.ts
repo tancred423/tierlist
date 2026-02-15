@@ -33,12 +33,6 @@ export interface User {
   createdAt?: string;
 }
 
-export function getDisplayName(
-  user: User | { username: string; nickname?: string | null },
-): string {
-  return user.nickname || user.username;
-}
-
 export interface Tier {
   id: string;
   templateId: string;

@@ -4,7 +4,7 @@ import { useAuthStore } from '../stores/auth';
 import { useThemeStore } from '../stores/theme';
 import { useClockFormatStore } from '../stores/clockFormat';
 import { useI18n } from '../i18n';
-import { getDisplayName } from '../types';
+import { getDisplayName } from '../utils/user';
 import './Header.css';
 
 function DiscordIcon() {

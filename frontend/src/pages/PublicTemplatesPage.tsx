@@ -5,7 +5,7 @@ import { useAuthStore } from '../stores/auth';
 import { useClockFormatStore } from '../stores/clockFormat';
 import { useI18n } from '../i18n';
 import { usePageTitle } from '../hooks/usePageTitle';
-import { getDisplayName } from '../types';
+import { getDisplayName } from '../utils/user';
 import type { Pagination as PaginationType, Template } from '../types';
 import { formatDate } from '../utils/format';
 import { Pagination } from '../components/Pagination';

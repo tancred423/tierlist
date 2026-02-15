@@ -5,7 +5,7 @@ import { useAuthStore } from '../stores/auth';
 import { useClockFormatStore } from '../stores/clockFormat';
 import { useI18n } from '../i18n';
 import { usePageTitle } from '../hooks/usePageTitle';
-import { getDisplayName } from '../types';
+import { getDisplayName } from '../utils/user';
 import type { FilledTierlist, CardPlacement, PlacementData } from '../types';
 import { hasQuickEdits, buildEffectiveTemplate } from '../utils/tierlist';
 import { formatDate } from '../utils/format';

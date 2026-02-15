@@ -57,6 +57,13 @@
       "when": 1770100000000,
       "tag": "0007_user_sort_preferences",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "5",
+      "when": 1770200000000,
+      "tag": "0008_add_indexes",
+      "breakpoints": true
     }
   ]
 }

@@ -1,5 +1,5 @@
 import { Hono } from "@hono/hono";
-import { and, desc, eq, inArray, like, or } from "drizzle-orm";
+import { and, asc, count, desc, eq, inArray, like, or, sql } from "drizzle-orm";
 import { db, schema } from "../db/index.ts";
 import { generateId, generateToken } from "../utils/id.ts";
 import { requireAuth } from "../middleware/auth.ts";
@@ -42,79 +42,55 @@ templates.get("/public", async (c) => {
     )!;
   }
 
-  try {
-    const publicTemplates = await db.query.templates.findMany({
-      where: whereClause,
-      with: {
-        owner: {
-          columns: { id: true, username: true, nickname: true, avatar: true },
-        },
-        tiers: true,
-        columns: true,
-        cards: true,
-        likes: true,
-      },
-    });
+  const [countResult] = await db
+    .select({ total: count() })
+    .from(schema.templates)
+    .where(whereClause);
+  const total = countResult.total;
 
-    const templatesWithLikeCount = publicTemplates.map((template) => {
-      const likeCount = (template.likes || []).length;
-      const { likes: _likes, ...rest } = template;
-      return { ...rest, likeCount };
-    });
-
-    if (sort === "newest") {
-      templatesWithLikeCount.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-    } else if (sort === "oldest") {
-      templatesWithLikeCount.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
-    } else {
-      templatesWithLikeCount.sort((a, b) => b.likeCount - a.likeCount);
-    }
-
-    const total = templatesWithLikeCount.length;
-    const paginatedTemplates = templatesWithLikeCount.slice(offset, offset + limit);
-
-    return c.json({
-      templates: paginatedTemplates,
-      pagination: {
-        page,
-        limit,
-        total,
-        totalPages: Math.ceil(total / limit),
-      },
-    });
-  } catch (error) {
-    console.error("Error fetching public templates with likes, falling back:", error);
-    const publicTemplates = await db.query.templates.findMany({
-      where: whereClause,
-      with: {
-        owner: {
-          columns: { id: true, username: true, nickname: true, avatar: true },
-        },
-        tiers: true,
-        columns: true,
-        cards: true,
-      },
-      orderBy: [desc(schema.templates.createdAt)],
-    });
-
-    const templatesWithLikeCount = publicTemplates.map((template) => ({
-      ...template,
-      likeCount: 0,
-    }));
-
-    const total = templatesWithLikeCount.length;
-    const paginatedTemplates = templatesWithLikeCount.slice(offset, offset + limit);
-
-    return c.json({
-      templates: paginatedTemplates,
-      pagination: {
-        page,
-        limit,
-        total,
-        totalPages: Math.ceil(total / limit),
-      },
-    });
+  let orderByClause;
+  if (sort === "newest") {
+    orderByClause = [desc(schema.templates.createdAt)];
+  } else if (sort === "oldest") {
+    orderByClause = [asc(schema.templates.createdAt)];
+  } else {
+    orderByClause = [
+      desc(sql`(SELECT COUNT(*) FROM template_likes WHERE template_likes.template_id = templates.id)`),
+      desc(schema.templates.createdAt),
+    ];
   }
+
+  const publicTemplates = await db.query.templates.findMany({
+    where: whereClause,
+    with: {
+      owner: {
+        columns: { id: true, username: true, nickname: true, avatar: true },
+      },
+      tiers: true,
+      columns: true,
+      cards: true,
+      likes: true,
+    },
+    orderBy: orderByClause,
+    limit,
+    offset,
+  });
+
+  const paginatedTemplates = publicTemplates.map((template) => {
+    const likeCount = (template.likes || []).length;
+    const { likes: _likes, ...rest } = template;
+    return { ...rest, likeCount };
+  });
+
+  return c.json({
+    templates: paginatedTemplates,
+    pagination: {
+      page,
+      limit,
+      total,
+      totalPages: Math.ceil(total / limit),
+    },
+  });
 });
 
 templates.get("/my", requireAuth, async (c) => {
@@ -124,33 +100,43 @@ templates.get("/my", requireAuth, async (c) => {
   const sort = c.req.query("sort") || "updated_desc";
   const offset = (page - 1) * limit;
 
-  const allTemplates = await db.query.templates.findMany({
+  const [countResult] = await db
+    .select({ total: count() })
+    .from(schema.templates)
+    .where(eq(schema.templates.ownerId, user.userId));
+  const total = countResult.total;
+
+  let orderByClause;
+  switch (sort) {
+    case "created_desc":
+      orderByClause = [desc(schema.templates.createdAt)];
+      break;
+    case "created_asc":
+      orderByClause = [asc(schema.templates.createdAt)];
+      break;
+    case "title_asc":
+      orderByClause = [asc(schema.templates.title)];
+      break;
+    case "title_desc":
+      orderByClause = [desc(schema.templates.title)];
+      break;
+    case "updated_desc":
+    default:
+      orderByClause = [desc(schema.templates.updatedAt)];
+      break;
+  }
+
+  const paginatedTemplates = await db.query.templates.findMany({
     where: eq(schema.templates.ownerId, user.userId),
     with: {
       tiers: true,
       columns: true,
       cards: true,
     },
+    orderBy: orderByClause,
+    limit,
+    offset,
   });
-
-  allTemplates.sort((a, b) => {
-    switch (sort) {
-      case "created_desc":
-        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-      case "created_asc":
-        return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
-      case "title_asc":
-        return a.title.localeCompare(b.title);
-      case "title_desc":
-        return b.title.localeCompare(a.title);
-      case "updated_desc":
-      default:
-        return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
-    }
-  });
-
-  const total = allTemplates.length;
-  const paginatedTemplates = allTemplates.slice(offset, offset + limit);
 
   return c.json({
     templates: paginatedTemplates,

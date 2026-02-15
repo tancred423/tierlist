@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { api } from '../api/client';
 import { useAuthStore } from '../stores/auth';
 import { useI18n } from '../i18n';
-import { getDisplayName } from '../types';
+import { getDisplayName } from '../utils/user';
 import './AccountPage.css';
 
 export function AccountPage() {

@@ -4,7 +4,7 @@ import { api } from '../api/client';
 import { useAuthStore } from '../stores/auth';
 import { useI18n } from '../i18n';
 import { usePageTitle } from '../hooks/usePageTitle';
-import { getDisplayName } from '../types';
+import { getDisplayName } from '../utils/user';
 import type { Template, CardPlacement } from '../types';
 import { TierlistGrid } from '../components/TierlistGrid';
 import './SharedTemplatePage.css';

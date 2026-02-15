@@ -1,5 +1,5 @@
 import { Hono } from "@hono/hono";
-import { and, desc, eq } from "drizzle-orm";
+import { and, asc, desc, eq, inArray } from "drizzle-orm";
 import { db, schema } from "../db/index.ts";
 import { generateId, generateToken } from "../utils/id.ts";
 import { requireAuth } from "../middleware/auth.ts";
@@ -14,8 +14,49 @@ filledTierlists.get("/my", requireAuth, async (c) => {
   const sort = c.req.query("sort") || "updated_desc";
   const offset = (page - 1) * limit;
 
-  const ownedLists = await db.query.filledTierlists.findMany({
-    where: eq(schema.filledTierlists.ownerId, user.userId),
+  const ownedIds = await db
+    .select({ id: schema.filledTierlists.id })
+    .from(schema.filledTierlists)
+    .where(eq(schema.filledTierlists.ownerId, user.userId));
+
+  const coOwnedIds = await db
+    .select({ id: schema.filledTierlistCoOwners.listId })
+    .from(schema.filledTierlistCoOwners)
+    .where(eq(schema.filledTierlistCoOwners.userId, user.userId));
+
+  const coOwnerIdSet = new Set(coOwnedIds.map((r) => r.id));
+  const uniqueIds = [...new Set([...ownedIds.map((r) => r.id), ...coOwnedIds.map((r) => r.id)])];
+  const total = uniqueIds.length;
+
+  if (total === 0) {
+    return c.json({
+      tierlists: [],
+      pagination: { page, limit, total: 0, totalPages: 0 },
+    });
+  }
+
+  let orderByClause;
+  switch (sort) {
+    case "created_desc":
+      orderByClause = [desc(schema.filledTierlists.createdAt)];
+      break;
+    case "created_asc":
+      orderByClause = [asc(schema.filledTierlists.createdAt)];
+      break;
+    case "title_asc":
+      orderByClause = [asc(schema.filledTierlists.title)];
+      break;
+    case "title_desc":
+      orderByClause = [desc(schema.filledTierlists.title)];
+      break;
+    case "updated_desc":
+    default:
+      orderByClause = [desc(schema.filledTierlists.updatedAt)];
+      break;
+  }
+
+  const allLists = await db.query.filledTierlists.findMany({
+    where: inArray(schema.filledTierlists.id, uniqueIds),
     with: {
       template: {
         with: {
@@ -25,68 +66,24 @@ filledTierlists.get("/my", requireAuth, async (c) => {
           cards: true,
         },
       },
+      owner: {
+        columns: { id: true, username: true, nickname: true, avatar: true },
+      },
       placements: true,
       coOwners: true,
     },
-    orderBy: [desc(schema.filledTierlists.updatedAt)],
+    orderBy: orderByClause,
+    limit,
+    offset,
   });
 
-  const coOwnedRelations = await db.query.filledTierlistCoOwners.findMany({
-    where: eq(schema.filledTierlistCoOwners.userId, user.userId),
-    with: {
-      filledTierlist: {
-        with: {
-          template: {
-            with: {
-              owner: { columns: { id: true, username: true, nickname: true, avatar: true } },
-              tiers: true,
-              columns: true,
-              cards: true,
-            },
-          },
-          owner: {
-            columns: { id: true, username: true, nickname: true, avatar: true },
-          },
-          placements: true,
-          coOwners: true,
-        },
-      },
-    },
-  });
-
-  const sharedLists = coOwnedRelations.map((rel) => ({
-    ...rel.filledTierlist,
-    isShared: true,
+  const paginatedLists = allLists.map((l) => ({
+    ...l,
+    isCoOwner: coOwnerIdSet.has(l.id),
   }));
-
-  const allLists = [
-    ...ownedLists.map((l) => ({ ...l, isCoOwner: false })),
-    ...sharedLists.map((l) => ({ ...l, isCoOwner: true })),
-  ];
-
-  allLists.sort((a, b) => {
-    switch (sort) {
-      case "created_desc":
-        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-      case "created_asc":
-        return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
-      case "title_asc":
-        return a.title.localeCompare(b.title);
-      case "title_desc":
-        return b.title.localeCompare(a.title);
-      case "updated_desc":
-      default:
-        return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
-    }
-  });
-
-  const total = allLists.length;
-  const paginatedLists = allLists.slice(offset, offset + limit);
 
   return c.json({
     tierlists: paginatedLists,
-    owned: ownedLists,
-    shared: sharedLists,
     pagination: {
       page,
       limit,

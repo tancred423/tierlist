@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { api } from '../api/client';
 import { useI18n } from '../i18n';
-import { getDisplayName } from '../types';
+import { getDisplayName } from '../utils/user';
 import type { FilledTierlist } from '../types';
 import './ShareModal.css';
 
