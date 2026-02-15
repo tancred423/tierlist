@@ -5,23 +5,13 @@ import { useAuthStore } from '../stores/auth';
 import { useClockFormatStore } from '../stores/clockFormat';
 import { useI18n } from '../i18n';
 import { usePageTitle } from '../hooks/usePageTitle';
-import { getDisplayName } from '../types';
+import { getDisplayName, SORT_OPTIONS, SORT_LABEL_KEYS } from '../types';
 import type { FilledTierlist, Pagination as PaginationType, SortOption } from '../types';
 import { formatDate } from '../utils/format';
-import { sortByOrder } from '../utils/tierlist';
-import { getContrastColor } from '../utils/color';
+import { sortByOrder, hasQuickEdits } from '../utils/tierlist';
 import { Pagination } from '../components/Pagination';
+import { PreviewGrid, PreviewCardBar } from '../components/PreviewGrid';
 import './MyTierlistsPage.css';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
-
-function getImageUrl(url: string | null): string | null {
-  if (!url) return null;
-  if (url.startsWith('/uploads/')) {
-    return `${API_URL}${url}`;
-  }
-  return url;
-}
 
 interface TierlistWithCoOwner extends FilledTierlist {
   isCoOwner: boolean;
@@ -33,8 +23,6 @@ interface TierlistCardProps {
   language: string;
   clockFormat: '12h' | '24h';
 }
-
-import { hasQuickEdits } from '../utils/tierlist';
 
 function TierlistCard({ tierlist, t, language, clockFormat }: TierlistCardProps) {
   const maxTiers = 5;
@@ -136,92 +124,27 @@ function TierlistCard({ tierlist, t, language, clockFormat }: TierlistCardProps)
       </div>
 
       <div className="tierlist-table-preview">
-        <div className="preview-grid">
-          <div className="preview-header-row">
-            <div className="preview-tier-label" />
-            {visibleCols.map(col => (
-              <div
-                key={col.id}
-                className="preview-col-header"
-                title={col.name || ''}
-                style={
-                  col.color
-                    ? { backgroundColor: col.color, color: getContrastColor(col.color) }
-                    : undefined
-                }
-              >
-                {col.name || ''}
-              </div>
-            ))}
-            {extraCols > 0 && <div className="preview-extra">+{extraCols}</div>}
-          </div>
-          {visibleTiers.map(tier => (
-            <div key={tier.id} className="preview-row">
-              <div
-                className="preview-tier-label"
-                style={{ backgroundColor: tier.color }}
-                title={tier.name}
-              >
-                {tier.name}
-              </div>
-              {visibleCols.map(col => {
-                const card = getCardForCell(tier.id, col.id);
-                return (
-                  <div key={col.id} className="preview-cell">
-                    {card && (
-                      <div className="preview-cell-card" title={card.title}>
-                        {card.imageUrl ? (
-                          <img src={getImageUrl(card.imageUrl)!} alt={card.title} />
-                        ) : (
-                          <span>{card.title[0]}</span>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-              {extraCols > 0 && <div className="preview-cell preview-cell-extra" />}
-            </div>
-          ))}
-          {extraTiers > 0 && (
-            <div className="preview-row preview-row-extra">
-              <div className="preview-extra-tiers">
-                +{extraTiers} {t('template.more')}
-              </div>
-            </div>
-          )}
-        </div>
+        <PreviewGrid
+          tiers={visibleTiers}
+          columns={visibleCols}
+          extraTiers={extraTiers}
+          extraCols={extraCols}
+          moreLabel={t('template.more')}
+          getCellCard={getCardForCell}
+        />
       </div>
 
       <div className="tierlist-unranked-preview">
-        {visibleUnranked.map(placement => {
-          const card = cardMap.get(placement.cardId);
-          if (!card) return null;
-          return (
-            <div key={placement.cardId} className="preview-card" title={card.title}>
-              {card.imageUrl ? (
-                <img src={getImageUrl(card.imageUrl)!} alt={card.title} />
-              ) : (
-                <span>{card.title[0]}</span>
-              )}
-            </div>
-          );
-        })}
-        {extraUnranked > 0 && (
-          <div className="preview-card preview-card-extra">+{extraUnranked}</div>
-        )}
+        <PreviewCardBar
+          cards={visibleUnranked
+            .map(p => cardMap.get(p.cardId))
+            .filter((c): c is NonNullable<typeof c> => !!c)}
+          extraCards={extraUnranked}
+        />
       </div>
     </Link>
   );
 }
-
-const SORT_OPTIONS: SortOption[] = [
-  'updated_desc',
-  'created_desc',
-  'created_asc',
-  'title_asc',
-  'title_desc',
-];
 
 export function MyTierlistsPage() {
   const [tierlists, setTierlists] = useState<TierlistWithCoOwner[]>([]);
@@ -287,9 +210,7 @@ export function MyTierlistsPage() {
             >
               {SORT_OPTIONS.map(opt => (
                 <option key={opt} value={opt}>
-                  {t(
-                    `sort.${opt === 'updated_desc' ? 'updatedDesc' : opt === 'created_desc' ? 'createdDesc' : opt === 'created_asc' ? 'createdAsc' : opt === 'title_asc' ? 'titleAsc' : 'titleDesc'}`,
-                  )}
+                  {t(SORT_LABEL_KEYS[opt])}
                 </option>
               ))}
             </select>

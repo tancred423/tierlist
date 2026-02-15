@@ -173,6 +173,9 @@ cards.put("/:templateId/reorder", requireAuth, async (c) => {
     return c.json({ error: "Access denied" }, 403);
   }
 
+  if (!Array.isArray(body.cardOrders) || body.cardOrders.length > 200) {
+    return c.json({ error: "Invalid cardOrders" }, 400);
+  }
   const cardOrders: { id: string; orderIndex: number }[] = body.cardOrders;
 
   for (const { id, orderIndex } of cardOrders) {

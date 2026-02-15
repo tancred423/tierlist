@@ -7,31 +7,10 @@ import { useI18n } from '../i18n';
 import { usePageTitle } from '../hooks/usePageTitle';
 import { getDisplayName } from '../types';
 import type { Pagination as PaginationType, Template } from '../types';
+import { formatDate } from '../utils/format';
 import { Pagination } from '../components/Pagination';
-import { getContrastColor } from '../utils/color';
+import { PreviewGrid, PreviewCardBar } from '../components/PreviewGrid';
 import './PublicTemplatesPage.css';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
-
-function getImageUrl(url: string | null): string | null {
-  if (!url) return null;
-  if (url.startsWith('/uploads/')) {
-    return `${API_URL}${url}`;
-  }
-  return url;
-}
-
-function formatDate(dateString: string, language: string, clockFormat: '12h' | '24h'): string {
-  const date = new Date(dateString);
-  return date.toLocaleDateString(language === 'de' ? 'de-DE' : 'en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: clockFormat === '12h',
-  });
-}
 
 interface TemplateWithLikes extends Template {
   likeCount: number;
@@ -110,61 +89,17 @@ function TemplateCard({
       </div>
 
       <div className="template-table-preview">
-        <div className="preview-grid">
-          <div className="preview-header-row">
-            <div className="preview-tier-label" />
-            {visibleCols.map(col => (
-              <div
-                key={col.id}
-                className="preview-col-header"
-                title={col.name || undefined}
-                style={
-                  col.color
-                    ? { backgroundColor: col.color, color: getContrastColor(col.color) }
-                    : undefined
-                }
-              >
-                {col.name || ''}
-              </div>
-            ))}
-            {extraCols > 0 && <div className="preview-extra">+{extraCols}</div>}
-          </div>
-          {visibleTiers.map(tier => (
-            <div key={tier.id} className="preview-row">
-              <div
-                className="preview-tier-label"
-                style={{ backgroundColor: tier.color }}
-                title={tier.name}
-              >
-                {tier.name}
-              </div>
-              {visibleCols.map(col => (
-                <div key={col.id} className="preview-cell" />
-              ))}
-              {extraCols > 0 && <div className="preview-cell preview-cell-extra" />}
-            </div>
-          ))}
-          {extraTiers > 0 && (
-            <div className="preview-row preview-row-extra">
-              <div className="preview-extra-tiers">
-                +{extraTiers} {t('template.more')}
-              </div>
-            </div>
-          )}
-        </div>
+        <PreviewGrid
+          tiers={visibleTiers}
+          columns={visibleCols}
+          extraTiers={extraTiers}
+          extraCols={extraCols}
+          moreLabel={t('template.more')}
+        />
       </div>
 
       <div className="template-cards-preview">
-        {visibleCards.map(card => (
-          <div key={card.id} className="preview-card" title={card.title}>
-            {card.imageUrl ? (
-              <img src={getImageUrl(card.imageUrl)!} alt={card.title} />
-            ) : (
-              <span>{card.title[0]}</span>
-            )}
-          </div>
-        ))}
-        {extraCards > 0 && <div className="preview-card preview-card-extra">+{extraCards}</div>}
+        <PreviewCardBar cards={visibleCards} extraCards={extraCards} />
       </div>
     </Link>
   );
@@ -195,19 +130,14 @@ export function PublicTemplatesPage() {
       setTemplates(result.templates);
       setPagination(result.pagination);
 
-      if (user) {
-        const likes = new Set<string>();
-        for (const template of result.templates) {
-          try {
-            const likeResult = await api.getTemplateLike(template.id);
-            if (likeResult.liked) {
-              likes.add(template.id);
-            }
-          } catch {
-            // Ignore - template may not exist or user not logged in
-          }
+      if (user && result.templates.length > 0) {
+        try {
+          const ids = result.templates.map(t => t.id);
+          const { likedIds } = await api.getBatchTemplateLikes(ids);
+          setUserLikes(new Set(likedIds));
+        } catch {
+          setUserLikes(new Set());
         }
-        setUserLikes(likes);
       }
     } catch (error) {
       console.error('Failed to load templates:', error);

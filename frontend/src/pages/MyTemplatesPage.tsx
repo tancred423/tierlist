@@ -5,32 +5,12 @@ import { useAuthStore } from '../stores/auth';
 import { useClockFormatStore } from '../stores/clockFormat';
 import { useI18n } from '../i18n';
 import { usePageTitle } from '../hooks/usePageTitle';
+import { SORT_OPTIONS, SORT_LABEL_KEYS } from '../types';
 import type { Template, Pagination as PaginationType, SortOption } from '../types';
+import { formatDate } from '../utils/format';
 import { Pagination } from '../components/Pagination';
-import { getContrastColor } from '../utils/color';
+import { PreviewGrid, PreviewCardBar } from '../components/PreviewGrid';
 import './MyTemplatesPage.css';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
-
-function getImageUrl(url: string | null): string | null {
-  if (!url) return null;
-  if (url.startsWith('/uploads/')) {
-    return `${API_URL}${url}`;
-  }
-  return url;
-}
-
-function formatDate(dateString: string, language: string, clockFormat: '12h' | '24h'): string {
-  const date = new Date(dateString);
-  return date.toLocaleDateString(language === 'de' ? 'de-DE' : 'en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: clockFormat === '12h',
-  });
-}
 
 interface TemplateCardProps {
   template: Template;
@@ -71,73 +51,21 @@ function TemplateCard({ template, t, language, clockFormat }: TemplateCardProps)
       </div>
 
       <div className="template-table-preview">
-        <div className="preview-grid">
-          <div className="preview-header-row">
-            <div className="preview-tier-label" />
-            {visibleCols.map(col => (
-              <div
-                key={col.id}
-                className="preview-col-header"
-                title={col.name || undefined}
-                style={
-                  col.color
-                    ? { backgroundColor: col.color, color: getContrastColor(col.color) }
-                    : undefined
-                }
-              >
-                {col.name || ''}
-              </div>
-            ))}
-            {extraCols > 0 && <div className="preview-extra">+{extraCols}</div>}
-          </div>
-          {visibleTiers.map(tier => (
-            <div key={tier.id} className="preview-row">
-              <div
-                className="preview-tier-label"
-                style={{ backgroundColor: tier.color }}
-                title={tier.name}
-              >
-                {tier.name}
-              </div>
-              {visibleCols.map(col => (
-                <div key={col.id} className="preview-cell" />
-              ))}
-              {extraCols > 0 && <div className="preview-cell preview-cell-extra" />}
-            </div>
-          ))}
-          {extraTiers > 0 && (
-            <div className="preview-row preview-row-extra">
-              <div className="preview-extra-tiers">
-                +{extraTiers} {t('template.more')}
-              </div>
-            </div>
-          )}
-        </div>
+        <PreviewGrid
+          tiers={visibleTiers}
+          columns={visibleCols}
+          extraTiers={extraTiers}
+          extraCols={extraCols}
+          moreLabel={t('template.more')}
+        />
       </div>
 
       <div className="template-cards-preview">
-        {visibleCards.map(card => (
-          <div key={card.id} className="preview-card" title={card.title}>
-            {card.imageUrl ? (
-              <img src={getImageUrl(card.imageUrl)!} alt={card.title} />
-            ) : (
-              <span>{card.title[0]}</span>
-            )}
-          </div>
-        ))}
-        {extraCards > 0 && <div className="preview-card preview-card-extra">+{extraCards}</div>}
+        <PreviewCardBar cards={visibleCards} extraCards={extraCards} />
       </div>
     </Link>
   );
 }
-
-const SORT_OPTIONS: SortOption[] = [
-  'updated_desc',
-  'created_desc',
-  'created_asc',
-  'title_asc',
-  'title_desc',
-];
 
 export function MyTemplatesPage() {
   const [templates, setTemplates] = useState<Template[]>([]);
@@ -204,9 +132,7 @@ export function MyTemplatesPage() {
               >
                 {SORT_OPTIONS.map(opt => (
                   <option key={opt} value={opt}>
-                    {t(
-                      `sort.${opt === 'updated_desc' ? 'updatedDesc' : opt === 'created_desc' ? 'createdDesc' : opt === 'created_asc' ? 'createdAsc' : opt === 'title_asc' ? 'titleAsc' : 'titleDesc'}`,
-                    )}
+                    {t(SORT_LABEL_KEYS[opt])}
                   </option>
                 ))}
               </select>

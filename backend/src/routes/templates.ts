@@ -1,5 +1,5 @@
 import { Hono } from "@hono/hono";
-import { and, desc, eq, like, or } from "drizzle-orm";
+import { and, desc, eq, inArray, like, or } from "drizzle-orm";
 import { db, schema } from "../db/index.ts";
 import { generateId, generateToken } from "../utils/id.ts";
 import { requireAuth } from "../middleware/auth.ts";
@@ -659,6 +659,29 @@ templates.delete("/:id", requireAuth, async (c) => {
   await db.delete(schema.templates).where(eq(schema.templates.id, id));
 
   return c.json({ success: true });
+});
+
+templates.post("/batch-likes", requireAuth, async (c) => {
+  const user = c.get("user")!;
+  const body = await c.req.json();
+
+  if (!Array.isArray(body.templateIds) || body.templateIds.length > 100) {
+    return c.json({ error: "templateIds must be an array (max 100)" }, 400);
+  }
+
+  if (body.templateIds.length === 0) {
+    return c.json({ likedIds: [] });
+  }
+
+  const likes = await db.query.templateLikes.findMany({
+    where: and(
+      eq(schema.templateLikes.userId, user.userId),
+      inArray(schema.templateLikes.templateId, body.templateIds),
+    ),
+  });
+
+  const likedIds = likes.map((l) => l.templateId);
+  return c.json({ likedIds });
 });
 
 templates.get("/:id/like", requireAuth, async (c) => {

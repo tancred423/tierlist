@@ -5,6 +5,22 @@ export type SortOption =
   | 'title_asc'
   | 'title_desc';
 
+export const SORT_OPTIONS: SortOption[] = [
+  'updated_desc',
+  'created_desc',
+  'created_asc',
+  'title_asc',
+  'title_desc',
+];
+
+export const SORT_LABEL_KEYS: Record<SortOption, string> = {
+  updated_desc: 'sort.updatedDesc',
+  created_desc: 'sort.createdDesc',
+  created_asc: 'sort.createdAsc',
+  title_asc: 'sort.titleAsc',
+  title_desc: 'sort.titleDesc',
+};
+
 export interface User {
   id: string;
   discordId: string;

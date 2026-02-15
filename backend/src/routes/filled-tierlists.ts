@@ -419,12 +419,24 @@ filledTierlists.put("/:id/placements", requireAuth, async (c) => {
     return c.json({ error: "Access denied" }, 403);
   }
 
+  if (!Array.isArray(body.placements)) {
+    return c.json({ error: "placements must be an array" }, 400);
+  }
+  if (body.placements.length > 500) {
+    return c.json({ error: "Too many placements" }, 400);
+  }
   const placements: Array<{
     cardId: string;
     tierId: string | null;
     columnId: string | null;
     orderIndex: number;
   }> = body.placements;
+
+  for (const p of placements) {
+    if (typeof p.cardId !== "string" || typeof p.orderIndex !== "number") {
+      return c.json({ error: "Invalid placement data" }, 400);
+    }
+  }
 
   await db.delete(schema.cardPlacements)
     .where(eq(schema.cardPlacements.listId, id));

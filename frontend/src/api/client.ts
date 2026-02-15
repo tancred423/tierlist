@@ -108,6 +108,13 @@ class ApiClient {
     return this.request(`/api/templates/${id}/like`);
   }
 
+  async getBatchTemplateLikes(templateIds: string[]): Promise<{ likedIds: string[] }> {
+    return this.request('/api/templates/batch-likes', {
+      method: 'POST',
+      body: JSON.stringify({ templateIds }),
+    });
+  }
+
   async toggleTemplateLike(id: string): Promise<{ liked: boolean; likeCount: number }> {
     return this.request(`/api/templates/${id}/like`, {
       method: 'POST',

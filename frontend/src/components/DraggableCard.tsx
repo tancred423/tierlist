@@ -2,17 +2,8 @@ import { useEffect, useRef } from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import type { Card } from '../types';
+import { getImageUrl } from '../utils/format';
 import './DraggableCard.css';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
-
-function getImageUrl(url: string | null): string | null {
-  if (!url) return null;
-  if (url.startsWith('/uploads/')) {
-    return `${API_URL}${url}`;
-  }
-  return url;
-}
 
 interface DraggableCardProps {
   card: Card;

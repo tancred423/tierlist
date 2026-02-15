@@ -59,6 +59,9 @@ columnsRouter.put("/:id", requireAuth, async (c) => {
     updates.name = nameResult.value;
   }
   if (body.color !== undefined) {
+    if (body.color && body.color !== "" && !/^#[0-9a-fA-F]{6}$/.test(body.color)) {
+      return c.json({ error: "Invalid color format" }, 400);
+    }
     updates.color = body.color || null;
   }
   if (Object.keys(updates).length > 0) {
