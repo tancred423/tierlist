@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { api } from '../api/client';
 import { useI18n } from '../i18n';
 import { getDisplayName } from '../utils/user';
@@ -20,6 +20,14 @@ export function ShareModal({ tierlist, onClose, onUpdate }: ShareModalProps) {
 
   const viewUrl = `${window.location.origin}/share/view/${tierlist.viewShareToken}`;
   const editUrl = `${window.location.origin}/share/edit/${tierlist.editShareToken}`;
+
+  useEffect(() => {
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key === 'Escape') onClose();
+    }
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [onClose]);
 
   async function handleViewToggle() {
     setIsUpdating(true);
@@ -108,15 +116,21 @@ export function ShareModal({ tierlist, onClose, onUpdate }: ShareModalProps) {
         allowTaint: true,
         onclone: (clonedDoc: Document) => {
           clonedDoc
-            .querySelectorAll('.tier-move-btn, .col-move-btn, .tier-edit-btn, .col-edit-btn')
+            .querySelectorAll(
+              '.col-move-btn, .col-edit-btn, .col-delete-btn, .card-action-btn, .add-col-btn, .add-tier-btn',
+            )
             .forEach(el => {
               (el as HTMLElement).style.display = 'none';
             });
+          clonedDoc.querySelectorAll('.tier-toolbar').forEach(el => {
+            (el as HTMLElement).style.display = 'none';
+          });
         },
       });
 
       const link = document.createElement('a');
       link.download = `${tierlist.title.replace(/[^a-z0-9]/gi, '_')}.png`;
+      link.download = link.download.replace(/_+/g, '_');
       link.href = canvas.toDataURL('image/png');
       link.click();
     } catch (error) {
