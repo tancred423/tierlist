@@ -72,6 +72,14 @@
     "hintPublic": "Public Templates",
     "hintEnd": "to start a new tierlist!"
   },
+  "sort": {
+    "label": "Sort",
+    "updatedDesc": "Last updated",
+    "createdDesc": "Newest first",
+    "createdAsc": "Oldest first",
+    "titleAsc": "A \u2013 Z",
+    "titleDesc": "Z \u2013 A"
+  },
   "myTemplates": {
     "title": "My Templates",
     "empty": "You haven't created any templates yet.",
@@ -193,7 +201,7 @@
     "leaveConfirm": "Are you sure you want to leave as co-owner? You will no longer be able to edit this tierlist.",
     "copyRanking": "Make a Copy",
     "copying": "Copying...",
-    "createTemplate": "Create Template",
+    "createTemplate": "Create Template from Tierlist",
     "creatingTemplate": "Creating...",
     "basedOnDeleted": "Based on a deleted template",
     "moveRowUp": "Move row up",
@@ -204,7 +212,9 @@
     "editColumn": "Edit column",
     "edited": "(Edited)",
     "addNewCard": "Add Card",
-    "column": "Column"
+    "column": "Column",
+    "removeColor": "Remove color",
+    "addColor": "Add color"
   },
   "share": {
     "shareTemplate": "Share Template",

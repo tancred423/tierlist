@@ -72,6 +72,14 @@
     "hintPublic": "Öffentliche Vorlagen",
     "hintEnd": "an, um eine neue Tierlist zu starten!"
   },
+  "sort": {
+    "label": "Sortierung",
+    "updatedDesc": "Zuletzt aktualisiert",
+    "createdDesc": "Neueste zuerst",
+    "createdAsc": "Älteste zuerst",
+    "titleAsc": "A \u2013 Z",
+    "titleDesc": "Z \u2013 A"
+  },
   "myTemplates": {
     "title": "Meine Vorlagen",
     "empty": "Du hast noch keine Vorlagen erstellt.",
@@ -193,7 +201,7 @@
     "leaveConfirm": "Möchtest du wirklich als Mitbesitzer verlassen? Du kannst diese Tierlist dann nicht mehr bearbeiten.",
     "copyRanking": "Kopie erstellen",
     "copying": "Kopiere...",
-    "createTemplate": "Vorlage erstellen",
+    "createTemplate": "Vorlage aus Tierlist erstellen",
     "creatingTemplate": "Erstelle...",
     "basedOnDeleted": "Basiert auf einer gelöschten Vorlage",
     "moveRowUp": "Zeile nach oben",
@@ -204,7 +212,9 @@
     "editColumn": "Spalte bearbeiten",
     "edited": "(Bearbeitet)",
     "addNewCard": "Karte hinzufügen",
-    "column": "Spalte"
+    "column": "Spalte",
+    "removeColor": "Farbe entfernen",
+    "addColor": "Farbe hinzufügen"
   },
   "share": {
     "shareTemplate": "Vorlage teilen",

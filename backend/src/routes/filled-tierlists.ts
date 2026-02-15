@@ -11,6 +11,7 @@ filledTierlists.get("/my", requireAuth, async (c) => {
   const user = c.get("user")!;
   const page = Math.max(1, parseInt(c.req.query("page") || "1"));
   const limit = clampPaginationLimit(parseInt(c.req.query("limit") || "12"));
+  const sort = c.req.query("sort") || "updated_desc";
   const offset = (page - 1) * limit;
 
   const ownedLists = await db.query.filledTierlists.findMany({
@@ -61,7 +62,23 @@ filledTierlists.get("/my", requireAuth, async (c) => {
   const allLists = [
     ...ownedLists.map((l) => ({ ...l, isCoOwner: false })),
     ...sharedLists.map((l) => ({ ...l, isCoOwner: true })),
-  ].sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
+  ];
+
+  allLists.sort((a, b) => {
+    switch (sort) {
+      case "created_desc":
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      case "created_asc":
+        return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+      case "title_asc":
+        return a.title.localeCompare(b.title);
+      case "title_desc":
+        return b.title.localeCompare(a.title);
+      case "updated_desc":
+      default:
+        return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
+    }
+  });
 
   const total = allLists.length;
   const paginatedLists = allLists.slice(offset, offset + limit);

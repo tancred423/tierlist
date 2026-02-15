@@ -51,13 +51,14 @@ class ApiClient {
     return this.request(`/api/templates/public${query ? `?${query}` : ''}`);
   }
 
-  async getMyTemplates(params?: { page?: number; limit?: number }): Promise<{
+  async getMyTemplates(params?: { page?: number; limit?: number; sort?: string }): Promise<{
     templates: import('../types').Template[];
     pagination: import('../types').Pagination;
   }> {
     const queryParams = new URLSearchParams();
     if (params?.page) queryParams.set('page', params.page.toString());
     if (params?.limit) queryParams.set('limit', params.limit.toString());
+    if (params?.sort) queryParams.set('sort', params.sort);
     const query = queryParams.toString();
     return this.request(`/api/templates/my${query ? `?${query}` : ''}`);
   }
@@ -221,7 +222,7 @@ class ApiClient {
     });
   }
 
-  async getMyFilledTierlists(params?: { page?: number; limit?: number }): Promise<{
+  async getMyFilledTierlists(params?: { page?: number; limit?: number; sort?: string }): Promise<{
     tierlists: (import('../types').FilledTierlist & { isCoOwner: boolean })[];
     owned: import('../types').FilledTierlist[];
     shared: import('../types').FilledTierlist[];
@@ -230,6 +231,7 @@ class ApiClient {
     const queryParams = new URLSearchParams();
     if (params?.page) queryParams.set('page', params.page.toString());
     if (params?.limit) queryParams.set('limit', params.limit.toString());
+    if (params?.sort) queryParams.set('sort', params.sort);
     const query = queryParams.toString();
     return this.request(`/api/filled-tierlists/my${query ? `?${query}` : ''}`);
   }
@@ -316,7 +318,11 @@ class ApiClient {
     return this.request('/api/auth/me', { method: 'DELETE' });
   }
 
-  async updateProfile(data: { nickname?: string }): Promise<{ user: import('../types').User }> {
+  async updateProfile(data: {
+    nickname?: string;
+    tierlistSort?: string;
+    templateSort?: string;
+  }): Promise<{ user: import('../types').User }> {
     return this.request('/api/auth/me', {
       method: 'PUT',
       body: JSON.stringify(data),

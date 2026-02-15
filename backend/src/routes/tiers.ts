@@ -63,7 +63,7 @@ tiersRouter.put("/:id", requireAuth, async (c) => {
   }
 
   if (body.color !== undefined) {
-    if (typeof body.color === "string" && /^#[0-9a-fA-F]{6}$/.test(body.color)) {
+    if (typeof body.color === "string" && (body.color === "" || /^#[0-9a-fA-F]{6}$/.test(body.color))) {
       updates.color = body.color;
     }
   }

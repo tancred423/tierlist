@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import { useState, useEffect, useLayoutEffect, useMemo, useCallback, useRef } from 'react';
 import {
   DndContext,
   DragOverlay,
@@ -84,13 +84,17 @@ function applyTierOverrides(
 
 function applyColumnOverrides(
   columns: Column[],
-  overrides?: Record<string, { name?: string }>,
+  overrides?: Record<string, { name?: string; color?: string }>,
 ): Column[] {
   if (!overrides) return columns;
   return columns.map(col => {
     const ov = overrides[col.id];
     if (!ov) return col;
-    return { ...col, name: ov.name ?? col.name };
+    return {
+      ...col,
+      name: ov.name ?? col.name,
+      color: ov.color !== undefined ? ov.color || null : col.color,
+    };
   });
 }
 
@@ -211,11 +215,13 @@ export function TierlistGrid({
     tier: Tier;
     name: string;
     color: string;
+    anchorRect?: DOMRect;
   } | null>(null);
   const [editingColumn, setEditingColumn] = useState<{
     column: Column;
     name: string;
     color: string;
+    anchorRect?: DOMRect;
   } | null>(null);
   const [editingCard, setEditingCard] = useState<{
     cardId: string;
@@ -230,6 +236,13 @@ export function TierlistGrid({
   const [cardModalCard, setCardModalCard] = useState<Card | null>(null);
   const [showCardModal, setShowCardModal] = useState(false);
   const editPopoverRef = useRef<HTMLDivElement>(null);
+  const gridRef = useRef<HTMLDivElement>(null);
+  const [overlayRect, setOverlayRect] = useState<{
+    top: number;
+    left: number;
+    width: number;
+    height: number;
+  } | null>(null);
   const useRichCardEditor = !!onCardAdd || (!!onDisplaySettingsChange && !!onPlacementsChange);
 
   useEffect(() => {
@@ -244,6 +257,60 @@ export function TierlistGrid({
       return () => document.removeEventListener('mousedown', handleClickOutside);
     }
   }, [editingTier, editingColumn]);
+
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useLayoutEffect(() => {
+    if (!cellsBlocked || !gridRef.current || !containerRef.current) {
+      setOverlayRect(null);
+      return;
+    }
+    function measure() {
+      const grid = gridRef.current;
+      const container = containerRef.current;
+      if (!grid || !container) return;
+
+      const firstCell = grid.querySelector('.droppable-cell') as HTMLElement | null;
+      const addTierCell = grid.querySelector('.add-tier-cell') as HTMLElement | null;
+      const addColSpacer = grid.querySelector('.grid-add-col-spacer') as HTMLElement | null;
+
+      if (!firstCell) return;
+
+      const top = firstCell.offsetTop;
+      const left = firstCell.offsetLeft;
+
+      let rightEdge = grid.offsetLeft + grid.scrollWidth;
+      if (addColSpacer) {
+        rightEdge = addColSpacer.offsetLeft;
+      }
+
+      let bottomEdge = grid.offsetTop + grid.offsetHeight;
+      if (addTierCell) {
+        bottomEdge = addTierCell.offsetTop;
+      }
+
+      setOverlayRect({
+        top,
+        left,
+        width: Math.max(rightEdge - left, 0),
+        height: Math.max(bottomEdge - top, 0),
+      });
+    }
+
+    measure();
+    const gridEl = gridRef.current!;
+    const resizeObs = new ResizeObserver(measure);
+    resizeObs.observe(gridEl);
+    gridEl.querySelectorAll('.tier-label').forEach(el => resizeObs.observe(el));
+
+    const mutationObs = new MutationObserver(measure);
+    mutationObs.observe(gridEl, { subtree: true, childList: true, characterData: true });
+
+    return () => {
+      resizeObs.disconnect();
+      mutationObs.disconnect();
+    };
+  }, [cellsBlocked, sortedTiers.length, sortedColumns.length]);
 
   function handleTierEditSave() {
     if (!editingTier) return;
@@ -290,12 +357,17 @@ export function TierlistGrid({
     } else if (onDisplaySettingsChange) {
       const columnOverrides = {
         ...settingsRef.current?.columnOverrides,
-        [editingColumn.column.id]: { name: editingColumn.name },
+        [editingColumn.column.id]: {
+          name: editingColumn.name,
+          color: editingColumn.color || undefined,
+        },
       };
       emitSettings({ columnOverrides });
       setSortedColumns(prev =>
         prev.map(c =>
-          c.id === editingColumn.column.id ? { ...c, name: editingColumn.name || null } : c,
+          c.id === editingColumn.column.id
+            ? { ...c, name: editingColumn.name || null, color: editingColumn.color || null }
+            : c,
         ),
       );
     }
@@ -820,8 +892,9 @@ export function TierlistGrid({
       onDragOver={handleDragOver}
       onDragEnd={handleDragEnd}
     >
-      <div className="tierlist-grid-container">
+      <div className="tierlist-grid-container" ref={containerRef}>
         <div
+          ref={gridRef}
           className="tierlist-grid"
           style={{
             gridTemplateColumns: `auto repeat(${sortedColumns.length}, 1fr)${onColumnAdd ? ' auto' : ''}`,
@@ -863,18 +936,17 @@ export function TierlistGrid({
                         </svg>
                       </button>
                     )}
-                    <span className="column-header-name">
-                      {column.name || `${t('tierlist.column')} ${colIndex + 1}`}
-                    </span>
+                    <span className="column-header-name">{column.name || ''}</span>
                     {showColumnEditBtn && (
                       <button
                         type="button"
                         className="col-edit-btn"
-                        onClick={() =>
+                        onClick={e =>
                           setEditingColumn({
                             column,
                             name: column.name || '',
-                            color: column.color || '#3b3f45',
+                            color: column.color || '',
+                            anchorRect: e.currentTarget.getBoundingClientRect(),
                           })
                         }
                         title={t('tierlist.editColumn')}
@@ -936,56 +1008,6 @@ export function TierlistGrid({
                         </svg>
                       </button>
                     )}
-                    {editingColumn && editingColumn.column.id === column.id && (
-                      <div
-                        className="edit-popover"
-                        ref={editPopoverRef}
-                        onClick={e => e.stopPropagation()}
-                      >
-                        <div className="edit-popover-row">
-                          <input
-                            type="text"
-                            className="edit-popover-input"
-                            value={editingColumn.name}
-                            onChange={e =>
-                              setEditingColumn({ ...editingColumn, name: e.target.value })
-                            }
-                            onKeyDown={e => {
-                              if (e.key === 'Enter') handleColumnEditSave();
-                              if (e.key === 'Escape') setEditingColumn(null);
-                            }}
-                            autoFocus
-                            placeholder={t('template.columnName')}
-                          />
-                          {onColumnEdit && (
-                            <input
-                              type="color"
-                              className="edit-popover-color"
-                              value={editingColumn.color}
-                              onChange={e =>
-                                setEditingColumn({ ...editingColumn, color: e.target.value })
-                              }
-                            />
-                          )}
-                        </div>
-                        <div className="edit-popover-actions">
-                          <button
-                            type="button"
-                            className="btn btn-secondary btn-sm"
-                            onClick={() => setEditingColumn(null)}
-                          >
-                            {t('common.cancel')}
-                          </button>
-                          <button
-                            type="button"
-                            className="btn btn-primary btn-sm"
-                            onClick={handleColumnEditSave}
-                          >
-                            {t('common.save')}
-                          </button>
-                        </div>
-                      </div>
-                    )}
                   </div>
                 );
               })}
@@ -1013,7 +1035,8 @@ export function TierlistGrid({
               canMoveDown={tierIndex < sortedTiers.length - 1}
               onEdit={
                 showTierEditBtn
-                  ? () => setEditingTier({ tier, name: tier.name, color: tier.color })
+                  ? (anchorRect: DOMRect) =>
+                      setEditingTier({ tier, name: tier.name, color: tier.color || '', anchorRect })
                   : undefined
               }
               onDelete={
@@ -1093,7 +1116,23 @@ export function TierlistGrid({
             </>
           )}
         </div>
-        {cellsBlocked && gridOverlay && <div className="grid-overlay">{gridOverlay}</div>}
+        {cellsBlocked && gridOverlay && (
+          <div
+            className="grid-overlay grid-overlay-scoped"
+            style={
+              overlayRect
+                ? {
+                    top: overlayRect.top,
+                    left: overlayRect.left,
+                    width: overlayRect.width,
+                    height: overlayRect.height,
+                  }
+                : undefined
+            }
+          >
+            {gridOverlay}
+          </div>
+        )}
       </div>
 
       {editingTier && (
@@ -1102,6 +1141,15 @@ export function TierlistGrid({
             className="edit-popover edit-popover-tier"
             ref={editPopoverRef}
             onClick={e => e.stopPropagation()}
+            style={
+              editingTier.anchorRect
+                ? {
+                    position: 'fixed',
+                    top: editingTier.anchorRect.bottom + 4,
+                    left: editingTier.anchorRect.left,
+                  }
+                : undefined
+            }
           >
             <div className="edit-popover-row">
               <input
@@ -1116,12 +1164,44 @@ export function TierlistGrid({
                 autoFocus
                 placeholder={t('template.tierName')}
               />
-              <input
-                type="color"
-                className="edit-popover-color"
-                value={editingTier.color}
-                onChange={e => setEditingTier({ ...editingTier, color: e.target.value })}
-              />
+              {editingTier.color ? (
+                <>
+                  <input
+                    type="color"
+                    className="edit-popover-color"
+                    value={editingTier.color}
+                    onChange={e => setEditingTier({ ...editingTier, color: e.target.value })}
+                  />
+                  <button
+                    type="button"
+                    className="btn btn-ghost btn-sm remove-color-btn"
+                    onClick={() => setEditingTier({ ...editingTier, color: '' })}
+                    title={t('tierlist.removeColor')}
+                  >
+                    <svg
+                      width="12"
+                      height="12"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <line x1="18" y1="6" x2="6" y2="18" />
+                      <line x1="6" y1="6" x2="18" y2="18" />
+                    </svg>
+                  </button>
+                </>
+              ) : (
+                <button
+                  type="button"
+                  className="btn btn-ghost btn-sm add-color-btn"
+                  onClick={() => setEditingTier({ ...editingTier, color: '#ff7f7f' })}
+                >
+                  {t('tierlist.addColor')}
+                </button>
+              )}
             </div>
             <div className="edit-popover-actions">
               <button
@@ -1132,6 +1212,94 @@ export function TierlistGrid({
                 {t('common.cancel')}
               </button>
               <button type="button" className="btn btn-primary btn-sm" onClick={handleTierEditSave}>
+                {t('common.save')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {editingColumn && (
+        <div className="edit-popover-overlay" onClick={() => setEditingColumn(null)}>
+          <div
+            className="edit-popover edit-popover-column"
+            ref={editPopoverRef}
+            onClick={e => e.stopPropagation()}
+            style={
+              editingColumn.anchorRect
+                ? {
+                    position: 'fixed',
+                    top: editingColumn.anchorRect.bottom + 4,
+                    right: Math.max(8, window.innerWidth - editingColumn.anchorRect.right),
+                  }
+                : undefined
+            }
+          >
+            <div className="edit-popover-row">
+              <input
+                type="text"
+                className="edit-popover-input"
+                value={editingColumn.name}
+                onChange={e => setEditingColumn({ ...editingColumn, name: e.target.value })}
+                onKeyDown={e => {
+                  if (e.key === 'Enter') handleColumnEditSave();
+                  if (e.key === 'Escape') setEditingColumn(null);
+                }}
+                autoFocus
+                placeholder={t('template.columnName')}
+              />
+              {editingColumn.color ? (
+                <>
+                  <input
+                    type="color"
+                    className="edit-popover-color"
+                    value={editingColumn.color}
+                    onChange={e => setEditingColumn({ ...editingColumn, color: e.target.value })}
+                  />
+                  <button
+                    type="button"
+                    className="btn btn-ghost btn-sm remove-color-btn"
+                    onClick={() => setEditingColumn({ ...editingColumn, color: '' })}
+                    title={t('tierlist.removeColor')}
+                  >
+                    <svg
+                      width="12"
+                      height="12"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <line x1="18" y1="6" x2="6" y2="18" />
+                      <line x1="6" y1="6" x2="18" y2="18" />
+                    </svg>
+                  </button>
+                </>
+              ) : (
+                <button
+                  type="button"
+                  className="btn btn-ghost btn-sm add-color-btn"
+                  onClick={() => setEditingColumn({ ...editingColumn, color: '#3b3f45' })}
+                >
+                  {t('tierlist.addColor')}
+                </button>
+              )}
+            </div>
+            <div className="edit-popover-actions">
+              <button
+                type="button"
+                className="btn btn-secondary btn-sm"
+                onClick={() => setEditingColumn(null)}
+              >
+                {t('common.cancel')}
+              </button>
+              <button
+                type="button"
+                className="btn btn-primary btn-sm"
+                onClick={handleColumnEditSave}
+              >
                 {t('common.save')}
               </button>
             </div>
@@ -1285,6 +1453,7 @@ export function TierlistGrid({
                     required
                     autoFocus
                   />
+                  <span className="char-counter">{newCardTitle.length}/25</span>
                 </div>
                 <div className="form-group">
                   <label className="form-label">{t('card.image')}</label>
@@ -1307,6 +1476,7 @@ export function TierlistGrid({
                     placeholder={t('card.descriptionPlaceholder')}
                     maxLength={40}
                   />
+                  <span className="char-counter">{newCardDesc.length}/40</span>
                 </div>
               </div>
               <div className="modal-footer">
@@ -1354,6 +1524,7 @@ export function TierlistGrid({
                     required
                     autoFocus
                   />
+                  <span className="char-counter">{editingCard.title.length}/25</span>
                 </div>
                 <div className="form-group">
                   <label className="form-label">{t('card.image')}</label>
@@ -1376,6 +1547,7 @@ export function TierlistGrid({
                     placeholder={t('card.descriptionPlaceholder')}
                     maxLength={40}
                   />
+                  <span className="char-counter">{editingCard.description.length}/40</span>
                 </div>
               </div>
               <div className="modal-footer">

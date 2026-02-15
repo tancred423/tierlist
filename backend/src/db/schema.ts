@@ -9,6 +9,8 @@ export const users = mysqlTable("users", {
   discriminator: varchar("discriminator", { length: 10 }),
   avatar: varchar("avatar", { length: 255 }),
   email: varchar("email", { length: 255 }),
+  tierlistSort: varchar("tierlist_sort", { length: 20 }).default("updated_desc"),
+  templateSort: varchar("template_sort", { length: 20 }).default("updated_desc"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
 });
@@ -57,7 +59,7 @@ export interface DisplaySettings {
   tierOrder?: string[];
   columnOrder?: string[];
   tierOverrides?: Record<string, { name?: string; color?: string }>;
-  columnOverrides?: Record<string, { name?: string }>;
+  columnOverrides?: Record<string, { name?: string; color?: string }>;
   additionalCards?: { id: string; title: string; imageUrl?: string | null; description?: string | null }[];
   additionalTiers?: { id: string; name: string; color: string; orderIndex: number }[];
   hiddenTierIds?: string[];

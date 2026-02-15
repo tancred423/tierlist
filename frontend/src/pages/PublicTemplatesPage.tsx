@@ -8,6 +8,7 @@ import { usePageTitle } from '../hooks/usePageTitle';
 import { getDisplayName } from '../types';
 import type { Pagination as PaginationType, Template } from '../types';
 import { Pagination } from '../components/Pagination';
+import { getContrastColor } from '../utils/color';
 import './PublicTemplatesPage.css';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
@@ -110,17 +111,24 @@ function TemplateCard({
 
       <div className="template-table-preview">
         <div className="preview-grid">
-          {(sortedCols.length > 1 || sortedCols.some(c => c.name)) && (
-            <div className="preview-header-row">
-              <div className="preview-tier-label" />
-              {visibleCols.map((col, i) => (
-                <div key={col.id} className="preview-col-header" title={col.name || undefined}>
-                  {col.name || `Col ${i + 1}`}
-                </div>
-              ))}
-              {extraCols > 0 && <div className="preview-extra">+{extraCols}</div>}
-            </div>
-          )}
+          <div className="preview-header-row">
+            <div className="preview-tier-label" />
+            {visibleCols.map(col => (
+              <div
+                key={col.id}
+                className="preview-col-header"
+                title={col.name || undefined}
+                style={
+                  col.color
+                    ? { backgroundColor: col.color, color: getContrastColor(col.color) }
+                    : undefined
+                }
+              >
+                {col.name || ''}
+              </div>
+            ))}
+            {extraCols > 0 && <div className="preview-extra">+{extraCols}</div>}
+          </div>
           {visibleTiers.map(tier => (
             <div key={tier.id} className="preview-row">
               <div
@@ -258,28 +266,41 @@ export function PublicTemplatesPage() {
       <div className="page-header">
         <h1>{t('publicTemplates.title')}</h1>
         <div className="page-controls">
-          <form className="search-form" onSubmit={handleSearch}>
-            <input
-              type="text"
-              className="form-input search-input"
-              placeholder={t('publicTemplates.search')}
-              value={searchInput}
-              onChange={e => setSearchInput(e.target.value)}
-            />
-            <button type="submit" className="btn btn-secondary">
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
+          <div className="page-controls-row-1">
+            <form className="search-form" onSubmit={handleSearch}>
+              <input
+                type="text"
+                className="form-input search-input"
+                placeholder={t('publicTemplates.search')}
+                value={searchInput}
+                onChange={e => setSearchInput(e.target.value)}
+              />
+              <button type="submit" className="btn btn-secondary">
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <circle cx="11" cy="11" r="8" />
+                  <path d="M21 21l-4.35-4.35" />
+                </svg>
+              </button>
+            </form>
+            {user && (
+              <button
+                type="button"
+                className={`btn ${showLikedOnly ? 'btn-primary' : 'btn-secondary'} liked-filter-btn`}
+                onClick={() => setShowLikedOnly(!showLikedOnly)}
+                title={t('publicTemplates.showLikedOnly')}
               >
-                <circle cx="11" cy="11" r="8" />
-                <path d="M21 21l-4.35-4.35" />
-              </svg>
-            </button>
-          </form>
+                <span className="liked-filter-icon">{showLikedOnly ? '♥' : '♡'}</span>
+                {t('publicTemplates.showLikedOnly')}
+              </button>
+            )}
+          </div>
           <select
             className="form-input sort-select"
             value={sort}
@@ -289,16 +310,6 @@ export function PublicTemplatesPage() {
             <option value="newest">{t('publicTemplates.sortNewest')}</option>
             <option value="oldest">{t('publicTemplates.sortOldest')}</option>
           </select>
-          {user && (
-            <button
-              className={`btn ${showLikedOnly ? 'btn-primary' : 'btn-secondary'} liked-filter-btn`}
-              onClick={() => setShowLikedOnly(!showLikedOnly)}
-              title={t('publicTemplates.showLikedOnly')}
-            >
-              <span className="liked-filter-icon">{showLikedOnly ? '♥' : '♡'}</span>
-              {t('publicTemplates.showLikedOnly')}
-            </button>
-          )}
         </div>
       </div>
 

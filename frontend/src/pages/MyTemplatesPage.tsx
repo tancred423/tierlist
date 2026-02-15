@@ -1,11 +1,13 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../api/client';
+import { useAuthStore } from '../stores/auth';
 import { useClockFormatStore } from '../stores/clockFormat';
 import { useI18n } from '../i18n';
 import { usePageTitle } from '../hooks/usePageTitle';
-import type { Template, Pagination as PaginationType } from '../types';
+import type { Template, Pagination as PaginationType, SortOption } from '../types';
 import { Pagination } from '../components/Pagination';
+import { getContrastColor } from '../utils/color';
 import './MyTemplatesPage.css';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
@@ -70,17 +72,24 @@ function TemplateCard({ template, t, language, clockFormat }: TemplateCardProps)
 
       <div className="template-table-preview">
         <div className="preview-grid">
-          {(sortedCols.length > 1 || sortedCols.some(c => c.name)) && (
-            <div className="preview-header-row">
-              <div className="preview-tier-label" />
-              {visibleCols.map((col, i) => (
-                <div key={col.id} className="preview-col-header" title={col.name || undefined}>
-                  {col.name || `Col ${i + 1}`}
-                </div>
-              ))}
-              {extraCols > 0 && <div className="preview-extra">+{extraCols}</div>}
-            </div>
-          )}
+          <div className="preview-header-row">
+            <div className="preview-tier-label" />
+            {visibleCols.map(col => (
+              <div
+                key={col.id}
+                className="preview-col-header"
+                title={col.name || undefined}
+                style={
+                  col.color
+                    ? { backgroundColor: col.color, color: getContrastColor(col.color) }
+                    : undefined
+                }
+              >
+                {col.name || ''}
+              </div>
+            ))}
+            {extraCols > 0 && <div className="preview-extra">+{extraCols}</div>}
+          </div>
           {visibleTiers.map(tier => (
             <div key={tier.id} className="preview-row">
               <div
@@ -122,6 +131,14 @@ function TemplateCard({ template, t, language, clockFormat }: TemplateCardProps)
   );
 }
 
+const SORT_OPTIONS: SortOption[] = [
+  'updated_desc',
+  'created_desc',
+  'created_asc',
+  'title_asc',
+  'title_desc',
+];
+
 export function MyTemplatesPage() {
   const [templates, setTemplates] = useState<Template[]>([]);
   const [pagination, setPagination] = useState<PaginationType | null>(null);
@@ -130,12 +147,28 @@ export function MyTemplatesPage() {
   const { t, language } = useI18n();
   const { getEffectiveFormat } = useClockFormatStore();
   const clockFormat = getEffectiveFormat();
+  const { user, setUser } = useAuthStore();
+  const [sort, setSort] = useState<SortOption>(user?.templateSort || 'updated_desc');
   usePageTitle(t('myTemplates.title'));
+
+  const handleSortChange = useCallback(
+    async (newSort: SortOption) => {
+      setSort(newSort);
+      setPage(1);
+      try {
+        const { user: updatedUser } = await api.updateProfile({ templateSort: newSort });
+        setUser(updatedUser);
+      } catch {
+        // Ignore
+      }
+    },
+    [setUser],
+  );
 
   const loadData = useCallback(async () => {
     setIsLoading(true);
     try {
-      const result = await api.getMyTemplates({ page, limit: 12 });
+      const result = await api.getMyTemplates({ page, limit: 12, sort });
       setTemplates(result.templates);
       setPagination(result.pagination);
     } catch (error) {
@@ -143,7 +176,7 @@ export function MyTemplatesPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [page]);
+  }, [page, sort]);
 
   useEffect(() => {
     loadData();
@@ -161,9 +194,28 @@ export function MyTemplatesPage() {
     <div className="container my-templates-page">
       <div className="page-header">
         <h1>{t('myTemplates.title')}</h1>
-        <Link to="/template/new" className="btn btn-secondary">
-          + {t('home.createNewTemplate')}
-        </Link>
+        <div className="page-header-actions">
+          {templates.length > 0 && (
+            <div className="sort-dropdown">
+              <select
+                id="template-sort"
+                value={sort}
+                onChange={e => handleSortChange(e.target.value as SortOption)}
+              >
+                {SORT_OPTIONS.map(opt => (
+                  <option key={opt} value={opt}>
+                    {t(
+                      `sort.${opt === 'updated_desc' ? 'updatedDesc' : opt === 'created_desc' ? 'createdDesc' : opt === 'created_asc' ? 'createdAsc' : opt === 'title_asc' ? 'titleAsc' : 'titleDesc'}`,
+                    )}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+          <Link to="/template/new" className="btn btn-secondary btn-sm">
+            + {t('home.createNewTemplate')}
+          </Link>
+        </div>
       </div>
 
       {templates.length === 0 ? (

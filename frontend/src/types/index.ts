@@ -1,3 +1,10 @@
+export type SortOption =
+  | 'updated_desc'
+  | 'created_desc'
+  | 'created_asc'
+  | 'title_asc'
+  | 'title_desc';
+
 export interface User {
   id: string;
   discordId: string;
@@ -5,6 +12,8 @@ export interface User {
   nickname: string | null;
   avatar: string | null;
   discriminator: string | null;
+  tierlistSort?: SortOption;
+  templateSort?: SortOption;
   createdAt?: string;
 }
 
@@ -93,7 +102,7 @@ export interface DisplaySettings {
   tierOrder?: string[];
   columnOrder?: string[];
   tierOverrides?: Record<string, { name?: string; color?: string }>;
-  columnOverrides?: Record<string, { name?: string }>;
+  columnOverrides?: Record<string, { name?: string; color?: string }>;
   additionalCards?: AdditionalCard[];
   additionalTiers?: Array<{ id: string; name: string; color: string; orderIndex: number }>;
   hiddenTierIds?: string[];

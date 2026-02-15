@@ -9,7 +9,7 @@ interface TierRowProps {
   onMoveDown?: () => void;
   canMoveUp?: boolean;
   canMoveDown?: boolean;
-  onEdit?: () => void;
+  onEdit?: (anchorRect: DOMRect) => void;
   onDelete?: () => void;
 }
 
@@ -23,7 +23,8 @@ export function TierRow({
   onEdit,
   onDelete,
 }: TierRowProps) {
-  const textColor = getContrastColor(tier.color);
+  const hasColor = !!tier.color;
+  const textColor = hasColor ? getContrastColor(tier.color) : undefined;
   const hasToolbar =
     onMoveUp !== undefined ||
     onMoveDown !== undefined ||
@@ -34,10 +35,7 @@ export function TierRow({
     <>
       <div
         className={`tier-label ${hasToolbar ? 'tier-label-with-toolbar' : ''}`}
-        style={{
-          backgroundColor: tier.color,
-          color: textColor,
-        }}
+        style={hasColor ? { backgroundColor: tier.color, color: textColor } : undefined}
         title={tier.name}
       >
         {hasToolbar && (
@@ -55,7 +53,11 @@ export function TierRow({
               </button>
             )}
             {onEdit && (
-              <button type="button" className="tier-tool-btn" onClick={onEdit}>
+              <button
+                type="button"
+                className="tier-tool-btn"
+                onClick={e => onEdit(e.currentTarget.getBoundingClientRect())}
+              >
                 <svg
                   width="11"
                   height="11"

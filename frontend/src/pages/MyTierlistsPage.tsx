@@ -1,13 +1,15 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../api/client';
+import { useAuthStore } from '../stores/auth';
 import { useClockFormatStore } from '../stores/clockFormat';
 import { useI18n } from '../i18n';
 import { usePageTitle } from '../hooks/usePageTitle';
 import { getDisplayName } from '../types';
-import type { FilledTierlist, Pagination as PaginationType } from '../types';
+import type { FilledTierlist, Pagination as PaginationType, SortOption } from '../types';
 import { formatDate } from '../utils/format';
 import { sortByOrder } from '../utils/tierlist';
+import { getContrastColor } from '../utils/color';
 import { Pagination } from '../components/Pagination';
 import './MyTierlistsPage.css';
 
@@ -43,14 +45,27 @@ function TierlistCard({ tierlist, t, language, clockFormat }: TierlistCardProps)
   const snapshot = tierlist.templateSnapshot;
   const ds = tierlist.displaySettings;
 
-  const rawTiers = template?.tiers ?? snapshot?.tiers ?? [];
-  const rawCols = template?.columns ?? snapshot?.columns ?? [];
+  const baseTiers = template?.tiers ?? snapshot?.tiers ?? [];
+  const baseCols = template?.columns ?? snapshot?.columns ?? [];
   const cards = [
     ...(template?.cards ?? snapshot?.cards ?? []),
     ...(ds?.additionalCards?.map(c => ({ ...c, templateId: '', orderIndex: 99999 })) ?? []),
   ];
 
-  if (rawTiers.length === 0 && rawCols.length === 0) return null;
+  if (baseTiers.length === 0 && baseCols.length === 0) return null;
+
+  const hiddenTierIds = new Set(ds?.hiddenTierIds ?? []);
+  const hiddenColIds = new Set(ds?.hiddenColumnIds ?? []);
+  const removedCardIds = new Set(ds?.removedCardIds ?? []);
+
+  const rawTiers = [
+    ...baseTiers.filter(t => !hiddenTierIds.has(t.id)),
+    ...(ds?.additionalTiers?.map(t => ({ ...t, templateId: '' })) ?? []),
+  ];
+  const rawCols = [
+    ...baseCols.filter(c => !hiddenColIds.has(c.id)),
+    ...(ds?.additionalColumns?.map(c => ({ ...c, templateId: '', color: null })) ?? []),
+  ];
 
   const tiers = rawTiers.map(tier => {
     const ov = ds?.tierOverrides?.[tier.id];
@@ -58,8 +73,11 @@ function TierlistCard({ tierlist, t, language, clockFormat }: TierlistCardProps)
   });
   const cols = rawCols.map(col => {
     const ov = ds?.columnOverrides?.[col.id];
-    return ov ? { ...col, name: ov.name ?? col.name } : col;
+    return ov ? { ...col, name: ov.name ?? col.name, color: ov.color ?? col.color } : col;
   });
+
+  const filteredCards = cards.filter(c => !removedCardIds.has(c.id));
+  const cardMap = new Map(filteredCards.map(c => [c.id, c]));
 
   const sortedTiers = sortByOrder(tiers, ds?.tierOrder);
   const sortedCols = sortByOrder(cols, ds?.columnOrder);
@@ -70,7 +88,6 @@ function TierlistCard({ tierlist, t, language, clockFormat }: TierlistCardProps)
   const extraCols = sortedCols.length - maxCols;
 
   const placements = tierlist.placements || [];
-  const cardMap = new Map(cards.map(c => [c.id, c]));
 
   const getCardForCell = (tierId: string, colId: string) => {
     const placement = placements.find(p => p.tierId === tierId && p.columnId === colId);
@@ -120,17 +137,24 @@ function TierlistCard({ tierlist, t, language, clockFormat }: TierlistCardProps)
 
       <div className="tierlist-table-preview">
         <div className="preview-grid">
-          {(sortedCols.length > 1 || sortedCols.some(c => c.name)) && (
-            <div className="preview-header-row">
-              <div className="preview-tier-label" />
-              {visibleCols.map((col, i) => (
-                <div key={col.id} className="preview-col-header" title={col.name || ''}>
-                  {col.name || `${i + 1}`}
-                </div>
-              ))}
-              {extraCols > 0 && <div className="preview-extra">+{extraCols}</div>}
-            </div>
-          )}
+          <div className="preview-header-row">
+            <div className="preview-tier-label" />
+            {visibleCols.map(col => (
+              <div
+                key={col.id}
+                className="preview-col-header"
+                title={col.name || ''}
+                style={
+                  col.color
+                    ? { backgroundColor: col.color, color: getContrastColor(col.color) }
+                    : undefined
+                }
+              >
+                {col.name || ''}
+              </div>
+            ))}
+            {extraCols > 0 && <div className="preview-extra">+{extraCols}</div>}
+          </div>
           {visibleTiers.map(tier => (
             <div key={tier.id} className="preview-row">
               <div
@@ -191,6 +215,14 @@ function TierlistCard({ tierlist, t, language, clockFormat }: TierlistCardProps)
   );
 }
 
+const SORT_OPTIONS: SortOption[] = [
+  'updated_desc',
+  'created_desc',
+  'created_asc',
+  'title_asc',
+  'title_desc',
+];
+
 export function MyTierlistsPage() {
   const [tierlists, setTierlists] = useState<TierlistWithCoOwner[]>([]);
   const [pagination, setPagination] = useState<PaginationType | null>(null);
@@ -199,12 +231,28 @@ export function MyTierlistsPage() {
   const { t, language } = useI18n();
   const { getEffectiveFormat } = useClockFormatStore();
   const clockFormat = getEffectiveFormat();
+  const { user, setUser } = useAuthStore();
+  const [sort, setSort] = useState<SortOption>(user?.tierlistSort || 'updated_desc');
   usePageTitle(t('myTierlists.title'));
+
+  const handleSortChange = useCallback(
+    async (newSort: SortOption) => {
+      setSort(newSort);
+      setPage(1);
+      try {
+        const { user: updatedUser } = await api.updateProfile({ tierlistSort: newSort });
+        setUser(updatedUser);
+      } catch {
+        // Ignore
+      }
+    },
+    [setUser],
+  );
 
   const loadData = useCallback(async () => {
     setIsLoading(true);
     try {
-      const result = await api.getMyFilledTierlists({ page, limit: 12 });
+      const result = await api.getMyFilledTierlists({ page, limit: 12, sort });
       setTierlists(result.tierlists);
       setPagination(result.pagination);
     } catch (error) {
@@ -212,7 +260,7 @@ export function MyTierlistsPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [page]);
+  }, [page, sort]);
 
   useEffect(() => {
     loadData();
@@ -230,6 +278,23 @@ export function MyTierlistsPage() {
     <div className="container my-tierlists-page">
       <div className="page-header">
         <h1>{t('myTierlists.title')}</h1>
+        {tierlists.length > 0 && (
+          <div className="sort-dropdown">
+            <select
+              id="tierlist-sort"
+              value={sort}
+              onChange={e => handleSortChange(e.target.value as SortOption)}
+            >
+              {SORT_OPTIONS.map(opt => (
+                <option key={opt} value={opt}>
+                  {t(
+                    `sort.${opt === 'updated_desc' ? 'updatedDesc' : opt === 'created_desc' ? 'createdDesc' : opt === 'created_asc' ? 'createdAsc' : opt === 'title_asc' ? 'titleAsc' : 'titleDesc'}`,
+                  )}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
       </div>
 
       {tierlists.length === 0 ? (

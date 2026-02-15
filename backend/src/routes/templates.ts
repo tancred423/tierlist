@@ -1,5 +1,5 @@
 import { Hono } from "@hono/hono";
-import { and, desc, eq, like, or, sql } from "drizzle-orm";
+import { and, desc, eq, like, or } from "drizzle-orm";
 import { db, schema } from "../db/index.ts";
 import { generateId, generateToken } from "../utils/id.ts";
 import { requireAuth } from "../middleware/auth.ts";
@@ -121,29 +121,39 @@ templates.get("/my", requireAuth, async (c) => {
   const user = c.get("user")!;
   const page = Math.max(1, parseInt(c.req.query("page") || "1"));
   const limit = clampPaginationLimit(parseInt(c.req.query("limit") || "12"));
+  const sort = c.req.query("sort") || "updated_desc";
   const offset = (page - 1) * limit;
 
-  const [userTemplates, countResult] = await Promise.all([
-    db.query.templates.findMany({
-      where: eq(schema.templates.ownerId, user.userId),
-      with: {
-        tiers: true,
-        columns: true,
-        cards: true,
-      },
-      orderBy: [desc(schema.templates.createdAt)],
-      limit,
-      offset,
-    }),
-    db.select({ count: sql<number>`count(*)` })
-      .from(schema.templates)
-      .where(eq(schema.templates.ownerId, user.userId)),
-  ]);
+  const allTemplates = await db.query.templates.findMany({
+    where: eq(schema.templates.ownerId, user.userId),
+    with: {
+      tiers: true,
+      columns: true,
+      cards: true,
+    },
+  });
 
-  const total = Number(countResult[0]?.count || 0);
+  allTemplates.sort((a, b) => {
+    switch (sort) {
+      case "created_desc":
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      case "created_asc":
+        return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+      case "title_asc":
+        return a.title.localeCompare(b.title);
+      case "title_desc":
+        return b.title.localeCompare(a.title);
+      case "updated_desc":
+      default:
+        return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
+    }
+  });
+
+  const total = allTemplates.length;
+  const paginatedTemplates = allTemplates.slice(offset, offset + limit);
 
   return c.json({
-    templates: userTemplates,
+    templates: paginatedTemplates,
     pagination: {
       page,
       limit,

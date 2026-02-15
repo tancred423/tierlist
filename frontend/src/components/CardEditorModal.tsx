@@ -173,6 +173,7 @@ export function CardEditorModal({ card, templateId, onClose, onSave }: CardEdito
                 maxLength={25}
                 required
               />
+              <span className="char-counter">{title.length}/25</span>
             </div>
 
             <div className="form-group">
@@ -288,6 +289,7 @@ export function CardEditorModal({ card, templateId, onClose, onSave }: CardEdito
                 placeholder={t('card.descriptionPlaceholder')}
                 maxLength={40}
               />
+              <span className="char-counter">{description.length}/40</span>
             </div>
           </div>
 

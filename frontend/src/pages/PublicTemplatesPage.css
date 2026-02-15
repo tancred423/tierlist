@@ -22,6 +22,23 @@
   align-items: center;
 }
 
+.page-controls-row-1 {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.page-controls .form-input,
+.page-controls .sort-select {
+  padding: 0.375rem 0.5rem;
+  font-size: 0.8125rem;
+}
+
+.page-controls .btn {
+  padding: 0.375rem 0.75rem;
+  font-size: 0.8125rem;
+}
+
 .search-form {
   display: flex;
   gap: 0.5rem;
@@ -166,7 +183,6 @@
   border-radius: var(--radius-md);
   padding: 0.5rem;
   overflow: hidden;
-  margin-top: auto;
 }
 
 .template-cards-preview {
@@ -176,6 +192,7 @@
   padding: 0.5rem;
   background: var(--color-bg);
   border-radius: var(--radius-sm);
+  margin-top: auto;
 }
 
 .empty-state {
@@ -205,6 +222,8 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  min-height: calc(0.625rem + 0.5rem);
+  box-sizing: border-box;
 }
 
 .preview-row {
@@ -300,15 +319,22 @@
 
   .page-controls {
     width: 100%;
-    flex-wrap: wrap;
+    flex-direction: column;
+    align-items: stretch;
   }
 
-  .search-form {
+  .page-controls-row-1 {
+    display: flex;
+    gap: 0.5rem;
     width: 100%;
-    flex: 1;
   }
 
-  .search-input {
+  .page-controls-row-1 .search-form {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .page-controls-row-1 .search-input {
     flex: 1;
     min-width: 0;
   }

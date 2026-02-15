@@ -4,7 +4,12 @@
 }
 
 .page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 1.5rem;
+  gap: 1rem;
+  flex-wrap: wrap;
 }
 
 .page-header h1 {
@@ -80,7 +85,6 @@
   border-radius: var(--radius-md);
   padding: 0.5rem;
   overflow: hidden;
-  margin-top: auto;
 }
 
 .tierlist-unranked-preview {
@@ -91,6 +95,7 @@
   padding: 0.5rem;
   background: var(--color-bg);
   border-radius: var(--radius-sm);
+  margin-top: auto;
 }
 
 .tierlist-unranked-preview::before {
@@ -156,6 +161,8 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  min-height: calc(0.625rem + 0.5rem);
+  box-sizing: border-box;
 }
 
 .preview-row {

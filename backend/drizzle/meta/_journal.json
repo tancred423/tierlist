@@ -50,6 +50,13 @@
       "when": 1770000000000,
       "tag": "0006_column_color",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "5",
+      "when": 1770100000000,
+      "tag": "0007_user_sort_preferences",
+      "breakpoints": true
     }
   ]
 }

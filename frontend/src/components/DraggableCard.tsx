@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import type { Card } from '../types';
@@ -37,6 +38,29 @@ export function DraggableCard({
     disabled,
   });
 
+  const titleRef = useRef<HTMLSpanElement>(null);
+  const descRef = useRef<HTMLSpanElement>(null);
+
+  useEffect(() => {
+    function measure(el: HTMLSpanElement | null) {
+      if (!el) return;
+      const staticEl = el.querySelector('.card-text-static') as HTMLElement | null;
+      if (!staticEl) return;
+      const isOverflowing = staticEl.scrollWidth > staticEl.clientWidth + 1;
+      if (isOverflowing) {
+        const speed = 30;
+        const duration = staticEl.scrollWidth / speed;
+        el.dataset.overflows = '';
+        el.style.setProperty('--marquee-duration', `${duration}s`);
+      } else {
+        delete el.dataset.overflows;
+        el.style.removeProperty('--marquee-duration');
+      }
+    }
+    measure(titleRef.current);
+    measure(descRef.current);
+  }, [card.title, card.description]);
+
   const style = disabled
     ? {}
     : {
@@ -50,7 +74,6 @@ export function DraggableCard({
       style={style}
       className={`draggable-card ${isDragging || isActive ? 'is-dragging' : ''} ${showDetails ? 'show-details' : ''} ${compact ? 'compact' : ''} ${disabled ? 'disabled' : ''}`}
       {...(disabled ? {} : { ...attributes, ...listeners })}
-      title={card.title}
     >
       {card.imageUrl ? (
         <img src={getImageUrl(card.imageUrl)!} alt={card.title} className="card-image" />
@@ -61,14 +84,22 @@ export function DraggableCard({
       )}
       {showDetails && (
         <div className="card-details">
-          <span className="card-title">{card.title}</span>
-          {card.description && <span className="card-desc">{card.description}</span>}
-        </div>
-      )}
-      {!showDetails && (
-        <div className="card-tooltip">
-          <strong>{card.title}</strong>
-          {card.description && <p>{card.description}</p>}
+          <span className="card-title" ref={titleRef}>
+            <span className="card-text-static">{card.title}</span>
+            <span className="card-text-track" aria-hidden="true">
+              <span>{card.title}</span>
+              <span>{card.title}</span>
+            </span>
+          </span>
+          {card.description && (
+            <span className="card-desc" ref={descRef}>
+              <span className="card-text-static">{card.description}</span>
+              <span className="card-text-track" aria-hidden="true">
+                <span>{card.description}</span>
+                <span>{card.description}</span>
+              </span>
+            </span>
+          )}
         </div>
       )}
       {(onEdit || onDelete) && (
@@ -146,7 +177,9 @@ export function CardOverlay({ card }: CardOverlayProps) {
         </div>
       )}
       <div className="card-details">
-        <span className="card-title">{card.title}</span>
+        <span className="card-title">
+          <span className="card-text-static">{card.title}</span>
+        </span>
       </div>
     </div>
   );

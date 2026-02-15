@@ -129,10 +129,14 @@ auth.get("/me", async (c) => {
       nickname: dbUser.nickname,
       avatar: dbUser.avatar,
       discriminator: dbUser.discriminator,
+      tierlistSort: dbUser.tierlistSort || "updated_desc",
+      templateSort: dbUser.templateSort || "updated_desc",
       createdAt: dbUser.createdAt,
     },
   });
 });
+
+const VALID_SORT_OPTIONS = ["updated_desc", "created_desc", "created_asc", "title_asc", "title_desc"];
 
 auth.put("/me", async (c) => {
   const user = c.get("user");
@@ -142,15 +146,35 @@ auth.put("/me", async (c) => {
   }
 
   const body = await c.req.json();
-  const { nickname } = body;
+  const { nickname, tierlistSort, templateSort } = body;
+
+  const updates: Record<string, unknown> = {};
 
   if (nickname !== undefined && nickname !== null) {
     const trimmed = typeof nickname === "string" ? nickname.trim() : "";
     if (trimmed.length > 255) {
       return c.json({ error: "Nickname must be at most 255 characters" }, 400);
     }
+    updates.nickname = trimmed || null;
+  }
+
+  if (tierlistSort !== undefined) {
+    if (!VALID_SORT_OPTIONS.includes(tierlistSort)) {
+      return c.json({ error: "Invalid tierlistSort value" }, 400);
+    }
+    updates.tierlistSort = tierlistSort;
+  }
+
+  if (templateSort !== undefined) {
+    if (!VALID_SORT_OPTIONS.includes(templateSort)) {
+      return c.json({ error: "Invalid templateSort value" }, 400);
+    }
+    updates.templateSort = templateSort;
+  }
+
+  if (Object.keys(updates).length > 0) {
     await db.update(schema.users)
-      .set({ nickname: trimmed || null })
+      .set(updates)
       .where(eq(schema.users.id, user.userId));
   }
 
@@ -170,6 +194,8 @@ auth.put("/me", async (c) => {
       nickname: dbUser.nickname,
       avatar: dbUser.avatar,
       discriminator: dbUser.discriminator,
+      tierlistSort: dbUser.tierlistSort || "updated_desc",
+      templateSort: dbUser.templateSort || "updated_desc",
       createdAt: dbUser.createdAt,
     },
   });

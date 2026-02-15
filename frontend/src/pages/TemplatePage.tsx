@@ -446,7 +446,7 @@ export function TemplatePage() {
       <button className="btn btn-primary btn-sm" onClick={handleStartTierlist}>
         {user ? t('home.startRanking') : t('auth.loginToStartRanking')}
       </button>
-      <p className="grid-overlay-text grid-overlay-divider">{t('template.cellBlockedCopyHint')}</p>
+      <p className="grid-overlay-text">{t('template.cellBlockedCopyHint')}</p>
       <button
         className="btn btn-secondary btn-sm"
         onClick={handleCopyTemplate}
@@ -500,7 +500,7 @@ export function TemplatePage() {
                   setIsPublic(!isPublic);
                 }}
               >
-                {isPublic ? '🔓' : '🔒'} {isPublic ? t('template.public') : t('template.private')}
+                {isPublic ? '🌍' : '🔒'} {isPublic ? t('template.public') : t('template.private')}
               </button>
               <div className="actions-menu" ref={menuRef}>
                 <button

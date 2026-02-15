@@ -185,6 +185,7 @@
   font-size: 0.875rem;
   color: var(--color-text);
   transition: background-color 150ms ease;
+  white-space: nowrap;
 }
 
 .actions-menu-dropdown button:hover {
