@@ -170,10 +170,10 @@ export function CardEditorModal({ card, templateId, onClose, onSave }: CardEdito
                 onChange={e => setTitle(e.target.value)}
                 className="form-input"
                 placeholder={t('card.title')}
-                maxLength={25}
+                maxLength={50}
                 required
               />
-              <span className="char-counter">{title.length}/25</span>
+              <span className="char-counter">{title.length} / 50</span>
             </div>
 
             <div className="form-group">
@@ -287,9 +287,9 @@ export function CardEditorModal({ card, templateId, onClose, onSave }: CardEdito
                 onChange={e => setDescription(e.target.value)}
                 className="form-input"
                 placeholder={t('card.descriptionPlaceholder')}
-                maxLength={40}
+                maxLength={50}
               />
-              <span className="char-counter">{description.length}/40</span>
+              <span className="char-counter">{description.length} / 50</span>
             </div>
           </div>
 
