@@ -152,7 +152,18 @@
     "shareTemplate": "Vorlage teilen",
     "shareLink": "Teilen-Link",
     "shareLinkHint": "Jeder mit diesem Link kann diese Vorlage ansehen und kopieren",
-    "linkCopied": "Link kopiert!"
+    "linkCopied": "Link kopiert!",
+    "publishConfirmTitle": "Vorlage veröffentlichen",
+    "publishConfirmMessage": "Bevor du deine Vorlage öffentlich machst, stelle bitte sicher:",
+    "publishConfirmCheck1": "Deine Vorlage ist hochwertig und vollständig",
+    "publishConfirmCheck2": "Die Vorlage ist einzigartig und kein Duplikat",
+    "publishConfirmCheck3": "Sie hat einen aussagekräftigen Titel",
+    "publishConfirmCheck4": "Die Beschreibung den Inhalt korrekt wiedergibt",
+    "publishConfirmAction": "Jetzt veröffentlichen",
+    "unpublishConfirmTitle": "Vorlage zurückziehen",
+    "unpublishConfirmMessage": "Möchtest du diese Vorlage wirklich privat machen?",
+    "unpublishConfirmHint": "Bestehende Likes werden nicht entfernt.",
+    "unpublishConfirmAction": "Zurückziehen"
   },
   "card": {
     "title": "Titel",

@@ -37,6 +37,7 @@ export function TemplatePage() {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [isPublic, setIsPublic] = useState(false);
+  const [visibilityConfirm, setVisibilityConfirm] = useState<'publish' | 'unpublish' | null>(null);
 
   const isCreatingRef = useRef(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -495,10 +496,7 @@ export function TemplatePage() {
               <button
                 type="button"
                 className={`visibility-btn ${isPublic ? 'is-public' : 'is-private'}`}
-                onClick={() => {
-                  metadataDirtyRef.current = true;
-                  setIsPublic(!isPublic);
-                }}
+                onClick={() => setVisibilityConfirm(isPublic ? 'unpublish' : 'publish')}
               >
                 {isPublic ? '🌍' : '🔒'} {isPublic ? t('template.public') : t('template.private')}
               </button>
@@ -594,6 +592,58 @@ export function TemplatePage() {
         onCardReorder={isOwner ? handleCardReorder : undefined}
         readOnly={!isOwner}
       />
+
+      {visibilityConfirm && (
+        <div className="modal-overlay" onClick={() => setVisibilityConfirm(null)}>
+          <div className="modal visibility-confirm-modal" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>
+                {visibilityConfirm === 'publish'
+                  ? t('template.publishConfirmTitle')
+                  : t('template.unpublishConfirmTitle')}
+              </h2>
+              <button onClick={() => setVisibilityConfirm(null)} className="btn btn-icon">
+                ×
+              </button>
+            </div>
+            <div className="modal-body">
+              {visibilityConfirm === 'publish' ? (
+                <>
+                  <p>{t('template.publishConfirmMessage')}</p>
+                  <ul className="publish-checklist">
+                    <li>{t('template.publishConfirmCheck1')}</li>
+                    <li>{t('template.publishConfirmCheck2')}</li>
+                    <li>{t('template.publishConfirmCheck3')}</li>
+                    <li>{t('template.publishConfirmCheck4')}</li>
+                  </ul>
+                </>
+              ) : (
+                <>
+                  <p>{t('template.unpublishConfirmMessage')}</p>
+                  <p className="unpublish-hint">{t('template.unpublishConfirmHint')}</p>
+                </>
+              )}
+            </div>
+            <div className="modal-footer">
+              <button onClick={() => setVisibilityConfirm(null)} className="btn btn-secondary">
+                {t('common.cancel')}
+              </button>
+              <button
+                onClick={() => {
+                  metadataDirtyRef.current = true;
+                  setIsPublic(!isPublic);
+                  setVisibilityConfirm(null);
+                }}
+                className={`btn ${visibilityConfirm === 'publish' ? 'btn-success' : 'btn-secondary'}`}
+              >
+                {visibilityConfirm === 'publish'
+                  ? t('template.publishConfirmAction')
+                  : t('template.unpublishConfirmAction')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

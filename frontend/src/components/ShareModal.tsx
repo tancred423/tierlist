@@ -16,6 +16,7 @@ export function ShareModal({ tierlist, onClose, onUpdate }: ShareModalProps) {
   const [viewEnabled, setViewEnabled] = useState(tierlist.viewShareEnabled ?? false);
   const [editEnabled, setEditEnabled] = useState(tierlist.editShareEnabled ?? false);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
   const [copied, setCopied] = useState<string | null>(null);
 
   const viewUrl = `${window.location.origin}/share/view/${tierlist.viewShareToken}`;
@@ -105,6 +106,7 @@ export function ShareModal({ tierlist, onClose, onUpdate }: ShareModalProps) {
     const gridContainer = document.querySelector('.tierlist-grid-container');
     if (!gridContainer) return;
 
+    setIsDownloading(true);
     try {
       const html2canvas = (await import('html2canvas')).default;
       const canvas = await html2canvas(gridContainer as HTMLElement, {
@@ -135,12 +137,14 @@ export function ShareModal({ tierlist, onClose, onUpdate }: ShareModalProps) {
       link.click();
     } catch (error) {
       console.error('Failed to generate image:', error);
+    } finally {
+      setIsDownloading(false);
     }
   }
 
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div className="modal share-modal" onClick={e => e.stopPropagation()}>
+      <div className="modal distrib-modal" onClick={e => e.stopPropagation()}>
         <div className="modal-header">
           <h2>{t('tierlist.shareRanking')}</h2>
           <button onClick={onClose} className="btn btn-icon">
@@ -148,14 +152,24 @@ export function ShareModal({ tierlist, onClose, onUpdate }: ShareModalProps) {
           </button>
         </div>
         <div className="modal-body">
-          <section className="share-section">
-            <button onClick={handleShareAsImage} className="btn btn-secondary share-image-btn">
-              📷 {t('tierlist.shareAsImage')}
+          <section className="distrib-section">
+            <button
+              onClick={handleShareAsImage}
+              className="btn btn-secondary capture-image-btn"
+              disabled={isDownloading}
+            >
+              {isDownloading ? (
+                <>
+                  <span className="btn-spinner" /> {t('common.loading')}
+                </>
+              ) : (
+                <>📷 {t('tierlist.shareAsImage')}</>
+              )}
             </button>
           </section>
 
-          <section className="share-section">
-            <div className="share-section-header">
+          <section className="distrib-section">
+            <div className="distrib-section-header">
               <div>
                 <h3>{t('tierlist.viewOnly')}</h3>
                 <p>{t('share.anyoneCanView')}</p>
@@ -172,12 +186,12 @@ export function ShareModal({ tierlist, onClose, onUpdate }: ShareModalProps) {
             </div>
             {viewEnabled && (
               <>
-                <div className="share-link-row">
+                <div className="link-copy-row">
                   <input
                     type="text"
                     value={viewUrl}
                     readOnly
-                    className="form-input share-link-input"
+                    className="form-input link-copy-input"
                   />
                   <button
                     onClick={() => copyToClipboard(viewUrl, 'view')}
@@ -197,8 +211,8 @@ export function ShareModal({ tierlist, onClose, onUpdate }: ShareModalProps) {
             )}
           </section>
 
-          <section className="share-section">
-            <div className="share-section-header">
+          <section className="distrib-section">
+            <div className="distrib-section-header">
               <div>
                 <h3>{t('tierlist.editable')}</h3>
                 <p>{t('share.anyoneCanEdit')}</p>
@@ -215,12 +229,12 @@ export function ShareModal({ tierlist, onClose, onUpdate }: ShareModalProps) {
             </div>
             {editEnabled && (
               <>
-                <div className="share-link-row">
+                <div className="link-copy-row">
                   <input
                     type="text"
                     value={editUrl}
                     readOnly
-                    className="form-input share-link-input"
+                    className="form-input link-copy-input"
                   />
                   <button
                     onClick={() => copyToClipboard(editUrl, 'edit')}

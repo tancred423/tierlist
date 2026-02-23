@@ -29,5 +29,7 @@
 @media (max-width: 400px) {
   .droppable-cell {
     min-height: 90px;
+    gap: 1px;
+    padding: 1px;
   }
 }

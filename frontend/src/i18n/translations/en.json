@@ -152,7 +152,18 @@
     "shareTemplate": "Share Template",
     "shareLink": "Share Link",
     "shareLinkHint": "Anyone with this link can view and copy this template",
-    "linkCopied": "Link copied!"
+    "linkCopied": "Link copied!",
+    "publishConfirmTitle": "Publish Template",
+    "publishConfirmMessage": "Before making your template public, please ensure:",
+    "publishConfirmCheck1": "Your template is high quality and complete",
+    "publishConfirmCheck2": "The template is unique and not a duplicate",
+    "publishConfirmCheck3": "It has a proper, descriptive title",
+    "publishConfirmCheck4": "The description accurately represents the content",
+    "publishConfirmAction": "Publish Now",
+    "unpublishConfirmTitle": "Unpublish Template",
+    "unpublishConfirmMessage": "Are you sure you want to make this template private?",
+    "unpublishConfirmHint": "Existing likes on your template will not be removed.",
+    "unpublishConfirmAction": "Unpublish"
   },
   "card": {
     "title": "Title",

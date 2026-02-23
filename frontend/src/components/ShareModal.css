@@ -1,22 +1,22 @@
-.share-modal {
+.distrib-modal {
   max-width: 550px;
 }
 
-.share-section {
+.distrib-section {
   padding: 1rem 0;
   border-bottom: 1px solid var(--color-border);
 }
 
-.share-image-btn {
+.capture-image-btn {
   width: 100%;
   justify-content: center;
 }
 
-.share-section:last-child {
+.distrib-section:last-child {
   border-bottom: none;
 }
 
-.share-section-header {
+.distrib-section-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
@@ -24,12 +24,12 @@
   margin-bottom: 0.75rem;
 }
 
-.share-section h3 {
+.distrib-section h3 {
   font-size: 1rem;
   margin-bottom: 0.25rem;
 }
 
-.share-section p {
+.distrib-section p {
   font-size: 0.875rem;
   color: var(--color-text-muted);
 }
@@ -82,13 +82,13 @@
   background-color: white;
 }
 
-.share-link-row {
+.link-copy-row {
   display: flex;
   gap: 0.5rem;
   margin-bottom: 0.75rem;
 }
 
-.share-link-input {
+.link-copy-input {
   flex: 1;
   font-size: 0.875rem;
   font-family: monospace;
@@ -122,4 +122,15 @@
   padding: 0.25rem 0.75rem;
   background: var(--color-bg-card);
   border-radius: var(--radius-sm);
+}
+
+.btn-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--color-border);
+  border-top-color: currentColor;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  flex-shrink: 0;
+  display: inline-block;
 }
