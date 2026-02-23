@@ -110,13 +110,15 @@ export function ShareModal({ tierlist, onClose, onUpdate }: ShareModalProps) {
     try {
       const fullWidth = gridContainer.scrollWidth;
 
-      const imageDims: { width: number; height: number; src: string }[] = [];
+      const imageDims: { width: number; height: number; natW: number; natH: number }[] = [];
       gridContainer.querySelectorAll('.card-image').forEach(img => {
         const rect = img.getBoundingClientRect();
+        const htmlImg = img as HTMLImageElement;
         imageDims.push({
           width: rect.width,
           height: rect.height,
-          src: (img as HTMLImageElement).src,
+          natW: htmlImg.naturalWidth,
+          natH: htmlImg.naturalHeight,
         });
       });
 
@@ -151,16 +153,42 @@ export function ShareModal({ tierlist, onClose, onUpdate }: ShareModalProps) {
 
           const clonedImages = clonedDoc.querySelectorAll('.tierlist-grid-container .card-image');
           clonedImages.forEach((imgEl, index) => {
+            const img = imgEl as HTMLImageElement;
             const dim = imageDims[index];
-            if (!dim) return;
-            const div = clonedDoc.createElement('div');
-            div.style.width = `${dim.width}px`;
-            div.style.height = `${dim.height}px`;
-            div.style.backgroundImage = `url(${dim.src})`;
-            div.style.backgroundSize = 'cover';
-            div.style.backgroundPosition = 'center';
-            div.style.flexShrink = '0';
-            imgEl.replaceWith(div);
+            if (!dim || !dim.natW || !dim.natH) return;
+
+            const cW = dim.width;
+            const cH = dim.height;
+            const cRatio = cW / cH;
+            const iRatio = dim.natW / dim.natH;
+            let imgW: number, imgH: number;
+            if (iRatio > cRatio) {
+              imgH = cH;
+              imgW = cH * iRatio;
+            } else {
+              imgW = cW;
+              imgH = cW / iRatio;
+            }
+
+            const wrapper = clonedDoc.createElement('div');
+            wrapper.style.width = `${cW}px`;
+            wrapper.style.height = `${cH}px`;
+            wrapper.style.overflow = 'hidden';
+            wrapper.style.position = 'relative';
+            wrapper.style.flexShrink = '0';
+
+            img.style.objectFit = 'none';
+            img.style.width = `${imgW}px`;
+            img.style.height = `${imgH}px`;
+            img.style.maxWidth = 'none';
+            img.style.flex = 'none';
+            img.style.minHeight = 'unset';
+            img.style.position = 'absolute';
+            img.style.left = `${-(imgW - cW) / 2}px`;
+            img.style.top = `${-(imgH - cH) / 2}px`;
+
+            img.parentNode?.insertBefore(wrapper, img);
+            wrapper.appendChild(img);
           });
         },
       });
