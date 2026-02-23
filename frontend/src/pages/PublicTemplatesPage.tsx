@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../api/client';
 import { useAuthStore } from '../stores/auth';
@@ -24,6 +24,37 @@ interface TemplateCardProps {
   t: (key: string) => string;
   language: string;
   clockFormat: '12h' | '24h';
+}
+
+function DescriptionLine({ text }: { text: string }) {
+  const ref = useRef<HTMLSpanElement>(null);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const staticEl = el.querySelector('.tpl-desc-static') as HTMLElement | null;
+    if (!staticEl) return;
+    const isOverflowing = staticEl.scrollWidth > staticEl.clientWidth + 1;
+    if (isOverflowing) {
+      el.dataset.overflows = '';
+      el.style.setProperty('--marquee-duration', `${staticEl.scrollWidth / 30}s`);
+    } else {
+      delete el.dataset.overflows;
+      el.style.removeProperty('--marquee-duration');
+    }
+  }, [text]);
+
+  if (!text) return <span className="tpl-desc-line">{'\u00A0'}</span>;
+
+  return (
+    <span className="tpl-desc-line" ref={ref}>
+      <span className="tpl-desc-static">{text}</span>
+      <span className="tpl-desc-track" aria-hidden="true">
+        <span>{text}</span>
+        <span>{text}</span>
+      </span>
+    </span>
+  );
 }
 
 function TemplateCard({
@@ -80,7 +111,16 @@ function TemplateCard({
             {t('template.by')} {getDisplayName(template.owner)}
           </span>
         )}
-        {template.description && <p className="template-description">{template.description}</p>}
+        {template.description && (
+          <div className="template-description">
+            {template.description
+              .split('\n')
+              .slice(0, 3)
+              .map((line, i) => (
+                <DescriptionLine key={i} text={line} />
+              ))}
+          </div>
+        )}
         {template.updatedAt && (
           <span className="template-revision">
             {t('template.revision')}: {formatDate(template.updatedAt, language, clockFormat)}

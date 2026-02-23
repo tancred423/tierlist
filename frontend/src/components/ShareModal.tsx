@@ -103,19 +103,32 @@ export function ShareModal({ tierlist, onClose, onUpdate }: ShareModalProps) {
   }
 
   async function handleShareAsImage() {
-    const gridContainer = document.querySelector('.tierlist-grid-container');
+    const gridContainer = document.querySelector('.tierlist-grid-container') as HTMLElement | null;
     if (!gridContainer) return;
 
     setIsDownloading(true);
     try {
+      const fullWidth = gridContainer.scrollWidth;
+
+      const imageDims: { width: number; height: number; src: string }[] = [];
+      gridContainer.querySelectorAll('.card-image').forEach(img => {
+        const rect = img.getBoundingClientRect();
+        imageDims.push({
+          width: rect.width,
+          height: rect.height,
+          src: (img as HTMLImageElement).src,
+        });
+      });
+
       const html2canvas = (await import('html2canvas')).default;
-      const canvas = await html2canvas(gridContainer as HTMLElement, {
+      const canvas = await html2canvas(gridContainer, {
         backgroundColor:
           getComputedStyle(document.documentElement).getPropertyValue('--color-bg').trim() ||
           '#0f0f0f',
         scale: 2,
         useCORS: true,
         allowTaint: true,
+        windowWidth: Math.max(fullWidth + 32, window.innerWidth),
         onclone: (clonedDoc: Document) => {
           clonedDoc
             .querySelectorAll(
@@ -126,6 +139,28 @@ export function ShareModal({ tierlist, onClose, onUpdate }: ShareModalProps) {
             });
           clonedDoc.querySelectorAll('.tier-toolbar').forEach(el => {
             (el as HTMLElement).style.display = 'none';
+          });
+
+          const clonedContainer = clonedDoc.querySelector(
+            '.tierlist-grid-container',
+          ) as HTMLElement | null;
+          if (clonedContainer) {
+            clonedContainer.style.overflow = 'visible';
+            clonedContainer.style.width = `${fullWidth}px`;
+          }
+
+          const clonedImages = clonedDoc.querySelectorAll('.tierlist-grid-container .card-image');
+          clonedImages.forEach((imgEl, index) => {
+            const dim = imageDims[index];
+            if (!dim) return;
+            const div = clonedDoc.createElement('div');
+            div.style.width = `${dim.width}px`;
+            div.style.height = `${dim.height}px`;
+            div.style.backgroundImage = `url(${dim.src})`;
+            div.style.backgroundSize = 'cover';
+            div.style.backgroundPosition = 'center';
+            div.style.flexShrink = '0';
+            imgEl.replaceWith(div);
           });
         },
       });

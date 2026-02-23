@@ -32,10 +32,12 @@ export function TierlistEditorPage() {
   const [isCopying, setIsCopying] = useState(false);
   const [isCreatingTemplate, setIsCreatingTemplate] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [descriptionInput, setDescriptionInput] = useState('');
   usePageTitle(tierlist ? `${t('pageTitle.tierlist')}: ${tierlist.title}` : '');
 
   const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pendingPlacementsRef = useRef<PlacementData[] | null>(null);
+  const descSaveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -56,6 +58,8 @@ export function TierlistEditorPage() {
       setTierlist(filledTierlist);
       setPlacements(filledTierlist.placements);
       setCanEdit(editable);
+      const descOverride = filledTierlist.displaySettings?.descriptionOverride;
+      setDescriptionInput(descOverride ?? filledTierlist.template?.description ?? '');
     } catch (error) {
       console.error('Failed to load tierlist:', error);
       navigate('/');
@@ -72,6 +76,9 @@ export function TierlistEditorPage() {
     return () => {
       if (saveTimeoutRef.current) {
         clearTimeout(saveTimeoutRef.current);
+      }
+      if (descSaveTimeoutRef.current) {
+        clearTimeout(descSaveTimeoutRef.current);
       }
       if (pendingPlacementsRef.current && id) {
         api.updatePlacements(id, pendingPlacementsRef.current);
@@ -125,6 +132,18 @@ export function TierlistEditorPage() {
     } catch (error) {
       console.error('Failed to update title:', error);
     }
+  }
+
+  function handleDescriptionChange(value: string) {
+    if (value.split('\n').length > 3) return;
+    setDescriptionInput(value);
+    if (descSaveTimeoutRef.current) clearTimeout(descSaveTimeoutRef.current);
+    setSaveStatus('saving');
+    descSaveTimeoutRef.current = setTimeout(() => {
+      if (!tierlist) return;
+      const ds = tierlist.displaySettings || {};
+      handleDisplaySettingsChange({ ...ds, descriptionOverride: value });
+    }, 800);
   }
 
   const handleDisplaySettingsChange = useCallback(
@@ -393,12 +412,25 @@ export function TierlistEditorPage() {
                 {hasQuickEdits(tierlist.displaySettings) && ` ${t('tierlist.edited')}`}
               </>
             )}
+            {tierlist.templateSnapshot?.snapshotAt && (
+              <span className="revision-inline">
+                {' · '}
+                {t('template.revision')}:{' '}
+                {formatDate(tierlist.templateSnapshot.snapshotAt, language, clockFormat)}
+              </span>
+            )}
           </p>
-          {tierlist.templateSnapshot?.snapshotAt && (
-            <p className="revision-info">
-              {t('template.revision')}:{' '}
-              {formatDate(tierlist.templateSnapshot.snapshotAt, language, clockFormat)}
-            </p>
+          {canEdit ? (
+            <textarea
+              value={descriptionInput}
+              onChange={e => handleDescriptionChange(e.target.value)}
+              className="editor-desc-input"
+              placeholder={t('template.descriptionPlaceholder')}
+              rows={3}
+              maxLength={2000}
+            />
+          ) : (
+            descriptionInput && <p className="editor-desc-text">{descriptionInput}</p>
           )}
         </div>
         <div className="editor-actions">

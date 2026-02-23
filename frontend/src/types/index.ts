@@ -120,6 +120,7 @@ export interface DisplaySettings {
   hiddenColumnIds?: string[];
   removedCardIds?: string[];
   cardOverrides?: Record<string, { title?: string; imageUrl?: string; description?: string }>;
+  descriptionOverride?: string;
 }
 
 export interface FilledTierlist {

@@ -13,7 +13,8 @@ export function hasQuickEdits(ds?: DisplaySettings | null): boolean {
     (ds.additionalColumns && ds.additionalColumns.length > 0) ||
     (ds.hiddenColumnIds && ds.hiddenColumnIds.length > 0) ||
     (ds.removedCardIds && ds.removedCardIds.length > 0) ||
-    (ds.cardOverrides && Object.keys(ds.cardOverrides).length > 0)
+    (ds.cardOverrides && Object.keys(ds.cardOverrides).length > 0) ||
+    ds.descriptionOverride !== undefined
   );
 }
 
