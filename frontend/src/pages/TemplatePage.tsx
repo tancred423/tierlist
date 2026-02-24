@@ -41,6 +41,7 @@ export function TemplatePage() {
 
   const isCreatingRef = useRef(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const mouseDownOnOverlayRef = useRef(false);
   const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isLoadedRef = useRef(false);
   const metadataDirtyRef = useRef(false);
@@ -594,8 +595,18 @@ export function TemplatePage() {
       />
 
       {visibilityConfirm && (
-        <div className="modal-overlay" onClick={() => setVisibilityConfirm(null)}>
-          <div className="modal visibility-confirm-modal" onClick={e => e.stopPropagation()}>
+        <div
+          className="modal-overlay"
+          onMouseDown={e => {
+            mouseDownOnOverlayRef.current = e.target === e.currentTarget;
+          }}
+          onMouseUp={e => {
+            if (mouseDownOnOverlayRef.current && e.target === e.currentTarget)
+              setVisibilityConfirm(null);
+            mouseDownOnOverlayRef.current = false;
+          }}
+        >
+          <div className="modal visibility-confirm-modal">
             <div className="modal-header">
               <h2>
                 {visibilityConfirm === 'publish'

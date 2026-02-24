@@ -68,6 +68,7 @@ export interface TierlistGridProps {
   onDisplaySettingsChange?: (settings: DisplaySettings) => void;
 
   readOnly?: boolean;
+  tierlistId?: string;
 }
 
 function applyTierOverrides(
@@ -119,6 +120,7 @@ export function TierlistGrid({
   displaySettings,
   onDisplaySettingsChange,
   readOnly = false,
+  tierlistId,
 }: TierlistGridProps) {
   const { t } = useI18n();
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -237,6 +239,7 @@ export function TierlistGrid({
   const [showCardModal, setShowCardModal] = useState(false);
   const editPopoverRef = useRef<HTMLDivElement>(null);
   const gridRef = useRef<HTMLDivElement>(null);
+  const mouseDownOnOverlayRef = useRef(false);
   const [overlayRect, setOverlayRect] = useState<{
     top: number;
     left: number;
@@ -1385,6 +1388,7 @@ export function TierlistGrid({
         <CardEditorModal
           card={cardModalCard}
           templateId={template.id}
+          tierlistId={tierlistId}
           onClose={() => {
             setShowCardModal(false);
             setCardModalCard(null);
@@ -1426,8 +1430,18 @@ export function TierlistGrid({
       )}
 
       {showAddCard && (
-        <div className="modal-overlay" onClick={() => setShowAddCard(false)}>
-          <div className="modal add-card-modal" onClick={e => e.stopPropagation()}>
+        <div
+          className="modal-overlay"
+          onMouseDown={e => {
+            mouseDownOnOverlayRef.current = e.target === e.currentTarget;
+          }}
+          onMouseUp={e => {
+            if (mouseDownOnOverlayRef.current && e.target === e.currentTarget)
+              setShowAddCard(false);
+            mouseDownOnOverlayRef.current = false;
+          }}
+        >
+          <div className="modal add-card-modal">
             <div className="modal-header">
               <h2>{t('tierlist.addNewCard')}</h2>
               <button onClick={() => setShowAddCard(false)} className="btn btn-icon">
@@ -1497,8 +1511,17 @@ export function TierlistGrid({
       )}
 
       {editingCard && onCardEdit && (
-        <div className="modal-overlay" onClick={() => setEditingCard(null)}>
-          <div className="modal add-card-modal" onClick={e => e.stopPropagation()}>
+        <div
+          className="modal-overlay"
+          onMouseDown={e => {
+            mouseDownOnOverlayRef.current = e.target === e.currentTarget;
+          }}
+          onMouseUp={e => {
+            if (mouseDownOnOverlayRef.current && e.target === e.currentTarget) setEditingCard(null);
+            mouseDownOnOverlayRef.current = false;
+          }}
+        >
+          <div className="modal add-card-modal">
             <div className="modal-header">
               <h2>{t('card.edit')}</h2>
               <button onClick={() => setEditingCard(null)} className="btn btn-icon">

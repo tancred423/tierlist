@@ -145,6 +145,13 @@ cards.delete("/:id", requireAuth, async (c) => {
 
   const templateId = card.templateId;
 
+  const cardCount = await db.query.cards.findMany({
+    where: eq(schema.cards.templateId, templateId),
+  });
+  if (cardCount.length <= 1) {
+    return c.json({ error: "Cannot delete the last card" }, 400);
+  }
+
   await deleteCardImage(card.imageUrl);
 
   await db.delete(schema.cards).where(eq(schema.cards.id, id));

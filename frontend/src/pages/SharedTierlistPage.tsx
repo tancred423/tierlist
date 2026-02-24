@@ -190,6 +190,8 @@ export function SharedTierlistPage({ mode }: SharedTierlistPageProps) {
                 {t('home.basedOn')} "{tierlist.template.title}"
                 {hasQuickEdits(tierlist.displaySettings) && ` ${t('tierlist.edited')}`}
               </>
+            ) : tierlist.templateSnapshot?.noTemplate ? (
+              <>{t('tierlist.withoutTemplate')}</>
             ) : (
               <>
                 {t('tierlist.basedOnDeleted')}
@@ -233,6 +235,7 @@ export function SharedTierlistPage({ mode }: SharedTierlistPageProps) {
         onPlacementsChange={handlePlacementsChange}
         readOnly={!canEdit}
         displaySettings={tierlist.displaySettings}
+        tierlistId={tierlist.id}
       />
     </div>
   );

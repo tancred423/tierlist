@@ -65,6 +65,7 @@
   },
   "myTierlists": {
     "title": "Meine Tierlists",
+    "createNewTierlist": "Neue Tierlist erstellen",
     "empty": "Du hast noch keine Tierlists erstellt.",
     "hint": "Schau dir",
     "hintTemplates": "Meine Vorlagen",
@@ -215,6 +216,7 @@
     "createTemplate": "Vorlage aus Tierlist erstellen",
     "creatingTemplate": "Erstelle...",
     "basedOnDeleted": "Basiert auf einer gelöschten Vorlage",
+    "withoutTemplate": "Tierlist ohne Vorlage",
     "moveRowUp": "Zeile nach oben",
     "moveRowDown": "Zeile nach unten",
     "moveColumnLeft": "Spalte nach links",

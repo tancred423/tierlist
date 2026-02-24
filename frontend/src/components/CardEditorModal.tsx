@@ -6,11 +6,18 @@ import { api } from '../api/client';
 interface CardEditorModalProps {
   card: Card | null;
   templateId: string;
+  tierlistId?: string;
   onClose: () => void;
   onSave: (data: { title: string; imageUrl?: string; description?: string }) => void;
 }
 
-export function CardEditorModal({ card, templateId, onClose, onSave }: CardEditorModalProps) {
+export function CardEditorModal({
+  card,
+  templateId,
+  tierlistId,
+  onClose,
+  onSave,
+}: CardEditorModalProps) {
   const { t } = useI18n();
   const [title, setTitle] = useState(card?.title || '');
   const [imageUrl, setImageUrl] = useState(card?.imageUrl || '');
@@ -25,6 +32,7 @@ export function CardEditorModal({ card, templateId, onClose, onSave }: CardEdito
   const titleInputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const dropZoneRef = useRef<HTMLDivElement>(null);
+  const mouseDownOnOverlay = useRef(false);
 
   useEffect(() => {
     if (!card && titleInputRef.current) {
@@ -38,7 +46,9 @@ export function CardEditorModal({ card, templateId, onClose, onSave }: CardEdito
       setUploadError(null);
 
       try {
-        const result = await api.uploadImage(templateId, file);
+        const result = tierlistId
+          ? await api.uploadTierlistImage(tierlistId, file)
+          : await api.uploadImage(templateId, file);
         setImageUrl(result.imageUrl);
         setImageSource('upload');
       } catch (err) {
@@ -48,7 +58,7 @@ export function CardEditorModal({ card, templateId, onClose, onSave }: CardEdito
         setIsUploading(false);
       }
     },
-    [templateId],
+    [templateId, tierlistId],
   );
 
   const handleFileChange = useCallback(
@@ -151,8 +161,19 @@ export function CardEditorModal({ card, templateId, onClose, onSave }: CardEdito
   }
 
   return (
-    <div className="modal-overlay" onClick={handleClose}>
-      <div className="modal" onClick={e => e.stopPropagation()}>
+    <div
+      className="modal-overlay"
+      onMouseDown={e => {
+        mouseDownOnOverlay.current = e.target === e.currentTarget;
+      }}
+      onMouseUp={e => {
+        if (mouseDownOnOverlay.current && e.target === e.currentTarget) {
+          handleClose();
+        }
+        mouseDownOnOverlay.current = false;
+      }}
+    >
+      <div className="modal">
         <div className="modal-header">
           <h2>{card ? t('card.editCard') : t('card.addCard')}</h2>
           <button onClick={handleClose} className="btn btn-icon">

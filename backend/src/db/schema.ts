@@ -74,6 +74,7 @@ export interface TemplateSnapshot {
   columns: { id: string; name: string | null; color?: string | null; orderIndex: number }[];
   cards: { id: string; title: string; imageUrl: string | null; description: string | null; orderIndex: number }[];
   snapshotAt: string;
+  noTemplate?: boolean;
 }
 
 export const filledTierlists = mysqlTable("filled_tierlists", {

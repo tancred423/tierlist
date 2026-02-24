@@ -15,6 +15,7 @@
   gap: 1rem;
   font-size: 0.875rem;
   color: var(--color-text-muted);
+  padding: 10px;
 }
 
 .footer-copyright {

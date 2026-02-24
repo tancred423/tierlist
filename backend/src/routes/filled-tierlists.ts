@@ -191,6 +191,88 @@ filledTierlists.post("/", requireAuth, async (c) => {
   return c.json({ filledTierlist: filledList }, 201);
 });
 
+const DEFAULT_TIERS = [
+  { name: "S", color: "#FF7F7F" },
+  { name: "A", color: "#FFBF7F" },
+  { name: "B", color: "#FFDF7F" },
+  { name: "C", color: "#FFFF7F" },
+  { name: "D", color: "#BFFF7F" },
+  { name: "E", color: "#7FBFFF" },
+  { name: "F", color: "#7F7FFF" },
+];
+
+filledTierlists.post("/without-template", requireAuth, async (c) => {
+  const user = c.get("user")!;
+  const body = await c.req.json().catch(() => ({}));
+
+  if (body.title !== undefined) {
+    const titleResult = validateOptionalString(body.title, LIMITS.TITLE, "Title");
+    if (!titleResult.valid) return c.json({ error: titleResult.error }, 400);
+  }
+
+  const defaultCardId = generateId();
+
+  const templateSnapshot: schema.TemplateSnapshot = {
+    tiers: DEFAULT_TIERS.map((t, i) => ({
+      id: generateId(),
+      name: t.name,
+      color: t.color,
+      orderIndex: i,
+    })),
+    columns: [{ id: generateId(), name: null, color: null, orderIndex: 0 }],
+    cards: [{
+      id: defaultCardId,
+      title: "My first card",
+      imageUrl: null,
+      description: "Edit me",
+      orderIndex: 0,
+    }],
+    snapshotAt: new Date().toISOString(),
+    noTemplate: true,
+  };
+
+  const filledId = generateId();
+  const viewToken = generateToken();
+  const editToken = generateToken();
+
+  const defaultTitle = (body.title || "My Tierlist").slice(0, LIMITS.TITLE);
+
+  await db.insert(schema.filledTierlists).values({
+    id: filledId,
+    templateId: null,
+    ownerId: user.userId,
+    title: defaultTitle,
+    templateSnapshot,
+    viewShareToken: viewToken,
+    viewShareEnabled: false,
+    editShareToken: editToken,
+    editShareEnabled: false,
+  });
+
+  await db.insert(schema.cardPlacements).values({
+    id: generateId(),
+    listId: filledId,
+    cardId: defaultCardId,
+    tierId: null,
+    columnId: null,
+    orderIndex: 0,
+  });
+
+  const filledList = await db.query.filledTierlists.findFirst({
+    where: eq(schema.filledTierlists.id, filledId),
+    with: {
+      template: {
+        with: {
+          owner: { columns: { id: true, username: true, nickname: true, avatar: true } },
+        },
+      },
+      placements: true,
+    },
+  });
+
+  return c.json({ filledTierlist: filledList }, 201);
+});
+
 filledTierlists.get("/:id", requireAuth, async (c) => {
   const id = c.req.param("id");
   const user = c.get("user")!;

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { api } from '../api/client';
 import { useI18n } from '../i18n';
 import { getDisplayName } from '../utils/user';
@@ -17,6 +17,7 @@ export function ShareModal({ tierlist, onClose, onUpdate }: ShareModalProps) {
   const [editEnabled, setEditEnabled] = useState(tierlist.editShareEnabled ?? false);
   const [isUpdating, setIsUpdating] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
+  const mouseDownOnOverlay = useRef(false);
   const [copied, setCopied] = useState<string | null>(null);
 
   const viewUrl = `${window.location.origin}/share/view/${tierlist.viewShareToken}`;
@@ -206,8 +207,17 @@ export function ShareModal({ tierlist, onClose, onUpdate }: ShareModalProps) {
   }
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal distrib-modal" onClick={e => e.stopPropagation()}>
+    <div
+      className="modal-overlay"
+      onMouseDown={e => {
+        mouseDownOnOverlay.current = e.target === e.currentTarget;
+      }}
+      onMouseUp={e => {
+        if (mouseDownOnOverlay.current && e.target === e.currentTarget) onClose();
+        mouseDownOnOverlay.current = false;
+      }}
+    >
+      <div className="modal distrib-modal">
         <div className="modal-header">
           <h2>{t('tierlist.shareRanking')}</h2>
           <button onClick={onClose} className="btn btn-icon">

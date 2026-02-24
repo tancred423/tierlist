@@ -272,6 +272,15 @@ class ApiClient {
     });
   }
 
+  async createFilledTierlistWithoutTemplate(data?: {
+    title?: string;
+  }): Promise<{ filledTierlist: import('../types').FilledTierlist }> {
+    return this.request('/api/filled-tierlists/without-template', {
+      method: 'POST',
+      body: JSON.stringify(data || {}),
+    });
+  }
+
   async updateFilledTierlist(
     id: string,
     data: {
@@ -340,10 +349,24 @@ class ApiClient {
     templateId: string,
     file: File | Blob,
   ): Promise<{ imageUrl: string; size: number }> {
+    return this._uploadToPath(`/api/uploads/${templateId}`, file);
+  }
+
+  async uploadTierlistImage(
+    tierlistId: string,
+    file: File | Blob,
+  ): Promise<{ imageUrl: string; size: number }> {
+    return this._uploadToPath(`/api/uploads/tierlist/${tierlistId}`, file);
+  }
+
+  private async _uploadToPath(
+    path: string,
+    file: File | Blob,
+  ): Promise<{ imageUrl: string; size: number }> {
     const formData = new FormData();
     formData.append('image', file);
 
-    const response = await fetch(`${API_URL}/api/uploads/${templateId}`, {
+    const response = await fetch(`${API_URL}${path}`, {
       method: 'POST',
       body: formData,
       credentials: 'include',

@@ -1,4 +1,4 @@
-import { Hono } from "@hono/hono";
+import { Context, Hono } from "@hono/hono";
 import { eq } from "drizzle-orm";
 import { db, schema } from "../db/index.ts";
 import { generateId } from "../utils/id.ts";
@@ -115,22 +115,7 @@ uploads.get("/storage", requireAuth, async (c) => {
   });
 });
 
-uploads.post("/:templateId", requireAuth, async (c) => {
-  const templateId = c.req.param("templateId");
-  const user = c.get("user")!;
-
-  const template = await db.query.templates.findFirst({
-    where: eq(schema.templates.id, templateId),
-  });
-
-  if (!template) {
-    return c.json({ error: "Template not found" }, 404);
-  }
-
-  if (template.ownerId !== user.userId) {
-    return c.json({ error: "Access denied" }, 403);
-  }
-
+async function processAndStoreUpload(c: Context, storageDirName: string) {
   const totalSize = await getDirectorySize(UPLOADS_DIR);
   if (totalSize >= GLOBAL_STORAGE_LIMIT) {
     return c.json({
@@ -225,16 +210,16 @@ uploads.post("/:templateId", requireAuth, async (c) => {
       }
     }
 
-    const templateDir = `${UPLOADS_DIR}/${templateId}`;
-    await ensureDir(templateDir);
+    const dir = `${UPLOADS_DIR}/${storageDirName}`;
+    await ensureDir(dir);
 
     const fileId = generateId();
     const fileName = `${fileId}.webp`;
-    const filePath = `${templateDir}/${fileName}`;
+    const filePath = `${dir}/${fileName}`;
 
     await Deno.writeFile(filePath, finalBuffer);
 
-    const imageUrl = `/uploads/${templateId}/${fileName}`;
+    const imageUrl = `/uploads/${storageDirName}/${fileName}`;
 
     return c.json({
       imageUrl,
@@ -254,6 +239,48 @@ uploads.post("/:templateId", requireAuth, async (c) => {
 
     return c.json({ error: "Failed to process image. Please try a different image." }, 500);
   }
+}
+
+uploads.post("/tierlist/:tierlistId", requireAuth, async (c) => {
+  const tierlistId = c.req.param("tierlistId");
+  const user = c.get("user")!;
+
+  const tierlist = await db.query.filledTierlists.findFirst({
+    where: eq(schema.filledTierlists.id, tierlistId),
+    with: { coOwners: true },
+  });
+
+  if (!tierlist) {
+    return c.json({ error: "Tierlist not found" }, 404);
+  }
+
+  const isOwner = tierlist.ownerId === user.userId;
+  const isCoOwner = tierlist.coOwners.some((co) => co.userId === user.userId);
+
+  if (!isOwner && !isCoOwner) {
+    return c.json({ error: "Access denied" }, 403);
+  }
+
+  return processAndStoreUpload(c, `tl-${tierlistId}`);
+});
+
+uploads.post("/:templateId", requireAuth, async (c) => {
+  const templateId = c.req.param("templateId");
+  const user = c.get("user")!;
+
+  const template = await db.query.templates.findFirst({
+    where: eq(schema.templates.id, templateId),
+  });
+
+  if (!template) {
+    return c.json({ error: "Template not found" }, 404);
+  }
+
+  if (template.ownerId !== user.userId) {
+    return c.json({ error: "Access denied" }, 403);
+  }
+
+  return processAndStoreUpload(c, templateId);
 });
 
 export default uploads;

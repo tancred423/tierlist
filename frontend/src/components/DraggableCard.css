@@ -207,6 +207,66 @@
   background: rgba(239, 68, 68, 0.9);
 }
 
+.card-image-preview {
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+  z-index: 10000;
+  pointer-events: none;
+}
+
+.card-image-preview.preview-above {
+  animation: preview-appear-up 200ms ease-out;
+}
+
+.card-image-preview.preview-below {
+  animation: preview-appear-down 200ms ease-out;
+}
+
+.card-image-preview img {
+  width: 100%;
+  height: auto;
+  max-height: 200px;
+  object-fit: contain;
+  display: block;
+  background: var(--color-bg);
+}
+
+.card-image-preview-title {
+  display: block;
+  padding: 0.375rem 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@keyframes preview-appear-up {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes preview-appear-down {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
 .card-overlay {
   touch-action: none;
   box-shadow: var(--shadow-lg);
@@ -234,6 +294,22 @@
   .draggable-card.show-details.compact {
     width: 80px;
     height: 96px;
+  }
+
+  .card-hover-actions {
+    opacity: 1;
+    gap: 2px;
+  }
+
+  .card-action-btn {
+    width: 24px;
+    height: 24px;
+    border-radius: 4px;
+  }
+
+  .card-action-btn svg {
+    width: 13px;
+    height: 13px;
   }
 }
 
@@ -280,5 +356,15 @@
 
   .card-desc {
     font-size: 0.5rem;
+  }
+
+  .card-action-btn {
+    width: 22px;
+    height: 22px;
+  }
+
+  .card-action-btn svg {
+    width: 12px;
+    height: 12px;
   }
 }

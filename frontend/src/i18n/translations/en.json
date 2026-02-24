@@ -65,6 +65,7 @@
   },
   "myTierlists": {
     "title": "My Tierlists",
+    "createNewTierlist": "Create New Tierlist",
     "empty": "You haven't created any tierlists yet.",
     "hint": "Check out",
     "hintTemplates": "My Templates",
@@ -215,6 +216,7 @@
     "createTemplate": "Create Template from Tierlist",
     "creatingTemplate": "Creating...",
     "basedOnDeleted": "Based on a deleted template",
+    "withoutTemplate": "Tierlist without template",
     "moveRowUp": "Move row up",
     "moveRowDown": "Move row down",
     "moveColumnLeft": "Move column left",

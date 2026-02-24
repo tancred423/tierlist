@@ -180,8 +180,12 @@ export function TierlistEditorPage() {
   const handleTierDelete = useCallback(
     (tierId: string) => {
       if (!tierlist) return;
-      if (!confirm(t('template.deleteTierConfirm'))) return;
       const ds = tierlist.displaySettings || {};
+      const baseTiers = tierlist.template?.tiers ?? tierlist.templateSnapshot?.tiers ?? [];
+      const visibleTierCount =
+        baseTiers.length + (ds.additionalTiers?.length || 0) - (ds.hiddenTierIds?.length || 0);
+      if (visibleTierCount <= 1) return;
+      if (!confirm(t('template.deleteTierConfirm'))) return;
       const isAdditional = (ds.additionalTiers || []).some(t => t.id === tierId);
       const newDs = { ...ds };
       if (isAdditional) {
@@ -224,8 +228,12 @@ export function TierlistEditorPage() {
   const handleColumnDelete = useCallback(
     (colId: string) => {
       if (!tierlist) return;
-      if (!confirm(t('template.deleteColumnConfirm'))) return;
       const ds = tierlist.displaySettings || {};
+      const baseCols = tierlist.template?.columns ?? tierlist.templateSnapshot?.columns ?? [];
+      const visibleColCount =
+        baseCols.length + (ds.additionalColumns?.length || 0) - (ds.hiddenColumnIds?.length || 0);
+      if (visibleColCount <= 1) return;
+      if (!confirm(t('template.deleteColumnConfirm'))) return;
       const isAdditional = (ds.additionalColumns || []).some(c => c.id === colId);
       const newDs = { ...ds };
       if (isAdditional) {
@@ -281,9 +289,15 @@ export function TierlistEditorPage() {
   const handleCardDelete = useCallback(
     (cardId: string) => {
       if (!tierlist) return;
-      if (!confirm(t('card.deleteConfirm'))) return;
+
       const ds = tierlist.displaySettings || {};
+      const baseCards = tierlist.template?.cards ?? tierlist.templateSnapshot?.cards ?? [];
       const additionalCards = ds.additionalCards || [];
+      const removedCount = ds.removedCardIds?.length || 0;
+      const totalCards = baseCards.length + additionalCards.length - removedCount;
+      if (totalCards <= 1) return;
+
+      if (!confirm(t('card.deleteConfirm'))) return;
       const isAdditional = additionalCards.some(c => c.id === cardId);
       const newDs = { ...ds };
       if (isAdditional) {
@@ -374,6 +388,12 @@ export function TierlistEditorPage() {
 
   const effectiveTemplate = buildEffectiveTemplate(tierlist);
 
+  const ds = tierlist.displaySettings || {};
+  const baseCards = tierlist.template?.cards ?? tierlist.templateSnapshot?.cards ?? [];
+  const totalCardCount =
+    baseCards.length + (ds.additionalCards?.length || 0) - (ds.removedCardIds?.length || 0);
+  const canDeleteCards = totalCardCount > 1;
+
   return (
     <div className="tierlist-editor-page">
       <div className="editor-header">
@@ -406,6 +426,8 @@ export function TierlistEditorPage() {
                   : ''}
                 {hasQuickEdits(tierlist.displaySettings) && ` ${t('tierlist.edited')}`}
               </>
+            ) : tierlist.templateSnapshot?.noTemplate ? (
+              <>{t('tierlist.withoutTemplate')}</>
             ) : (
               <>
                 {t('tierlist.basedOnDeleted')}
@@ -516,7 +538,8 @@ export function TierlistEditorPage() {
         onColumnAdd={canEdit ? handleColumnAdd : undefined}
         onColumnDelete={canEdit ? handleColumnDelete : undefined}
         onCardEdit={canEdit ? handleCardEdit : undefined}
-        onCardDelete={canEdit ? handleCardDelete : undefined}
+        onCardDelete={canEdit && canDeleteCards ? handleCardDelete : undefined}
+        tierlistId={tierlist.id}
       />
 
       {showShareModal && tierlist && (

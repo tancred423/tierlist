@@ -99,6 +99,7 @@ export interface TemplateSnapshot {
     orderIndex: number;
   }[];
   snapshotAt: string;
+  noTemplate?: boolean;
 }
 
 export interface AdditionalCard {

@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { api } from '../api/client';
 import { useAuthStore } from '../stores/auth';
 import { useClockFormatStore } from '../stores/clockFormat';
@@ -110,6 +110,8 @@ function TierlistCard({ tierlist, t, language, clockFormat }: TierlistCardProps)
               {template.owner ? `${t('template.by')} ${getDisplayName(template.owner)}` : ''}
               {hasQuickEdits(tierlist.displaySettings) && ` ${t('tierlist.edited')}`}
             </>
+          ) : tierlist.templateSnapshot?.noTemplate ? (
+            <>{t('tierlist.withoutTemplate')}</>
           ) : (
             <>
               {t('tierlist.basedOnDeleted')}
@@ -152,10 +154,12 @@ export function MyTierlistsPage() {
   const [pagination, setPagination] = useState<PaginationType | null>(null);
   const [page, setPage] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
+  const [isCreating, setIsCreating] = useState(false);
   const { t, language } = useI18n();
   const { getEffectiveFormat } = useClockFormatStore();
   const clockFormat = getEffectiveFormat();
   const { user, setUser } = useAuthStore();
+  const navigate = useNavigate();
   const [sort, setSort] = useState<SortOption>(user?.tierlistSort || 'updated_desc');
   usePageTitle(t('myTierlists.title'));
 
@@ -190,6 +194,17 @@ export function MyTierlistsPage() {
     loadData();
   }, [loadData]);
 
+  const handleCreateWithoutTemplate = useCallback(async () => {
+    setIsCreating(true);
+    try {
+      const { filledTierlist } = await api.createFilledTierlistWithoutTemplate();
+      navigate(`/tierlist/${filledTierlist.id}`);
+    } catch (error) {
+      console.error('Failed to create tierlist:', error);
+      setIsCreating(false);
+    }
+  }, [navigate]);
+
   if (isLoading) {
     return (
       <div className="loading-container">
@@ -202,21 +217,30 @@ export function MyTierlistsPage() {
     <div className="container my-tierlists-page">
       <div className="page-header">
         <h1>{t('myTierlists.title')}</h1>
-        {tierlists.length > 0 && (
-          <div className="sort-dropdown">
-            <select
-              id="tierlist-sort"
-              value={sort}
-              onChange={e => handleSortChange(e.target.value as SortOption)}
-            >
-              {SORT_OPTIONS.map(opt => (
-                <option key={opt} value={opt}>
-                  {t(SORT_LABEL_KEYS[opt])}
-                </option>
-              ))}
-            </select>
-          </div>
-        )}
+        <div className="page-header-actions">
+          {tierlists.length > 0 && (
+            <div className="sort-dropdown">
+              <select
+                id="tierlist-sort"
+                value={sort}
+                onChange={e => handleSortChange(e.target.value as SortOption)}
+              >
+                {SORT_OPTIONS.map(opt => (
+                  <option key={opt} value={opt}>
+                    {t(SORT_LABEL_KEYS[opt])}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+          <button
+            onClick={handleCreateWithoutTemplate}
+            className="btn btn-secondary btn-sm"
+            disabled={isCreating}
+          >
+            + {t('myTierlists.createNewTierlist')}
+          </button>
+        </div>
       </div>
 
       {tierlists.length === 0 ? (

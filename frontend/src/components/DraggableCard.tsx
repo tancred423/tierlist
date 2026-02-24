@@ -1,4 +1,5 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import type { Card } from '../types';
@@ -15,6 +16,10 @@ interface DraggableCardProps {
   onDelete?: () => void;
 }
 
+const PREVIEW_WIDTH = 200;
+const PREVIEW_GAP = 8;
+const VIEWPORT_MARGIN = 8;
+
 export function DraggableCard({
   card,
   disabled,
@@ -29,8 +34,23 @@ export function DraggableCard({
     disabled,
   });
 
+  const cardElRef = useRef<HTMLDivElement | null>(null);
   const titleRef = useRef<HTMLSpanElement>(null);
   const descRef = useRef<HTMLSpanElement>(null);
+  const hoverTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [showPreview, setShowPreview] = useState(false);
+  const [previewPos, setPreviewPos] = useState<{
+    style: React.CSSProperties;
+    direction: 'above' | 'below';
+  } | null>(null);
+
+  const combinedRef = useCallback(
+    (el: HTMLDivElement | null) => {
+      setNodeRef(el);
+      cardElRef.current = el;
+    },
+    [setNodeRef],
+  );
 
   useEffect(() => {
     function measure(el: HTMLSpanElement | null) {
@@ -52,6 +72,78 @@ export function DraggableCard({
     measure(descRef.current);
   }, [card.title, card.description]);
 
+  useEffect(() => {
+    if (isDragging || isActive) {
+      setShowPreview(false);
+      setPreviewPos(null);
+      if (hoverTimerRef.current) {
+        clearTimeout(hoverTimerRef.current);
+        hoverTimerRef.current = null;
+      }
+    }
+  }, [isDragging, isActive]);
+
+  const computePreviewPosition = useCallback(() => {
+    if (!cardElRef.current) return;
+    const rect = cardElRef.current.getBoundingClientRect();
+    const spaceAbove = rect.top;
+    const spaceBelow = window.innerHeight - rect.bottom;
+    const showAbove = spaceAbove > spaceBelow && spaceAbove > 100;
+
+    let left = rect.left + rect.width / 2 - PREVIEW_WIDTH / 2;
+    left = Math.max(
+      VIEWPORT_MARGIN,
+      Math.min(left, window.innerWidth - PREVIEW_WIDTH - VIEWPORT_MARGIN),
+    );
+
+    if (showAbove) {
+      setPreviewPos({
+        direction: 'above',
+        style: {
+          position: 'fixed',
+          bottom: `${window.innerHeight - rect.top + PREVIEW_GAP}px`,
+          left: `${left}px`,
+          width: `${PREVIEW_WIDTH}px`,
+          maxHeight: `${Math.max(spaceAbove - PREVIEW_GAP - VIEWPORT_MARGIN, 120)}px`,
+        },
+      });
+    } else {
+      setPreviewPos({
+        direction: 'below',
+        style: {
+          position: 'fixed',
+          top: `${rect.bottom + PREVIEW_GAP}px`,
+          left: `${left}px`,
+          width: `${PREVIEW_WIDTH}px`,
+          maxHeight: `${Math.max(spaceBelow - PREVIEW_GAP - VIEWPORT_MARGIN, 120)}px`,
+        },
+      });
+    }
+  }, []);
+
+  const handleMouseEnter = useCallback(() => {
+    if (!card.imageUrl || isDragging || isActive) return;
+    hoverTimerRef.current = setTimeout(() => {
+      computePreviewPosition();
+      setShowPreview(true);
+    }, 1500);
+  }, [card.imageUrl, isDragging, isActive, computePreviewPosition]);
+
+  const handleMouseLeave = useCallback(() => {
+    if (hoverTimerRef.current) {
+      clearTimeout(hoverTimerRef.current);
+      hoverTimerRef.current = null;
+    }
+    setShowPreview(false);
+    setPreviewPos(null);
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (hoverTimerRef.current) clearTimeout(hoverTimerRef.current);
+    };
+  }, []);
+
   const style = disabled
     ? {}
     : {
@@ -61,10 +153,12 @@ export function DraggableCard({
 
   return (
     <div
-      ref={setNodeRef}
+      ref={combinedRef}
       style={style}
       className={`draggable-card ${isDragging || isActive ? 'is-dragging' : ''} ${showDetails ? 'show-details' : ''} ${compact ? 'compact' : ''} ${disabled ? 'disabled' : ''}`}
       {...(disabled ? {} : { ...attributes, ...listeners })}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
     >
       {card.imageUrl ? (
         <img src={getImageUrl(card.imageUrl)!} alt={card.title} className="card-image" />
@@ -149,6 +243,19 @@ export function DraggableCard({
           )}
         </div>
       )}
+      {showPreview &&
+        card.imageUrl &&
+        previewPos &&
+        createPortal(
+          <div
+            className={`card-image-preview preview-${previewPos.direction}`}
+            style={previewPos.style}
+          >
+            <img src={getImageUrl(card.imageUrl)!} alt={card.title} />
+            <span className="card-image-preview-title">{card.title}</span>
+          </div>,
+          document.body,
+        )}
     </div>
   );
 }
