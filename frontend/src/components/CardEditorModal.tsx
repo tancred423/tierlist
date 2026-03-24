@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import type { Card } from '../types';
 import { useI18n } from '../i18n';
 import { api } from '../api/client';
+import { getImageUrl } from '../utils/format';
 
 interface CardEditorModalProps {
   card: Card | null;
@@ -25,7 +26,10 @@ export function CardEditorModal({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
-  const isUploadedImage = card?.imageUrl?.startsWith('/uploads/') ?? false;
+  const isUploadedImage =
+    card?.imageUrl?.startsWith('/uploads/') ||
+    card?.imageUrl?.startsWith('/api/uploads/') ||
+    false;
   const [imageSource, setImageSource] = useState<'url' | 'upload'>(
     isUploadedImage ? 'upload' : 'url',
   );
@@ -221,7 +225,11 @@ export function CardEditorModal({
               {imageSource === 'url' ? (
                 <input
                   type="text"
-                  value={imageUrl.startsWith('/uploads/') ? '' : imageUrl}
+                  value={
+                    imageUrl.startsWith('/uploads/') || imageUrl.startsWith('/api/uploads/')
+                      ? ''
+                      : imageUrl
+                  }
                   onChange={e => setImageUrl(e.target.value)}
                   className="form-input"
                   placeholder={t('card.imageUrlPlaceholder')}
@@ -278,11 +286,7 @@ export function CardEditorModal({
                   <label className="form-label">{t('card.currentImage')}</label>
                   <div className="current-image-preview">
                     <img
-                      src={
-                        imageUrl.startsWith('/uploads/')
-                          ? `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}${imageUrl}`
-                          : imageUrl
-                      }
+                      src={getImageUrl(imageUrl) || imageUrl}
                       alt="Preview"
                       onError={e => {
                         (e.target as HTMLImageElement).style.display = 'none';
