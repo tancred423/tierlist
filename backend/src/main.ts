@@ -48,7 +48,7 @@ app.route("/auth", authRoutes);
 app.route("/templates", templatesRoutes);
 app.route("/cards", cardsRoutes);
 app.route("/filled-tierlists", filledTierlistsRoutes);
-app.route("/uploads", uploadsRoutes);
+app.route("/api/uploads", uploadsRoutes);
 app.route("/tiers", tiersRoutes);
 app.route("/columns", columnsRoutes);
 
