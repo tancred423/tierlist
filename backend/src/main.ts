@@ -44,13 +44,13 @@ app.get("/health", (c) => {
   return c.json({ status: "healthy" });
 });
 
-app.route("/api/auth", authRoutes);
-app.route("/api/templates", templatesRoutes);
-app.route("/api/cards", cardsRoutes);
-app.route("/api/filled-tierlists", filledTierlistsRoutes);
-app.route("/api/uploads", uploadsRoutes);
-app.route("/api/tiers", tiersRoutes);
-app.route("/api/columns", columnsRoutes);
+app.route("/auth", authRoutes);
+app.route("/templates", templatesRoutes);
+app.route("/cards", cardsRoutes);
+app.route("/filled-tierlists", filledTierlistsRoutes);
+app.route("/uploads", uploadsRoutes);
+app.route("/tiers", tiersRoutes);
+app.route("/columns", columnsRoutes);
 
 app.notFound((c) => {
   return c.json({ error: "Not found" }, 404);
