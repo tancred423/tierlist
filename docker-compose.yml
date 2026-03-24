@@ -24,6 +24,7 @@ services:
     networks:
       - mysql-network
       - tierlist-network
+      - web
 
   frontend:
     image: ${FRONTEND_IMAGE:-ghcr.io/tancred423/tierlist/frontend:latest}
@@ -35,9 +36,12 @@ services:
     restart: unless-stopped
     networks:
       - tierlist-network
+      - web
 
 networks:
   mysql-network:
     external: true
   tierlist-network:
     driver: bridge
+  web:
+    external: true
