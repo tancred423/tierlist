@@ -27,9 +27,7 @@ export function CardEditorModal({
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const isUploadedImage =
-    card?.imageUrl?.startsWith('/uploads/') ||
-    card?.imageUrl?.startsWith('/api/uploads/') ||
-    false;
+    card?.imageUrl?.startsWith('/uploads/') || card?.imageUrl?.startsWith('/api/uploads/') || false;
   const [imageSource, setImageSource] = useState<'url' | 'upload'>(
     isUploadedImage ? 'upload' : 'url',
   );
