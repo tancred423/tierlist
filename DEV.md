@@ -112,8 +112,6 @@ Or: `bash dev.sh [command]`
 | `DISCORD_REDIRECT_URI` | Discord OAuth callback URL |
 | `FRONTEND_URL` | Public URL of the frontend |
 | `VITE_API_URL` | Public URL of the API |
-| `BACKEND_PORT` | Port to expose backend on host (default: 3000) |
-| `FRONTEND_PORT` | Port to expose frontend on host (default: 80) |
 | `VITE_TERMS_URL` | (Optional) URL to Terms of Service page |
 | `VITE_PRIVACY_URL` | (Optional) URL to Privacy Policy page |
 | `VITE_SUPPORT_URL` | (Optional) URL to Support/Discord server |
