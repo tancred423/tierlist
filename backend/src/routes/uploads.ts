@@ -79,8 +79,13 @@ async function deleteDirectory(path: string) {
 export async function deleteCardImage(imageUrl: string | null) {
   if (!imageUrl) return;
 
-  if (imageUrl.startsWith("/uploads/")) {
-    const filePath = `${UPLOADS_DIR}${imageUrl.replace("/uploads", "")}`;
+  const diskSuffix = imageUrl.startsWith("/api/uploads/")
+    ? imageUrl.replace("/api/uploads", "")
+    : imageUrl.startsWith("/uploads/")
+    ? imageUrl.replace("/uploads", "")
+    : null;
+  if (diskSuffix !== null) {
+    const filePath = `${UPLOADS_DIR}${diskSuffix}`;
     await deleteFile(filePath);
   }
 }
@@ -219,7 +224,7 @@ async function processAndStoreUpload(c: Context, storageDirName: string) {
 
     await Deno.writeFile(filePath, finalBuffer);
 
-    const imageUrl = `/uploads/${storageDirName}/${fileName}`;
+    const imageUrl = `/api/uploads/${storageDirName}/${fileName}`;
 
     return c.json({
       imageUrl,
