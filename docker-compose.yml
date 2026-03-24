@@ -16,8 +16,8 @@ services:
       UPLOAD_MAX_DIMENSION: ${UPLOAD_MAX_DIMENSION:-200}
       UPLOAD_STORAGE_LIMIT_GB: ${UPLOAD_STORAGE_LIMIT_GB:-5}
       NODE_ENV: production
-    ports:
-      - "${BACKEND_PORT:-7555}:3000"
+#    ports:
+#      - "${BACKEND_PORT:-7555}:3000"
     volumes:
       - ./images:/app/uploads
     restart: unless-stopped
@@ -29,8 +29,8 @@ services:
   frontend:
     image: ${FRONTEND_IMAGE:-ghcr.io/tancred423/tierlist/frontend:latest}
     container_name: tierlist-frontend
-    ports:
-      - "${FRONTEND_PORT:-7556}:80"
+#    ports:
+#      - "${FRONTEND_PORT:-7556}:80"
     depends_on:
       - backend
     restart: unless-stopped
