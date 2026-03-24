@@ -18,8 +18,11 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
 export function getImageUrl(url: string | null): string | null {
   if (!url) return null;
-  if (url.startsWith('/uploads/')) {
+  if (url.startsWith('/api/uploads/')) {
     return `${API_URL}${url}`;
+  }
+  if (url.startsWith('/uploads/')) {
+    return `${API_URL}/api/uploads${url.slice('/uploads'.length)}`;
   }
   return url;
 }

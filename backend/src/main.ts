@@ -29,6 +29,10 @@ app.use(
 );
 
 app.use("/uploads/*", serveStatic({ root: UPLOADS_DIR, rewriteRequestPath: (path) => path.replace("/uploads", "") }));
+app.use(
+  "/api/uploads/*",
+  serveStatic({ root: UPLOADS_DIR, rewriteRequestPath: (path) => path.replace("/api/uploads", "") }),
+);
 
 app.use("*", authMiddleware);
 
