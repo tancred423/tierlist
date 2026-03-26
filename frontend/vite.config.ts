@@ -17,8 +17,8 @@ export default defineConfig({
       '/api': {
         target: 'http://tierlist-backend:3000',
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, ''),
+        rewrite: path => path.replace(/^\/api/, ''),
       },
-    }
+    },
   },
 });

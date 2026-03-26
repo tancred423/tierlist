@@ -484,8 +484,7 @@ export function TierlistGrid({
   const keyboardSensor = useSensor(KeyboardSensor, {
     coordinateGetter: sortableKeyboardCoordinates,
   });
-  const isTouchDevice =
-    typeof window !== 'undefined' && ('ontouchstart' in window || navigator.maxTouchPoints > 0);
+  const isTouchDevice = typeof window !== 'undefined' && 'ontouchstart' in window;
   const sensors = useSensors(isTouchDevice ? touchSensor : pointerSensor, keyboardSensor);
 
   const cardMap = useMemo(() => {
